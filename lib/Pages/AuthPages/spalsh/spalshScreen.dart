@@ -1,0 +1,66 @@
+import 'package:cab_taxi_app/Pages/AuthPages/otp/ui/verify_otp.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
+import 'package:cab_taxi_app/app/router/app_router.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../Controllers/auth_controller.dart';
+import '../../../../app/router/navigation/nav.dart';
+import '../../../../app/router/navigation/routes.dart';
+import '../../../../core/api_client.dart';
+import '../../../cores/services/secure_storage_service.dart';
+import '../../HomePageFlow/home_controller.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    Future.delayed(const Duration(seconds: 3), () async {
+      //SharedPreferences prefs = await SharedPreferences.getInstance();
+      // prefs.getString('auth_token');
+      final userToken = await SecureStorageService.getToken();
+   //   String? userToken = prefs.getString('auth_token');
+
+      print('token============>$userToken');
+      if (userToken == null || userToken == "") {
+        Nav.go(context,Routes.login);
+        //  Get.off(const LoginSelectionScreen());
+        // Get.off(const OtpPage());
+      } else {
+        Nav.go(
+          context,
+          Routes.home,
+
+        );
+       // Get.off(const MainHomeController());
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 18.0),
+          child: Image.asset(
+            "assets/images/spalshSCreen.png",
+            // width: screenWidth * 0.5,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+}
