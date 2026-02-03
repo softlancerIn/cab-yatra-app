@@ -1,2 +1,0 @@
-D:/cab_yatri_flutter/android/app/.cxx/RelWithDebInfo/2s284k1o/x86/CMakeFiles/edit_cache.dir
-D:/cab_yatri_flutter/android/app/.cxx/RelWithDebInfo/2s284k1o/x86/CMakeFiles/rebuild_cache.dir
