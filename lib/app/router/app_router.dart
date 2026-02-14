@@ -14,6 +14,7 @@ import '../../Pages/HomePageFlow/custom/alertFilterScreen.dart';
 import '../../Pages/HomePageFlow/custom/apply_filter_dialog.dart';
 import '../../Pages/HomePageFlow/home_controller.dart';
 import '../../Pages/Mohnish_Sir/chat_listing.dart';
+import '../../Pages/editBooking/edit_new_booking.dart';
 import 'navigation/routes.dart';
 
 class AppRouter {
@@ -137,7 +138,11 @@ class AppRouter {
       GoRoute(
         path: Routes.applyFilter,
         builder: (_, __) =>  ApplyFilterDialog(),
-      ),     GoRoute(
+      ),  GoRoute(
+        path: Routes.editBooking,
+        builder: (_, __) =>  EditBookingScreen(),
+      ),
+      GoRoute(
         path: Routes.chatListing,
         builder: (_, __) =>  ChatListingScreen(),
       ),

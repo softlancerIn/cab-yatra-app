@@ -5,6 +5,7 @@ import '../Booking/my_booking.dart';
 import '../Custom_Widgets/bottom_nav_bar.dart';
 import '../Mohnish_Sir/chat_listing.dart';
 import '../Profile/profile.dart';
+import '../Review/reviewSectionNew.dart';
 import 'dashboard/ui/homepage.dart';
 
 
@@ -24,7 +25,8 @@ class _MainHomeControllerState extends State<MainHomeController> {
     BookingPage(),
     AddBookingScreen(),
     ChatListingScreen(),
-    EditProfilePage(),
+    // EditProfilePage(),
+    AgentReviewScreen(),
   ];
 
   void _onItemTapped(int index) {

@@ -3,18 +3,26 @@ import 'package:cab_taxi_app/Pages/Add%20New%20Booking/add_new_booking.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
 import 'package:cab_taxi_app/Pages/Mohnish_Sir/chat_listing.dart';
+import 'package:cab_taxi_app/app/router/app_router.dart';
+import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/models/my_booking_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../Controllers/home_controller.dart';
 import '../../Controllers/my_booking_controller.dart';
+import '../../app/router/navigation/routes.dart';
 import '../../core/network_service.dart';
 import '../../core/utils/helperFunctions.dart';
 import '../Custom_Widgets/custom_text_button.dart';
 import '../Custom_Widgets/CustomShimmer_widget.dart';
+import '../HomePageFlow/custom/customSearchBar.dart';
 import '../Review/write_review.dart';
+import 'bloc/booking_bloc.dart';
+import 'bloc/booking_event.dart';
+import 'bloc/booking_state.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -24,207 +32,222 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  final MyBookingController controller = Get.put(MyBookingController());
-  final HomeController homeController = Get.put(HomeController());
+  TextEditingController searchController = TextEditingController();
+  // final MyBookingController controller = Get.put(MyBookingController());
+  // final HomeController homeController = Get.put(HomeController());
 
 
   @override
   void initState() {
     super.initState();
-    controller.getMyBookingData();
+    context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    controller.getMyBookingData();
+    //controller.getMyBookingData();
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(title: "My Booking"),
+      appBar: AppBAR(title: "Posted Booking",showLeading: false,showAction: false,),
       body: RefreshIndicator(
         onRefresh: ()async {
-          await controller.getMyBookingData();
+          //await controller.getMyBookingData();
         },
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              GetBuilder<MyBookingController>(
-                init: MyBookingController(),
-                builder: (controller) {
-                if(controller.myBookingData.value.myBooking == null){
-                  return Center(
-                      heightFactor: size.height*0.02,
-                      child: const CircularProgressIndicator()
-                  );
+        child: BlocBuilder<BookingBloc,BookingState>(
+            builder: (context,state) {
+              if(state.isLoading){
+                return SizedBox(
+                    height: size.height,
+                    width: size.width,
+                    child: Center(child: const CircularProgressIndicator()));
 
-                }
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              }
+              if(state.postedBookingModel==null){
+                return SizedBox(
+                    height: size.height,
+                    width: size.width,
+                    child: Center(child: const CircularProgressIndicator()));
+
+              }
+
+              final newBooking=state.postedBookingModel!.data;
+
+
+              return SingleChildScrollView(
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
                     children: [
-                      controller.myBookingData.value.myBooking == null
-
-                          ? Center(
-                          heightFactor: size.height*0.02,
-                          child: CircularProgressIndicator()
+                      Expanded(
+                          child: CustomSearchBar(
+                            controller: searchController,
+                            onSearch: () {},
+                          )),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          //Nav.push(context,Routes.applyFilter);
+                        },
+                        child: Container(
+                            height: 50,
+                            padding: const EdgeInsets.all(12),
+                            clipBehavior: Clip.antiAlias,
+                            //     clipBehavior: Clip.antiAlias,
+                            decoration: ShapeDecoration(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(width: 0.50),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Image.asset(
+                              "assets/images/seetingFilter.png",
+                              scale: 3,
+                            )),
                       )
-                          :controller.myBookingData.value.myBooking!.data!.isEmpty?const Text("No Booking Found"): ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: controller.myBookingData.value.myBooking!.data!.length,
-                          itemBuilder: (context, index) {
-                            var newBookingData = controller.myBookingData.value.myBooking!.data![index];
-                            return controller.myBookingData.value.myBooking!.data!.isEmpty
-                                ? const Center(
-                              child: Text('No active booking'),
-                            )
-                                : customCards(context, newBookingData,);
-                          }),
                     ],
                   ),
-                );
-              },),
-
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+                ),
+                SizedBox(height: 10,),
 
 
-  Widget customCards(BuildContext context, MyBookingData data) {
-    final size = MediaQuery.of(context).size;
-    String? destinationAddress = data.destinationLoc!.isEmpty ? 'Not Available' : data.destinationLoc;
-    List<String> dropCities = [];
-    print(data.status);
-    if (destinationAddress!.isNotEmpty) {
-      var parsedDestination = json.decode(destinationAddress);
-      dropCities = List<String>.from(
-          parsedDestination.map((city) => city.replaceAll('"', '')));
-    }
-    List<dynamic> parseAddOnService(String addOnService) {
-      if (addOnService.isNotEmpty && addOnService != "[]") {
-        return jsonDecode(addOnService);
-      }
-      return [];
-    }
-    List<String> pickCities = [];
-    if (data.pickUpLoc != null && data.pickUpLoc!.isNotEmpty) {
-      for (String loc in data.pickUpLoc!) {
-        if (loc.isNotEmpty) {
-          try {
-            var parsedPickup = json.decode(loc);
-            if (parsedPickup is List) {
-              pickCities.addAll(List<String>.from(
-                  parsedPickup.map((city) => city.replaceAll('"', ''))));
-            } else {
-              pickCities.add(loc.replaceAll('"', ''));
-            }
-          } catch (e) {
-            pickCities.add(loc.replaceAll('"', ''));
-          }
-        } else {
-          pickCities.add('Not Available');
-        }
-      }
-    } else {
-      pickCities.add('Not Available');
-    }
-    String? initialTotal = '0';
-    if (data.offlinePayment!.isNotEmpty && data.driverComission!.isNotEmpty) {
-      final double offlinePaymentValue = double.tryParse(data.offlinePayment!) ?? 0;
-      final double driverCommissionValue = double.tryParse(data.driverComission!) ?? 0;
-      final double totalValue = offlinePaymentValue + driverCommissionValue;
-      initialTotal = totalValue.toString();
-    }
-    String pickUpDateStr = data.pickUpDate.toString();
-    DateTime pickUpDate = DateFormat('yyyy-MM-dd').parse(pickUpDateStr);////
-    String formattedDate = DateFormat('d MMM yyyy').format(pickUpDate);
-    String? destD = '';
-    if(data.destination_date!.isNotEmpty && data.destination_date != null){
-      String d = data.destination_date.toString();
-      DateTime dd = DateFormat('yyyy-MM-dd').parse(d);
-      String destDate = DateFormat('d MMM yyyy').format(dd);
-      destD = destDate;
-    }
-    return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 8.0, right: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding:
-                            const EdgeInsets.only(top: 7, left: 7, right: 7),
-                            child: Row(
-                              children: [
-                                Image.asset('assets/images/calender.png', scale: 5),
-                                SizedBox(width: size.width * 0.02),
-                                InkWell(
-                                  child: Text(
-                                    formattedDate,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500),
-                                  ),
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount:newBooking!.length,
+                    itemBuilder: (context, index) {
+                      var newBookingData = newBooking[index];
+                      return GestureDetector(
+                        onTap: () async {
+
+                         // Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
+
+
+                          //Fluttertoast.showToast(
+                          //   msg: 'Please add the Account Details!',
+                          //   gravity: ToastGravity.CENTER,
+                          //   backgroundColor: Colors.red,
+                          //   textColor: Colors.white,
+                          // );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                clipBehavior: Clip.antiAlias,
+                                decoration: ShapeDecoration(
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                  shadows: [
+                                    BoxShadow(
+                                      color: Color(0x3F000000),
+                                      blurRadius: 2,
+                                      offset: Offset(0, 0),
+                                      spreadRadius: 0,
+                                    )
+                                  ],
                                 ),
-                                const Spacer(),
-                                Text('ID : ${data.orderId.toString()}',
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500)),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: size.height * 0.005),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 7, right: 7),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                    'assets/images/clock.png', scale: 5),
-                                SizedBox(width: size.width * 0.02),
-                                InkWell(
-                                  child: Text(
-                                    data.pickUpTime.toString(),
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(data.subTypeLabel.toString(),
-                                    // 'One Way Trip',
-                                    style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
-                          const Divider(
-                              thickness: 1, color: Color.fromRGBO(
-                              0, 0, 0, 0.2)),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 7, right: 7),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        width: size.width * 0.85,
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            if (pickCities.length == 1)
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 7, left: 7, right: 7),
+                                      child: Row(
+                                        children: [
+                                          RichText(
+                                            text: TextSpan(
+                                              children: [
+                                                 TextSpan(
+                                                  text: 'ID : ${newBookingData.orderId}',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black,
+                                                  ),
+                                                ),
+                                                const TextSpan(
+                                                  text: ' (Open)',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xff45B129),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          // Text('654',
+                                          //     style: const TextStyle(
+                                          //         fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffFCB117))),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: size.height * 0.005),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 7, right: 7),
+                                      child: Row(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              InkWell(
+                                                child: Text(
+                                                  newBookingData.pickUpDate.toString(),
+                                                  style: const TextStyle(
+                                                      fontSize: 12, fontWeight: FontWeight.w500),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                "@ ",
+                                                style: const TextStyle(
+                                                    fontSize: 12, fontWeight: FontWeight.w500),
+                                              ),
+                                              InkWell(
+                                                // onTap: () => _selectTime(context), // Pick the time
+                                                child: Text( newBookingData.pickUpTime.toString(),
+                                                  // newBooking[index].pickupTime,
+                                                  //data.pickUpTime.toString(),
+                                                  // selectedTime != null
+                                                  //     ? selectedTime!.format(context)
+                                                  //     : TimeOfDay.now().format(context),
+                                                  style: const TextStyle(
+                                                      fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffF45858)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const Spacer(),
+                                          Text(
+                                            //data.subTypeLabel.toString(),
+                                              'One Way Trip',
+                                              style: const TextStyle(
+                                                  fontSize: 12, fontWeight: FontWeight.w600)),
+                                        ],
+                                      ),
+                                    ),
+                                    const Divider(
+                                        thickness: 1, color: Color.fromRGBO(0, 0, 0, 0.2)),
+                                    SizedBox(
+                                      width: size.width ,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+
                                               Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
@@ -240,699 +263,406 @@ class _BookingPageState extends State<BookingPage> {
                                                   ),
                                                   SizedBox(width: size.width * 0.02),
                                                   SizedBox(
-                                                    width: size.width * 0.6,
+                                                    width: size.width * 0.4,
                                                     child: Text(
-                                                      pickCities.first,
+                                                      newBookingData.pickUpLoc.toString(),
+                                                 //     newBooking[index].pickupLocation,
+                                                      maxLines: 1,
                                                       style: TextStyle(
-                                                        fontSize: size.width * 0.035,
+                                                        fontSize: 12,
                                                         fontFamily: 'Poppins',
-                                                        fontWeight: FontWeight.w600,
+                                                        fontWeight: FontWeight.w500,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
-                                              )
-                                            else
+                                              ),
+                                                                                Spacer(),
+
                                               Container(
-                                                // height: (pickCities.length * 30).toDouble(),
-                                                width: size.width * 0.7,
-                                                child: ListView.builder(
-                                                  shrinkWrap: true,
-                                                  physics: NeverScrollableScrollPhysics(),
-                                                  itemCount: pickCities.length,
-                                                  itemBuilder: (context, index) {
-                                                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> i dont  know why3");
-                                                    return Column(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisSize: MainAxisSize.min,
+                                                width: 168,
+                                                height: 30,
+                                                clipBehavior: Clip.antiAlias,
+                                                decoration: BoxDecoration(),
+                                                child: Stack(
+                                                  children: [
+                                                    Positioned(
+                                                      left: 84,
+                                                      top: 1,
+                                                      child: Container(
+                                                        width: 82,
+                                                        height: 27,
+                                                        clipBehavior: Clip.antiAlias,
+                                                        decoration: ShapeDecoration(
+                                                          color: const Color(0xFFFCB117),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.only(
+                                                              topRight: Radius.circular(2000),
+                                                              bottomRight: Radius.circular(2000),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Stack(
                                                           children: [
-                                                            Container(
-                                                              width: size.width * 0.035,
-                                                              height: size.height * 0.017,
-                                                              decoration: BoxDecoration(
-                                                                color: index == 0
-                                                                    ? const Color
-                                                                    .fromRGBO(
-                                                                    212, 119, 22, 1)
-                                                                    : Colors.green,
-                                                                borderRadius:
-                                                                BorderRadius.circular(
-                                                                    30),
+                                                            Positioned(
+                                                              left: 22,
+                                                              top: 3,
+                                                              child: Text(
+                                                                '₹ ${newBookingData.driverCommission}',
+                                                                style: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontSize: 12,
+                                                                  fontFamily: 'Poppins',
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
                                                               ),
                                                             ),
-                                                            SizedBox(width: size.width * 0.02),
-                                                            SizedBox(
-                                                              width: size.width * 0.55,
+                                                            Positioned(
+                                                              left: 23,
+                                                              top: 16,
                                                               child: Text(
-                                                                pickCities[index],
+                                                                'Commission',
                                                                 style: TextStyle(
-                                                                  fontSize:
-                                                                  size.width * 0.035,
+                                                                  color: Colors.white,
+                                                                  fontSize: 5.50,
                                                                   fontFamily: 'Poppins',
-                                                                  fontWeight:
-                                                                  FontWeight.w600,
+                                                                  fontWeight: FontWeight.w500,
                                                                 ),
                                                               ),
                                                             ),
                                                           ],
                                                         ),
-                                                        SizedBox(height: size.height*0.01),
-                                                      ],
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            const Spacer(),
-                                            Column(
-                                              children: [
-                                                if(data.status == '3')
-                                                  Text(
-                                                      "Cancelled",
-                                                      style: TextStyle(
-                                                          fontSize: size.width * 0.04,
-                                                          fontWeight: FontWeight.w500,
-                                                          color: Colors.red)),
-                                                  if(data.status == '2')//completed ride
-                                                    Text(
-                                                        "Completed",
-                                                        style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontWeight: FontWeight.w500,
-                                                            color: Colors.green)),
-                                                Row(
-                                                  children: [
-                                                    // if (data.driver_number!.isNotEmpty && data.driver_number != null)
-                                                    GestureDetector(
-                                                        onTap: () {
-                                                          print('tapped');
-                                                          HelperFunctions.makePhoneCall(context,data.driver_number??'');
-                                                        },
-                                                        child: Image.asset(
-                                                            'assets/images/call_1.png',
-                                                            scale: 4)),
-                                                    SizedBox(width: size.width * 0.03),
-                                                    GestureDetector(
-                                                      onTap: () async {
-                                                        await HelperFunctions.shareMessage(
-                                                          data.orderId ?? 'N/A',
-                                                          data.pickUpDate ?? 'N/A',
-                                                          pickCities.isNotEmpty ? pickCities.toString() : 'N/A',
-                                                          dropCities.isNotEmpty ? dropCities.toString() : 'N/A',
-                                                          data.car?.name??'N/A', // Vehicle
-                                                          data.subTypeLabel ?? 'N/A',
-                                                          data.offlinePayment ?? 'N/A',
-                                                          data.driverComission ?? 'N/A',
-                                                          (data.addOnService != null && data.addOnService!.isNotEmpty) ? "With carrier" : "N/A", // Extra Requirements
-                                                          // 'N/A',
-                                                          data.driver_number??'N/A',
-                                                        );                                  },
-                                                      child: Image.asset('assets/images/share.png', scale: 4),
+                                                      ),
+                                                    ),
+                                                    Positioned(
+                                                      left: 1,
+                                                      top: 1,
+                                                      child: Container(
+                                                        width: 82,
+                                                        height: 27,
+                                                        clipBehavior: Clip.antiAlias,
+                                                        decoration: ShapeDecoration(
+                                                          color: const Color(0xFFEFEFEF),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.only(
+                                                              topLeft: Radius.circular(2000),
+                                                              bottomLeft: Radius.circular(2000),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Stack(
+                                                          children: [
+                                                            Positioned(
+                                                              left: 18,
+                                                              top: 3,
+                                                              child: Text(
+                                                                '₹ ${newBookingData.totalFaire}',
+                                                                style: TextStyle(
+                                                                  color: Colors.black,
+                                                                  fontSize: 12,
+                                                                  fontFamily: 'Poppins',
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Positioned(
+                                                              left: 22,
+                                                              top: 16,
+                                                              child: Text(
+                                                                'Total Amount',
+                                                                style: TextStyle(
+                                                                  color: Colors.black,
+                                                                  fontSize: 5.50,
+                                                                  fontFamily: 'Poppins',
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
-                                              ],
-                                            )
+                                              )
+
+
+
+                                                                                       // Icon(Icons.arrow_forward_ios_sharp)
+
+
+                                            ],
+                                          ),
+
+                                          //  if (data.typeLabel != 'Local')
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              //  if (dropCities.length == 1)
+                                              Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Container(
+                                                    width: size.width * 0.035,
+                                                    height: size.height * 0.017,
+                                                    decoration: BoxDecoration(
+                                                      color: Color(0xFFC51C1C),
+                                                      borderRadius:
+                                                      BorderRadius.circular(30),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: size.width * 0.02),
+                                                  SizedBox(
+                                                    width: size.width * 0.6,
+                                                    child: Text( newBookingData.destinationLoc.toString(),
+                                                //      newBooking[index].destinationLocation,
+                                                      maxLines: 1,
+                                                      style: TextStyle(
+                                                        fontSize:12,
+                                                        fontFamily: 'Poppins',
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    //  if (data.destination_date!.isNotEmpty)
+
+                                    // SizedBox(height: 10,),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                                      child: Row(
+                                        children: [
+                                          Image.network("car image",scale: 4,errorBuilder: (context, error, stackTrace) {
+                                            return Image.asset("assets/images/carMO.png",scale: 4,);
+                                          },),
+                                          //  Image.asset("assets/images/carMO.png",scale: 4,),
+                                          SizedBox(width: 5,),
+                                          Text(
+                                              newBookingData.carCategory!.name.toString(),
+                                            //newBooking[index].carCategoryName,
+                                            style: TextStyle(
+                                              color: Colors.black.withValues(alpha: 0.50),
+                                              fontSize: 12,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w500,
+                                            ),
+
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Extra Requirement : ',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 11,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Text( newBookingData.remark.toString(),
+                                            //newBooking[index].remark??"N/A",
+                                            style: TextStyle(
+                                              color: const Color(0xFFF45858),
+                                              fontSize: 11,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 3,),
+                                    Padding(
+                                      padding: const EdgeInsets.all(7),
+                                      child: Container(
+                                        width: size.width *
+                                            0.9, // Adjust the container width as needed
+                                        height: 45, // Adjust the container height as needed
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(6),
+                                          border: Border.all(
+                                              color: Colors.white,
+                                              width: 2), // Outer border for entire container
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.stretch, // Ensure equal height
+                                          children: [
+                                            // First part
+                                            Expanded(
+                                              child: Container(
+                                                clipBehavior: Clip.antiAlias,
+                                                decoration: ShapeDecoration(
+                                                  color: const Color(0xADEFEFEF),
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Image.asset("assets/images/chatNew.png",scale: 3,),
+                                                    SizedBox(width: 10),   Text(
+                                                      "Chat",
+                                                      //"₹${newBooking[index].totalFare}",
+                                                      style: TextStyle(
+                                                          fontSize: size.width * 0.035,
+                                                          fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
+                                                    ),
+
+
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+
+                                            // Second part
+                                            GestureDetector(
+                                              onTap: (){
+                                                Nav.push(context, Routes.editBooking);
+                                              },
+                                              child: Expanded(
+                                                child: Container(
+                                                  clipBehavior: Clip.antiAlias,
+                                                  decoration: ShapeDecoration(
+                                                    color: const Color(0xADEFEFEF),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Image.asset("assets/images/pencil 1.png",scale: 3,),
+                                                      SizedBox(width: 10,),
+                                                      Text("Edit",
+                                                    //    "₹${newBooking[index].driverCommission}",
+                                                        style: TextStyle(
+                                                            fontSize: size.width * 0.035,
+                                                            fontWeight: FontWeight.w500),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+
+                                            // Third part
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: (){
+                                                  print("delete CCOUNT");
+                                                  showDialog(context: context, builder: (context) {
+                                                    return    DeleteBookingDialog(bookingId: "123",);
+                                                  },);
+
+                                                },
+                                                child: Container(
+                                                  clipBehavior: Clip.antiAlias,
+                                                  decoration: ShapeDecoration(
+                                                    color: const Color(0xADEFEFEF),
+                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                  ),
+                                                  child: Column(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: [
+                                                      Text("Delete",
+                                                       // "₹${newBooking[index].driverCommission}",
+                                                        style: TextStyle(
+                                                            fontSize: size.width * 0.035,
+                                                            fontWeight: FontWeight.w500,color: Color(0xffF45858)),
+                                                      ),
+
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
-                                      // SizedBox(height: size.height * 0.005),
-                                      // Container(
-                                      //   padding: EdgeInsets.only(
-                                      //       left: size.width * 0.015),
-                                      //   height: size.height * 0.03,
-                                      //   child: CustomPaint(
-                                      //       painter: DashedLinePainter()),
-                                      // ),
-                                      // SizedBox(height: size.height * 0.005),
-                                      if(data.typeLabel != 'Local')
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .start,
-                                          children: [
-                                            if (dropCities.length == 1)
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Container(
-                                                  width: size.width * 0.035,
-                                                  height: size.height * 0.017,
-                                                  decoration: BoxDecoration(
-                                                    color: Color(0xFFC51C1C),
-                                                    borderRadius: BorderRadius
-                                                        .circular(30),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                    width: size.width * 0.02),
-                                                SizedBox(
-                                                  width: size.width * 0.6,
-                                                  child: Text(
-                                                    dropCities.first,
-                                                    style: TextStyle(
-                                                      fontSize: size.width *
-                                                          0.035,
-                                                      fontFamily: 'Poppins',
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                            else
-                                              Container(
-                                                // height: (dropCities.length * 25).toDouble(),
-                                                width: size.width * 0.7,
-                                                child: ListView.builder(
-                                                  shrinkWrap: true,
-                                                  physics: NeverScrollableScrollPhysics(),
-                                                  itemCount: dropCities.length,
-                                                  itemBuilder: (context, index) {
-                                                    return Column(
-                                                      mainAxisAlignment: MainAxisAlignment.start,
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisSize: MainAxisSize.min,
-                                                          children: [
-                                                            Container(
-                                                              width: size.width * 0.035,
-                                                              height: size.height * 0.017,
-                                                              decoration: BoxDecoration(
-                                                                color: index == dropCities.length - 1
-                                                                    ?  Color(0xFFC51C1C)
-                                                                    : Colors.green,
-                                                                borderRadius: BorderRadius.circular(30),
-                                                              ),
-                                                            ),
-                                                            SizedBox(width: size.width * 0.02),
-                                                            SizedBox(
-                                                              width: size.width * 0.55,
-                                                              child: Text(
-                                                                dropCities[index],
-                                                                style: TextStyle(
-                                                                  fontSize: size.width * 0.035,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w600,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        SizedBox(height: size.height*0.01),
-                                                      ],
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                          ],
-                                        )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if(data.destination_date!.isNotEmpty)
-                            Padding(
-                              padding:
-                              const EdgeInsets.only(top: 5, left: 7, right: 7),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'End Date: ',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
+                                    ),
+                                  ///Chat wala section with Icons
+                                    Container(
+                                      clipBehavior: Clip.antiAlias,
+                                      height: 45,
+                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                      decoration: ShapeDecoration(
+                                        color: const Color(0xADEFEFEF),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                                       ),
-                                      Image.asset('assets/images/calender.png',
-                                          scale: 5),
-                                      SizedBox(width: size.width * 0.02),
-                                      Text(
-                                        '${destD ?? ''}',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      SizedBox(width: size.width * 0.02),
-                                      Image.asset(
-                                          'assets/images/clock.png', scale: 5),
-                                      SizedBox(width: size.width * 0.01),
-                                      Text(
-                                        '11:59 PM',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.all(7),
-                            child: Container(
-                              width: size.width * 0.9,
-                              height: size.height * 0.08,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(
-                                    color: Colors.white, width: 2),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(6),
-                                            bottomLeft: Radius.circular(6)),
-                                        color: const Color.fromRGBO(
-                                            225, 242, 255, 1),
-                                        border: Border.all(
-                                            color: Colors.white, width: 1.5),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            "Parking",
+                                          Image.asset("assets/images/chatNew.png",scale: 3,),
+                                          SizedBox(width: 10),   Text(
+                                            "Chat",
+                                            //"₹${newBooking[index].totalFare}",
                                             style: TextStyle(
                                                 fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500),
+                                                fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
                                           ),
-                                          SizedBox(height: size.height * 0.01),
-                                          Text(
-                                            "Extra",
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w400),
-                                          ),
+
+
                                         ],
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: const Color.fromRGBO(
-                                            225, 242, 255, 1),
-                                        border: Border.all(
-                                            color: Colors.white, width: 1.5),
+                                    ///Share with section with Icons
+                                    Container(
+                                      clipBehavior: Clip.antiAlias,
+                                      height: 45,
+                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                      decoration: ShapeDecoration(
+                                        color: const Color(0xffFCB117),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                                       ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            "Toll",
+
+                                        Text(
+                                            "Chat",
+                                            //"₹${newBooking[index].totalFare}",
                                             style: TextStyle(
                                                 fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          SizedBox(height: size.height * 0.01),
-                                          Text(
-                                            data.toll ?? "",
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w400),
-                                          ),
+                                                fontWeight: FontWeight.w500,color: Colors.white),
+                                          ),   SizedBox(width: 10),  Image.asset("assets/images/paper-plane 1.png",scale: 3,),
+
+
                                         ],
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.only(
-                                            topRight: Radius.circular(6),
-                                            bottomRight: Radius.circular(6)),
-                                        color: const Color.fromRGBO(
-                                            225, 242, 255, 1),
-                                        border: Border.all(
-                                            color: Colors.white, width: 1.5),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Tax",
-                                            style: TextStyle(
-                                                fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          SizedBox(height: size.height * 0.01),
-                                          Text(
-                                            data.tax ?? "",
-                                            // "Included",
-                                            style: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(7),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: size.width * 0.008,
-                                  height: size.height * 0.004,
-                                  decoration: BoxDecoration(
-                                      color:
-                                      const Color.fromRGBO(255, 0, 0, 1),
-                                      borderRadius:
-                                      BorderRadius.circular(35)),
-                                ),
-                                SizedBox(width: size.width * 0.02),
-                                Expanded(
-                                  child: Text(
-                                    (parseAddOnService(data.addOnService!)
-                                        .isNotEmpty
-                                        ? "There Should be carrier | "
-                                        : "") +
-                                        (data.remark ?? ''),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: Color.fromRGBO(255, 0, 0, 1),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              if (data.typeLabel != 'Local')
-                                Column(
-                                  children: [
-                                    Text(
-                                      data.include_km != null
-                                          ? (data.include_km!.endsWith('km')
-                                          ? data.include_km!
-                                          : '${data.include_km} km')
-                                          : 'N/A',
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w500,
-                                        color: Color.fromRGBO(46, 46, 46, 0.6),
-                                      ),
-                                    ),
-                                    const Text(
-                                      "Total KM",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.black,
-                                      ),
-                                    ),
+
                                   ],
-                                ),
-                              if (data.typeLabel == 'Local')
-                                Column(
-                                  children: [
-                                    Text(
-                                        data.timeScheduleData?.time ?? 'N/A',
-                                        style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w500,
-                                            color:
-                                            Color.fromRGBO(46, 46, 46, 0.6))),
-                                    const Text("Total KM",
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black)),
-                                  ],
-                                ),
-                              Column(
-                                children: [
-                                  Text('₹${data.extra_fair_perKm??'N/A'}/km',
-                                      style: const TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w500,
-                                          color: Color.fromRGBO(46, 46, 46, 0.6))),
-                                  const Text("Extra Per KM",
-                                      style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.black)),
-                                ],
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(7.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: size.width * 0.18,
-                                  height: size.height * 0.037,
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                        width: 1,
-                                        color: const Color(0xFF45B129),
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'CAB',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:const Color(0xFF45B129),
-                                        fontSize: 10,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text("${data.carCategory?.name ?? "N/A"}",
-                                    style: TextStyle(
-                                        fontSize: size.width * 0.035,
-                                        fontWeight: FontWeight.w400,
-                                        color: Color.fromRGBO(0, 0, 0, 0.5))),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Center(
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                        fontSize: 13, color: Colors.black),
-                                    children: <TextSpan>[
-                                      const TextSpan(
-                                          text: 'Total Amount:   ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      TextSpan(
-                                          text:
-                                          '₹ ${((double.tryParse(
-                                              data.driverComission ?? '0') ??
-                                              0.0) + (double.tryParse(
-                                              data.offlinePayment ?? '0') ??
-                                              0.0)).toString()}',
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  69, 177, 41, 1))),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: size.height * 0.01),
-                              Center(
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: const TextStyle(
-                                        fontSize: 13, color: Colors.black),
-                                    children: <TextSpan>[
-                                      const TextSpan(
-                                          text: 'Driver Earning:   ',
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold)),
-                                      TextSpan(
-                                          text: '₹ ${data.offlinePayment ??
-                                              "0"}',
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  69, 177, 41, 1))),
-                                    ],
-                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: size.height * 0.04),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                if (data.status == '0')
-                                  Expanded(
-                                    child: CustomTextButton(
-                                      title: "Delete",
-                                      color: Colors.red,
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return DeleteBookingDialog(
-                                              bookingId: data.id,
-                                              controller: controller,
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                if (data.status == '0')
-                                  Expanded(
-                                    child: CustomTextButton(
-                                      title: "Edit",
-                                      color: Colors.black,
-                                      textColor: Colors.white,
-                                      onPressed: () {
-
-                                      },
-                                    ),
-                                  ),
-                                if (data.status == '1')
-                                  Expanded(
-                                    child: CustomTextButton(
-                                      title: "Cancel",
-                                      color: const Color.fromRGBO(255, 0, 0, 1),
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return CancelBookingDialog(
-                                              bookingId: data.id.toString(),
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                if (data.status != '3')
-                                  Expanded(
-                                    child: CustomTextButton(
-                                      title: "Chat",
-                                      color: const Color(0xFF45B129),
-                                      textColor: Colors.white,
-                                      onPressed: () {
-                                        Get.to(() => const ChatListingScreen());
-                                      },
-                                    ),
-                                  ),
-                                if (HelperFunctions.isPickupTime(data.pickUpDate, data.pickUpTime) && data.status == '1')
-                                  Expanded(
-                                    child: CustomTextButton(
-                                      title: "Pickup",
-                                      color: const Color.fromRGBO(255, 185, 0, 1),
-                                      textColor: Colors.white,
-                                      onPressed: () async {
-                                        final result = await NetworkService().verifyStartRideOtp(
-                                          bookingId: data.id.toString(),
-                                        );
-                                        print(result);
-                                        controller.getMyBookingData();
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text(result?['message'] ?? 'An error occurred'),
-                                            duration: const Duration(seconds: 2),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                          if (data.status == '4')
-                            SizedBox(
-                              width: double.infinity,
-                              child: CustomTextButton(
-                                title: "Complete Booking",
-                                color: const Color(0xFFB15A29),
-                                textColor: Colors.white,
-                                onPressed: () async {
-                                  bool? confirm = await _showConfirmationDialog(context);
-                                  if (confirm == true) {
-                                    final result = await NetworkService().endRide(bookingId: data.id.toString());
-                                    if (result != null && result['status'] == true) {
-                                      Fluttertoast.showToast(msg: "Ride Completed Successfully!");
-                                      if (data.driver_number != null && data.driver_number!.isNotEmpty) {
-                                        Get.to(() => ReviewPage(
-                                          driverId: data.driver_id,
-                                          bookingId: data.id.toString(),
-                                        ));
-                                      } else {
-                                        await homeController.getHomeData();
-                                      }
-                                    }
-                                  } else {
-                                    print("User canceled the booking.");
-                                  }
-                                },
-                              ),
-                            ),
-                          if (data.status == '4' || data.status == '2')
-                          SizedBox(
-                            width: double.infinity,
-                            child: CustomTextButton(
-                              title: "Write your Review",
-                              color:  Colors.blueGrey,
-                              textColor: Colors.white,
-                              onPressed: () {
-                                        Get.to(() => ReviewPage(
-                                          bookingId: data.id.toString(),
-                                          driverId: data.driver_id,
-                                        ));
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-
-
+                        ),
+                      );
+                    }),
+              ],
+            ),
+                    );
+          }
+        ),
+      ),
+    );
   }
+
+
+
   Future<bool?> _showConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
       context: context,
@@ -967,11 +697,11 @@ class _BookingPageState extends State<BookingPage> {
 //////
 class DeleteBookingDialog extends StatelessWidget {
   var bookingId;
-  MyBookingController controller;
 
 
 
-  DeleteBookingDialog({super.key, required this.bookingId,required this.controller});
+
+  DeleteBookingDialog({super.key, required this.bookingId});
 
  // final controller = Get.put(MyBookingController());
 
@@ -982,101 +712,98 @@ class DeleteBookingDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       backgroundColor: Colors.white,
-      child: GetBuilder<MyBookingController>(
-        init: MyBookingController(),
-        builder: (controller) {
-       if  ( controller.myBookingLoading.value){
-         return             Center(
-               child: CustomShimmerContainer(
-                 width: screenWidth * 0.8,
-                 height: screenHeight * 0.05,
-               ),
-           );
-       }
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Are you sure you want to Delete Booking',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFFFF0000),
-                  fontSize: 22,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Delete Booking ',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color(0xFF3E4959),
+                fontSize: 18,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              'Are you sure you want to delete this booking? ',
+              style: TextStyle(
+                color: const Color(0xFF3E4959),
+                fontSize: 15,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            SizedBox(
+              height: screenHeight * 0.02,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: screenWidth * 0.27,
+                    height: screenHeight * 0.045,
+                    decoration: ShapeDecoration(
+                      color: Color(0xff3E4959),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          width: 2,
+                          color: Color(0xff3E4959),
+                        ),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Go back',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                softWrap: true,
-              ),
-              SizedBox(
-                height: screenHeight * 0.02,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      controller.deleteBooking(
-                          bookingId: bookingId);
-                    },
-                    child: Container(
-                      width: screenWidth * 0.27,
-                      height: screenHeight * 0.05,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFFFF0000),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Yes',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
+                GestureDetector(
+                  onTap: () {
+                    // controller.deleteBooking(
+                    //     bookingId: bookingId);
+                  },
+                  child: Container(
+                    width: screenWidth * 0.27,
+                    height: screenHeight * 0.045,
+                    decoration: ShapeDecoration(
+                      color: const Color(0xFFFF0000),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5)),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Yes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      width: screenWidth * 0.27,
-                      height: screenHeight * 0.05,
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 2,
-                            color: Colors.black.withOpacity(0.5),
-                          ),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'No',
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(0.5),
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },),
+                ),
+
+              ],
+            ),
+          ],
+        ),
+      ),
       // child: Obx(() {
       //   return controller.myBookingLoading.value
       //       ?  Center(
@@ -1171,3 +898,9 @@ class DeleteBookingDialog extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+

@@ -1,33 +1,23 @@
 
 import 'package:cab_taxi_app/Pages/Add%20New%20Booking/ui/addBookingRoundTripScreen.dart';
-import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingOneWayScreen.dart';
+import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingRoundTripScreen.dart';
 
-import '../../Controllers/home_controller.dart';
-import '../../Controllers/my_booking_controller.dart';
-import '../../core/network_service.dart';
-import '../../models/dropdown_models.dart';
-import '../../models/post_booking_model.dart';
-import '../../services/location_search.dart';
-import '../Custom_Widgets/CustomShimmer_widget.dart';
-import '../HomePageFlow/home_controller.dart';
-import 'ui/addBookingOneWayScreen.dart';
+import 'package:flutter/material.dart';
+
 
 //todo special req: text size bigger
 //todo: list of vehical based on length
 //todo: list of location spacing reduce
 //todo: bold
-class AddBookingScreen extends StatefulWidget {
-  const AddBookingScreen({super.key});
+class EditBookingScreen extends StatefulWidget {
+  const EditBookingScreen({super.key});
 
   @override
-  State<AddBookingScreen> createState() => _AddBookingScreenState();
+  State<EditBookingScreen> createState() => _EditBookingScreenState();
 }
 
-class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerProviderStateMixin  {
+class _EditBookingScreenState extends State<EditBookingScreen> with SingleTickerProviderStateMixin  {
   late TabController _tabController;
   @override
   void initState() {
@@ -59,7 +49,7 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
         ),
         centerTitle: false,
         title: Text(
-          'Add New Booking',
+          'Edit Booking',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black,
@@ -105,8 +95,8 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  AddBookingOneWayScreen(),
-                  AddBookingRoundTripScreen(),
+                  EditBookingOneWayScreen(),
+                  EditBookingRoundTripScreen(),
                 ],
               ),
             ),

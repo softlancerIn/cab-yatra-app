@@ -6,6 +6,7 @@ class Routes {
   static const home = '/home';
   static const alertFilter = '/alertFilter';
   static const applyFilter = '/applyFilter';
+  static const editBooking = '/editBooking';
   static const chatListing = '/chatListing';
   static const success = '/success';
   static const support = '/support';

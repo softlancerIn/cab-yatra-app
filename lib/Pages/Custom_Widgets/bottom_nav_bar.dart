@@ -20,7 +20,7 @@ class CustomBottomNavBar extends StatelessWidget {
         ),
         const BottomNavigationBarItem(
           icon: Icon(Icons.car_rental),
-          label: 'My Booking',
+          label: 'Posted Booking',
         ),
         BottomNavigationBarItem(
           icon: Container(

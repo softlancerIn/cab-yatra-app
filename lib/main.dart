@@ -7,8 +7,10 @@ import 'Pages/AuthPages/login/bloc/loginBloc.dart';
 
 import 'Pages/AuthPages/otp/bloc/otpBloc.dart';
 import 'Pages/AuthPages/register/bloc/registerBloc.dart';
+import 'Pages/Booking/bloc/booking_bloc.dart';
 import 'Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 import 'Pages/bookingDetails/bloc/bookingDetailsBloc.dart';
+import 'Pages/editBooking/bloc/editBookingBloc.dart';
 import 'app/router/app_router.dart';
 import 'core/api_client.dart';
 
@@ -36,7 +38,8 @@ class MyApp extends StatelessWidget {
         BlocProvider<RegisterBloc>(create: (context) => RegisterBloc(),),
         BlocProvider<DashboardBloc>(create: (context) => DashboardBloc(),),
          BlocProvider<BookingDetailBloc>(create: (context) => BookingDetailBloc(),),
-        // BlocProvider<DashboardBloc>(create: (context) => DashboardBloc(),),
+         BlocProvider<BookingBloc>(create: (context) => BookingBloc(),),
+        BlocProvider<EditBookingBloc>(create: (context) => EditBookingBloc(),),
         // BlocProvider<SettingsBloc>(create: (context) => SettingsBloc(),),
         // BlocProvider<BookingHistoryBloc>(create: (context) => BookingHistoryBloc(),),
         // BlocProvider(create: (_) => AuthBloc()..add(CheckAuthStatusEvent())),
