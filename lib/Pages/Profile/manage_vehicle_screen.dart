@@ -1,5 +1,7 @@
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
+import 'package:cab_taxi_app/Pages/Profile/add_vehicle_slider.dart';
 import 'package:cab_taxi_app/widget/custom_app_bar.dart';
+import 'package:cab_taxi_app/widget/custom_bottom_slider.dart';
 import 'package:flutter/material.dart';
 
 class ManageVehicleScreen extends StatefulWidget {
@@ -99,9 +101,14 @@ class _ManageVehicleScreenState
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFFFB100),
         onPressed: () {
-          // Add vehicle logic here
+
+          CustomBottomSlider.show(
+            context: context,
+            child: const AddVehicleSlider(),
+          );
+
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add),
       ),
     );
   }

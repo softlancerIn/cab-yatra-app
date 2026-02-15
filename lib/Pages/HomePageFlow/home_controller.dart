@@ -1,3 +1,4 @@
+import 'package:cab_taxi_app/Pages/Chat/chats_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,7 +26,8 @@ class _MainHomeControllerState extends State<MainHomeController> {
     Homepage(),
     BookingPage(),
     AddBookingScreen(),
-    ChatListingScreen(),
+    // ChatListingScreen(),
+    ChatsScreen(),
     // EditProfilePagRe(),
     // AgentReviewScreen(),
     ProfileScreen(),
