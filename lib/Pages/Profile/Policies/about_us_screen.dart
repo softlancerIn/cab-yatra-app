@@ -1,3 +1,4 @@
+import 'package:cab_taxi_app/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../Custom_Widgets/custom_app_bar.dart';
@@ -8,12 +9,10 @@ class AboutUsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBAR(
+      appBar: const CustomAppBar(
         title: "About Us",
-        showLeading: true,
-        showAction: false,
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: SingleChildScrollView(

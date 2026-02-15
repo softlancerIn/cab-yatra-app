@@ -1,4 +1,5 @@
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
+import 'package:cab_taxi_app/widget/custom_app_bar.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 
@@ -29,17 +30,8 @@ class _ManageDriversScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
-          "Manage Drivers",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      appBar: const CustomAppBar(
+        title: "Manage Drivers",
       ),
       backgroundColor: const Color(0xFFF4F4F4),
 
@@ -101,14 +93,12 @@ class _ManageDriversScreenState
       ),
 
       /// Floating Add Button
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: PrimaryButton(
-          text: 'Add Driver',
-          onPressed: () {
-            // Add driver logic here
-          },
-        ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFFFB100),
+        onPressed: () {
+          // Add vehicle logic here
+        },
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }

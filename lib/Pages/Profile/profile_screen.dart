@@ -1,6 +1,7 @@
 import 'package:cab_taxi_app/Pages/Profile/Policies/about_us_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/Policies/privacy_policy_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/Policies/terms_conditions_screen.dart';
+import 'package:cab_taxi_app/Pages/Profile/booking_transactions_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/manage_drivers_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/manage_vehicle_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/personal_information_screen.dart';
@@ -140,7 +141,19 @@ class ProfileScreen extends StatelessWidget {
                 },
               ),
               _profileTile(context, Icons.credit_card, "Payment Methods"),
-              _profileTile(context, Icons.receipt_long, "Booking Transactions"),
+              _profileTile(
+                context,
+                Icons.receipt_long,
+                "Booking Transactions",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BookingTransactionsScreen(),
+                    ),
+                  );
+                },
+              ),
 
               const SizedBox(height: 20),
 

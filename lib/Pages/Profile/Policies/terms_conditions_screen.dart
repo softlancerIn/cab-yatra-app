@@ -1,3 +1,4 @@
+import 'package:cab_taxi_app/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import '../../Custom_Widgets/custom_app_bar.dart';
 
@@ -7,12 +8,10 @@ class TermsConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4),
-      appBar: AppBAR(
+      appBar: const CustomAppBar(
         title: "Terms & Conditions",
-        showLeading: true,
-        showAction: false,
       ),
+      backgroundColor: const Color(0xFFF4F4F4),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(

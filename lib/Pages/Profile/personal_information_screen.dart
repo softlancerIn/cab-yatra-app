@@ -1,3 +1,4 @@
+import 'package:cab_taxi_app/widget/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class PersonalInformationScreen extends StatefulWidget {
@@ -12,21 +13,15 @@ class _PersonalInformationScreenState
     extends State<PersonalInformationScreen> {
 
   int selectedRole = 0; // 0 = Agent, 1 = Owner, 2 = Driver
+  String company = '';
+  String license1 = '';
+  String license2 = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: const Text(
-          "Personal information",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      appBar: const CustomAppBar(
+        title: "Personal Information",
       ),
       backgroundColor: const Color(0xFFF4F4F4),
       body: SafeArea(
