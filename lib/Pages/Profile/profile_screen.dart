@@ -1,6 +1,9 @@
 import 'package:cab_taxi_app/Pages/Profile/Policies/about_us_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/Policies/privacy_policy_screen.dart';
 import 'package:cab_taxi_app/Pages/Profile/Policies/terms_conditions_screen.dart';
+import 'package:cab_taxi_app/Pages/Profile/manage_drivers_screen.dart';
+import 'package:cab_taxi_app/Pages/Profile/manage_vehicle_screen.dart';
+import 'package:cab_taxi_app/Pages/Profile/personal_information_screen.dart';
 import 'package:flutter/material.dart';
 import '../Custom_Widgets/custom_app_bar.dart';
 import '../Review/reviewSectionNew.dart';
@@ -18,13 +21,11 @@ class ProfileScreen extends StatelessWidget {
         showAction: false,
       ),
       body: SafeArea(
+        top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 100), // <-- Fix bottom cut
           child: Column(
             children: [
-
-              /// 👤 Profile Section
-              const SizedBox(height: 20),
+              // const SizedBox(height: 10),
 
               const CircleAvatar(
                 radius: 55,
@@ -98,9 +99,46 @@ class ProfileScreen extends StatelessWidget {
 
               /// 🔹 Account Section
               _sectionTitle("Account"),
-              _profileTile(context, Icons.person, "Personal Information"),
-              _profileTile(context, Icons.group, "Manage Drivers"),
-              _profileTile(context, Icons.directions_car, "Manage Vehicles"),
+              _profileTile(
+                context,
+                Icons.person,
+                "Personal Information",
+                onTap: () {
+                  Navigator.of(context, rootNavigator: true).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PersonalInformationScreen(),
+                    ),
+                  );
+                },
+              ),
+              _profileTile(
+                context,
+                Icons.group,
+                "Manage Drivers",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                      const ManageDriversScreen(),
+                    ),
+                  );
+                },
+              ),
+              _profileTile(
+                context,
+                Icons.directions_car,
+                "Manage Vehicles",
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                      const ManageVehicleScreen(),
+                    ),
+                  );
+                },
+              ),
               _profileTile(context, Icons.credit_card, "Payment Methods"),
               _profileTile(context, Icons.receipt_long, "Booking Transactions"),
 
@@ -187,8 +225,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Section Title Widget
-  static Widget _sectionTitle(String title) {
+  Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Align(
@@ -205,7 +242,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   /// Profile ListTile
-  static Widget _profileTile(
+  Widget _profileTile(
       BuildContext context,
       IconData icon,
       String title,

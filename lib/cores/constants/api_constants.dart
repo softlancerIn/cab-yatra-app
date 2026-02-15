@@ -18,6 +18,7 @@
     static const String booking = 'api/driver/V2/booking';
     static const String bookingDetail = 'api/driver/V2/booking';
 
+    static const String profileInformation = 'api/driver/V2/profile';
 
     static const String location = 'api/driver/home/location';
 
