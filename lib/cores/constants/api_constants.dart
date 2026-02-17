@@ -5,6 +5,7 @@
 //static const String baseUrl = 'http://35.154.123.59/';
    // static const String baseUrl = 'https://vl9639nz-5009.inc1.devtunnels.ms/';
     static const String sendOtp = 'api/driver/send-otp';
+    static const String logOut = 'api/driver/logout';
     static const String getCarCategory = 'api/driver/V2/get-car-category';
     static const String addBooking = 'api/driver/V2/booking';
     static const String home = 'api/driver/home';
