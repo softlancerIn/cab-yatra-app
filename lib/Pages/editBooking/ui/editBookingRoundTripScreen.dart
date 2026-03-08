@@ -15,25 +15,28 @@ import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
 import '../repo/editBookingRepo.dart';
 
-class EditBookingRoundTripScreen extends StatelessWidget {
-  const EditBookingRoundTripScreen({super.key});
+
+class EditBookingRoundTripScreen extends StatefulWidget {
+  final String vehicalType;
+  final String pickUpLocation;
+  final String dropLocation;
+  final String pickUpDate;
+  final String pickUpTime;
+  final String totalFare;
+  final String driverCommission;
+  final String remark;
+
+  const EditBookingRoundTripScreen({super.key,required this.pickUpTime,required this.remark,required this.driverCommission,required this.pickUpDate,required this.totalFare,required this.dropLocation,required this.pickUpLocation,required this.vehicalType});
+
+
 
   @override
-  Widget build(BuildContext context) {
-    return const _EditBookingRoundTripScreenView();
-  }
+  State<EditBookingRoundTripScreen> createState() =>
+      EditBookingRoundTripScreenState();
 }
 
-class _EditBookingRoundTripScreenView extends StatefulWidget {
-  const _EditBookingRoundTripScreenView();
-
-  @override
-  State<_EditBookingRoundTripScreenView> createState() =>
-      _EditBookingRoundTripScreenViewState();
-}
-
-class _EditBookingRoundTripScreenViewState
-    extends State<_EditBookingRoundTripScreenView> {
+class EditBookingRoundTripScreenState
+    extends State<EditBookingRoundTripScreen> {
   // Controllers
   final _startDateCtrl = TextEditingController();
   final _startTimeCtrl = TextEditingController();
@@ -45,6 +48,18 @@ class _EditBookingRoundTripScreenViewState
 
   String? _selectedTripType = 'One Way';
   bool _showPhoneNumber = false;
+  @override
+  void initState() {
+    super.initState();
+
+    _pickupCtrl.text = widget.pickUpLocation;
+    _dropCtrl.text = widget.dropLocation;
+    _startDateCtrl.text = widget.pickUpDate;
+    _startTimeCtrl.text = widget.pickUpTime;
+    _totalFareCtrl.text = widget.totalFare;
+    _driverCommCtrl.text = widget.driverCommission;
+    _remarksCtrl.text = widget.remark;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,34 +138,10 @@ class _EditBookingRoundTripScreenViewState
 
                   const SizedBox(height: 24),
 
-                  // ── Trip Type (simple for now) ──────────────────────────────
-                  // _buildDropdownField(
-                  //   label: "Trip Type",
-                  //   value: _selectedTripType,
-                  //   items: const ['One Way', 'Round Trip'],
-                  //   onChanged: (val) => setState(() => _selectedTripType = val),
-                  // ),
-
-                  //  const SizedBox(height: 16),
-
-                  // ── Pickup & Drop (single field for now) ────────────────────
-                  // containerShadow(
-                  //   child: _buildTextField(
-                  //     label: "Pickup Location",
-                  //     controller: _pickupCtrl,
-                  //     hint: "e.g. Ghaziabad",
-                  //   ),
-                  // ),
                   CommonTextFormField(controller: _pickupCtrl,hintText: "Pickup Location",),
                   const SizedBox(height: 16),
                   CommonTextFormField(controller: _dropCtrl,hintText: "Drop Location",),
-                  // containerShadow(
-                  //   child: _buildTextField(
-                  //     label: "Drop Location",
-                  //     controller: _dropCtrl,
-                  //     hint: "e.g. Noida",
-                  //   ),
-                  // ),
+
 
                   const SizedBox(height: 24),
 
@@ -186,14 +177,7 @@ class _EditBookingRoundTripScreenViewState
 
                       const SizedBox(width: 12),
                       Expanded(child: CommonTextFormField(controller: _driverCommCtrl,hintText: "Driver Commission",)),
-                      // Expanded(
-                      //   child: containerShadow(
-                      //     child: _buildNumberField(
-                      //       label: "Driver Commission",
-                      //       controller: _driverCommCtrl,
-                      //     ),
-                      //   ),
-                      // ),
+
                     ],
                   ),
 
@@ -271,7 +255,7 @@ class _EditBookingRoundTripScreenViewState
                   const SizedBox(height: 40),
                   CommonAppButton(
                     isLoading: state.isSubmitting,
-                    text: "Post Booking",    onPressed: state.isSubmitting
+                    text: "Update Booking",    onPressed: state.isSubmitting
                       ? null
                       : () {
                     if (state.selectedCarCategoryId == null) {

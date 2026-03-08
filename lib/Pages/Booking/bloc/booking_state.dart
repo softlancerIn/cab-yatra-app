@@ -2,6 +2,7 @@
 
 import 'package:equatable/equatable.dart';
 
+import '../model/deletePostedBookingModel.dart';
 import '../model/postBookingListModel.dart';
 
 
@@ -11,6 +12,7 @@ class BookingState extends Equatable {
   final String? errorMessage;
 
   final PostedBookingModel? postedBookingModel;
+  final DeletePostedBookingModel? deletePostedBookingModel;
 
 
   const BookingState({
@@ -19,6 +21,7 @@ class BookingState extends Equatable {
     this.isLoading = false,
 
     this.postedBookingModel,
+    this.deletePostedBookingModel,
 
 
   });
@@ -29,6 +32,7 @@ class BookingState extends Equatable {
     String? errorMessage,
 
     PostedBookingModel? postedBookingModel,
+    DeletePostedBookingModel? deletePostedBookingModel,
 
   }) {
     return BookingState(
@@ -37,6 +41,7 @@ class BookingState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
 
       postedBookingModel: postedBookingModel ?? this.postedBookingModel,
+      deletePostedBookingModel: deletePostedBookingModel ?? this.deletePostedBookingModel,
 
 
     );
@@ -49,7 +54,7 @@ class BookingState extends Equatable {
     isLoading,
     errorMessage,
 
-    postedBookingModel,
+    postedBookingModel,deletePostedBookingModel
 
   ];
 }

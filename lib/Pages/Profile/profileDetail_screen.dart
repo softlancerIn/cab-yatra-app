@@ -295,17 +295,17 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _buildTextField('Car Name', carNameController,false),
         _buildTextField('Car Number', carNumberController,false),
         _buildTextField('Expiry Date', expiryController,false),
-        DropdownField(
-          items: fuelTypes,
-          selectedValue: selectedFuelType,
-          label: 'Fuel Type',
-          onChanged: (value) {
-            setState(() {
-              selectedFuelType = value;
-              selectedFuelIndex = fuelTypes.indexOf(value!);
-            });
-          },
-        ),
+        // DropdownField(
+        //   items: fuelTypes,
+        //   selectedValue: selectedFuelType,
+        //   label: 'Fuel Type',
+        //   onChanged: (value) {
+        //     setState(() {
+        //       selectedFuelType = value;
+        //       selectedFuelIndex = fuelTypes.indexOf(value!);
+        //     });
+        //   },
+        // ),
         _buildTextField('No. of Seats', noOfSeats,false),
         const SizedBox(height: 16),
         Row(

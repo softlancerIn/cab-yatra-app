@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/Pages/Mohnish_Sir/chat_listing.dart';
+import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
 import 'package:cab_taxi_app/Pages/bookingDetails/bloc/bookingDetailsEvent.dart';
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/app/router/navigation/routes.dart';
@@ -352,6 +352,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     children: [
                                       Text(
                                         'Extra Requirement : ',
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 11,

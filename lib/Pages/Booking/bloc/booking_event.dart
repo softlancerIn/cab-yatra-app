@@ -24,6 +24,14 @@ class GetPostedBooingEvent extends BookingEvent {
 
   @override
   List<Object?> get props => [context];
+}class DeleteBooingEvent extends BookingEvent {
+  final BuildContext context;
+  final String bookingId;
+
+  const DeleteBooingEvent({required this.context,required this.bookingId});
+
+  @override
+  List<Object?> get props => [context,bookingId];
 }
 
 

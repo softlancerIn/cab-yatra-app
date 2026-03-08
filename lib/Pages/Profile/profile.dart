@@ -1,16 +1,15 @@
 
-import 'package:cab_taxi_app/Pages/AuthPages/login/ui/loginScreen.dart';
-import 'package:cab_taxi_app/Pages/Profile/profileDetail_screen.dart';
+import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/app/router/navigation/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:cab_taxi_app/Pages/Mohnish_Sir/html_data_page.dart';
-
-import 'package:cab_taxi_app/Pages/Payment%20Method/payment_method.dart';
-import 'package:cab_taxi_app/Pages/Support/support.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../Controllers/profile_controller.dart';
+import 'bloc/personal_info_bloc.dart';
+import 'bloc/personal_info_event.dart';
+import 'bloc/personal_info_state.dart';
 
 
 
@@ -24,12 +23,12 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final ProfileController controller = Get.put(ProfileController());
+  // final ProfileController controller = Get.put(ProfileController());
   bool isSettingExpanded = false;
   @override
   void initState() {
     super.initState();
-    controller.getProfileData();
+    context.read<PersonalInfoBloc>().add(LoadProfile(context));
   }
 
   @override
@@ -55,72 +54,119 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
               SizedBox(height: 10,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: Color(0xFFFCB117),
-                            ),
-                            borderRadius: BorderRadius.circular(50),
-                          ),
+              BlocConsumer<PersonalInfoBloc, PersonalInfoState>(
+                  listener: (context, state) {
 
-                          child: Icon(Icons.person,size: 60,color: Color(0xFFFCB117),)),
-                      SizedBox(height: 5,),
-                      Text(
-                        'Brijesh',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      //SizedBox(height: 5,),
-                      Text(
-                        '6389716535',
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey
-                        ),
-                      ),SizedBox(height: 5,),
-                      Row(
+
+
+
+                  },
+                  builder: (context, state) {
+                    if (state.isLoading) {
+                      return const SizedBox(
+                        height: 400,
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+
+                    return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(
-                            '4.9',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50), // adjust for more/less roundness
+                            child: Container(
+                              width: 100,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  width: 2,
+                                  color: const Color(0xFFFCB117),
+                                ),
+                                // borderRadius: BorderRadius.circular(50),  // optional if not using ClipRRect
+                              ),
+                              child: Image.network(
+                                state.networkImage ?? '',
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[100],
+                                    child: const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Color(0xFFFCB117),
+                                    ),
+                                  );
+                                },
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return const Center(
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFCB117)),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
-                          Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                          // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                          // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                          // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                          // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                          SizedBox(height: 5,),
                           Text(
-                            '(1 review)',
+                            state.name?? 'Brijesh',
                             style: TextStyle(
-                              color: const Color(0xFF787878),
-                              fontSize: 10,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          //SizedBox(height: 5,),
+                          Text(
+                       state.phone??     '6389716535',
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey
+                            ),
+                          ),SizedBox(height: 5,),
+                          GestureDetector(
+                            onTap: (){
+                              Nav.push(context, Routes.reviewScreen);
+                            },
+                            child: Row(
+                              children: [
+                                Text(
+                                  '4.9',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                Text(
+                                  '(1 review)',
+                                  style: TextStyle(
+                                    color: const Color(0xFF787878),
+                                    fontSize: 10,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
+
+                              ],
                             ),
                           )
 
                         ],
-                      )
-
+                      ),
                     ],
-                  ),
-                ],
+                  );
+                }
               ),
 
 
@@ -129,15 +175,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
               SizedBox(height: 10,),
               titleData(title: 'Account'),
               SizedBox(height: 10,),
-              titleCardData(onTap: (){}, image: 'assets/images/personalIcon.png', title: 'Personal Information'),
+              titleCardData(onTap: (){
+                Nav.push(context, Routes.profile);
+              }, image: 'assets/images/personalIcon.png', title: 'Personal Information'),
               SizedBox(height: 10,),
-              titleCardData(onTap: (){}, image: 'assets/images/ManageDriver.png', title: 'Manage Drivers'),
+              titleCardData(onTap: (){
+                Nav.push(context, Routes.manageDrivers);
+              }, image: 'assets/images/ManageDriver.png', title: 'Manage Drivers'),
               SizedBox(height: 10,),
               titleCardData(onTap: (){}, image: 'assets/images/manageVahical.png', title: 'Manage Vehicles'),
               SizedBox(height: 10,),
-              titleCardData(onTap: (){}, image: 'assets/images/paymentVahical.png', title: 'Payment Methods'),
+              titleCardData(onTap: (){
+                Nav.push(context, Routes.paymentMethod);
+              }, image: 'assets/images/paymentVahical.png', title: 'Payment Methods'),
               SizedBox(height: 10,),
-              titleCardData(onTap: (){}, image: 'assets/images/BookingIcon.png', title: 'Booking Transactions'),
+              titleCardData(onTap: (){
+                Nav.push(context, Routes.transection,);
+              }, image: 'assets/images/BookingIcon.png', title: 'Booking Transactions'),
               SizedBox(height: 10,),
               titleData(title: 'Policies'),
               SizedBox(height: 10,),

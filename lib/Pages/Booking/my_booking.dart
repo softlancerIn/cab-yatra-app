@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:cab_taxi_app/Pages/Add%20New%20Booking/add_new_booking.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/Pages/Mohnish_Sir/chat_listing.dart';
+import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
 import 'package:cab_taxi_app/app/router/app_router.dart';
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/models/my_booking_model.dart';
@@ -231,7 +231,7 @@ class _BookingPageState extends State<BookingPage> {
                                           const Spacer(),
                                           Text(
                                             //data.subTypeLabel.toString(),
-                                              'One Way Trip',
+                                              ' ${newBookingData.subTypeLabel}',
                                               style: const TextStyle(
                                                   fontSize: 12, fontWeight: FontWeight.w600)),
                                         ],
@@ -474,6 +474,7 @@ class _BookingPageState extends State<BookingPage> {
                                           ),
                                           Text( newBookingData.remark.toString(),
                                             //newBooking[index].remark??"N/A",
+                                            overflow: TextOverflow.ellipsis,
                                             style: TextStyle(
                                               color: const Color(0xFFF45858),
                                               fontSize: 11,
@@ -530,11 +531,18 @@ class _BookingPageState extends State<BookingPage> {
 
                                             // Second part
                                             GestureDetector(
-                                              onTap: (){
-                                                Nav.push(context, Routes.editBooking);
+                                              onTap: () {
+                                                Nav.push(
+                                                  context,
+                                                  Routes.editBooking,
+                                                  extra: newBookingData, // 👈 FULL OBJECT PASS
+                                                );
+
+                                                print("Booking Type 🙌 ${newBookingData.subTypeLabel}");
                                               },
                                               child: Expanded(
                                                 child: Container(
+                                                  width: 100,
                                                   clipBehavior: Clip.antiAlias,
                                                   decoration: ShapeDecoration(
                                                     color: const Color(0xADEFEFEF),
@@ -564,7 +572,7 @@ class _BookingPageState extends State<BookingPage> {
                                                 onTap: (){
                                                   print("delete CCOUNT");
                                                   showDialog(context: context, builder: (context) {
-                                                    return    DeleteBookingDialog(bookingId: "123",);
+                                                    return    DeleteBookingDialog(bookingId: newBookingData.id.toString(),);
                                                   },);
 
                                                 },
@@ -774,6 +782,15 @@ class DeleteBookingDialog extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
+
+                    context.read<BookingBloc>().add(
+                      DeleteBooingEvent(
+                        context: context,
+                        bookingId: bookingId,
+
+                      ),
+                    );
+                    Navigator.of(context).pop();
                     // controller.deleteBooking(
                     //     bookingId: bookingId);
                   },

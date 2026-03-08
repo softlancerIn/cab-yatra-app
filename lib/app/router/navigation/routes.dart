@@ -4,6 +4,8 @@ class Routes {
   static const login = '/';
   static const dashboard = '/dashboard';
   static const home = '/home';
+  static const paymentMethod = '/paymentMethod';
+  static const manageDrivers = '/manageDrivers';
   static const alertFilter = '/alertFilter';
   static const applyFilter = '/applyFilter';
   static const editBooking = '/editBooking';
@@ -19,6 +21,7 @@ class Routes {
   static const privacy = '/privacy';
   static const terms = '/terms';
   static const refundPolicy = '/refundPolicy';
+  static const transection = '/transection';
 
 
   static const history = '/history';
@@ -26,6 +29,8 @@ class Routes {
   static const editProfile = '/editProfile';
   static const register = '/register';
   static const verifySuccess = '/verifySuccess';
+  static const reviewScreen = '/reviewScreen';
+
   // static const logins = '/login';
   // static const home = '/onboarding';
 }

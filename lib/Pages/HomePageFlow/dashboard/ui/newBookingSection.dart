@@ -191,8 +191,8 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                           ),
                                           const Spacer(),
                                           Text(
-                                            //data.subTypeLabel.toString(),
-                                              'One Way Trip',
+                                              newBooking[index].bookingType,
+                                              //'One Way Trip',
                                               style: const TextStyle(
                                                   fontSize: 14, fontWeight: FontWeight.bold)),
                                         ],
@@ -330,13 +330,17 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
-                                          Text(
-                                            newBooking[index].remark??"N/A",
-                                            style: TextStyle(
-                                              color: const Color(0xFFF45858),
-                                              fontSize: 11,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
+                                          SizedBox(
+                                            width: 200,
+                                            child: Text(
+                                              newBooking[index].remark??"N/A",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: const Color(0xFFF45858),
+                                                fontSize: 11,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
                                         ],

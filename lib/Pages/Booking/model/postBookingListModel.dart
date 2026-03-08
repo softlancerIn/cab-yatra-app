@@ -1,7 +1,7 @@
 class PostedBookingModel {
   bool? status;
   String? message;
-  List<Data>? data;
+  List<SeeBookingData>? data;
 
   PostedBookingModel({this.status, this.message, this.data});
 
@@ -9,9 +9,9 @@ class PostedBookingModel {
     status = json['status'];
     message = json['message'];
     if (json['data'] != null) {
-      data = <Data>[];
+      data = <SeeBookingData>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(new SeeBookingData.fromJson(v));
       });
     }
   }
@@ -27,7 +27,7 @@ class PostedBookingModel {
   }
 }
 
-class Data {
+class SeeBookingData {
   int? id;
   String? orderId;
   int? driverId;
@@ -35,6 +35,7 @@ class Data {
   String? carCategoryId;
   String? pickUpDate;
   String? pickUpTime;
+  // String? booking_type;
   String? pickUpLoc;
   String? destinationLoc;
   String? totalFaire;
@@ -48,7 +49,7 @@ class Data {
   String? isAirportLabel;
   CarCategory? carCategory;
 
-  Data(
+  SeeBookingData(
       {this.id,
         this.orderId,
         this.driverId,
@@ -56,6 +57,7 @@ class Data {
         this.carCategoryId,
         this.pickUpDate,
         this.pickUpTime,
+        // this.booking_type,
         this.pickUpLoc,
         this.destinationLoc,
         this.totalFaire,
@@ -69,7 +71,7 @@ class Data {
         this.isAirportLabel,
         this.carCategory});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  SeeBookingData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     orderId = json['orderId'];
     driverId = json['driver_id'];
@@ -77,6 +79,7 @@ class Data {
     carCategoryId = json['carCategory_id'];
     pickUpDate = json['pickUp_date'];
     pickUpTime = json['pickUp_time'];
+    // booking_type = json['booking_type'];
     pickUpLoc = json['pickUpLoc'];
     destinationLoc = json['destinationLoc'];
     totalFaire = json['total_faire'];
@@ -102,6 +105,7 @@ class Data {
     data['carCategory_id'] = this.carCategoryId;
     data['pickUp_date'] = this.pickUpDate;
     data['pickUp_time'] = this.pickUpTime;
+    // data['booking_type'] = this.booking_type;
     data['pickUpLoc'] = this.pickUpLoc;
     data['destinationLoc'] = this.destinationLoc;
     data['total_faire'] = this.totalFaire;

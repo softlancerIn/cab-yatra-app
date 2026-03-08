@@ -29,9 +29,9 @@ class AuthController extends GetxController {
           print('OTP sent successfully: ${response.otp}');
         } else {
           if (response.userType!.toLowerCase() == 'new') {
-            Get.to(() => Profile(
-                  mobile: mobile,
-                ));
+            // Get.to(() => Profile(
+            //       mobile: mobile,
+            //     ));
           }
         }
       } else {
@@ -63,9 +63,9 @@ class AuthController extends GetxController {
 
           ///
           if (response.userType!.toLowerCase() == 'new') {
-            Get.to(() => Profile(
-                  mobile: mobile,
-                ));
+            // Get.to(() => Profile(
+            //       mobile: mobile,
+            //     ));
           } else {
             Get.offAll(const MainHomeController());
           }
@@ -75,18 +75,18 @@ class AuthController extends GetxController {
           // print('OTP sent successfully: ${response.otp}');
         } else {
           if (response.userType!.toLowerCase() == 'new') {
-            Get.to(() => Profile(
-                  mobile: mobile,
-                ));
+            // Get.to(() => Profile(
+            //       mobile: mobile,
+            //     ));
           } else {
             String? token = response.token;
 
             if (token != null) {
               Get.offAll(const MainHomeController());
             } else {
-              Get.to(() => Profile(
-                    mobile: mobile,
-                  ));
+              // Get.to(() => Profile(
+              //       mobile: mobile,
+              //     ));
             }
           }
         }

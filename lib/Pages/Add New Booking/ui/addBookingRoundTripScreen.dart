@@ -24,7 +24,7 @@ class AddBookingRoundTripScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-      AddBookingBloc(AddBookingRepo())..add(LoadCarCategories(context)),
+      AddBookingBloc()..add(LoadCarCategories(context)),
       child: const _AddBookingRoundTripScreenView(),
     );
   }
@@ -45,6 +45,8 @@ class _AddBookingRoundTripScreenViewState
   final _startTimeCtrl = TextEditingController();
   final _pickupCtrl = TextEditingController();
   final _dropCtrl = TextEditingController();
+  final noOfDays = TextEditingController();//no_of_days
+  final tripNotes = TextEditingController();//no_of_days
   final _totalFareCtrl = TextEditingController();
   final _driverCommCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
@@ -91,7 +93,7 @@ class _AddBookingRoundTripScreenViewState
                   const SizedBox(height: 8),
 
                   state.isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(child: SizedBox())
                       : state.carCategories == null ||
                       state.carCategories!.data!.isEmpty
                       ? const Text("No categories available",
@@ -149,7 +151,10 @@ class _AddBookingRoundTripScreenViewState
                   // ),
                   CommonTextFormField(controller: _pickupCtrl,hintText: "Pickup Location",),
                   const SizedBox(height: 16),
-                  CommonTextFormField(controller: _dropCtrl,hintText: "Drop Location",),
+                  CommonTextFormField(controller: noOfDays,hintText: "No Of Days",),
+                  const SizedBox(height: 16),
+                  CommonTextFormField(controller: tripNotes,hintText: "Trip Notes",),
+
                   // containerShadow(
                   //   child: _buildTextField(
                   //     label: "Drop Location",
@@ -290,9 +295,13 @@ class _AddBookingRoundTripScreenViewState
                           msg: "Pickup location is required");
                       return;
                     }
-                    if (_dropCtrl.text.trim().isEmpty) {
+                    if (noOfDays.text.trim().isEmpty) {
                       Fluttertoast.showToast(
-                          msg: "Drop location is required");
+                          msg: "No Of Days is required");
+                      return;
+                    } if (tripNotes.text.trim().isEmpty) {
+                      Fluttertoast.showToast(
+                          msg: "Trip Notes is required");
                       return;
                     }
                     if (_startDateCtrl.text.isEmpty) {
@@ -312,6 +321,8 @@ class _AddBookingRoundTripScreenViewState
                       carCategoryId: state.selectedCarCategoryId!,
                       pickUpDate: _startDateCtrl.text,
                       pickUpTime: _startTimeCtrl.text,
+                      tripNotes: tripNotes.text,
+                      noOfDay: noOfDays.text,
                       pickUpLocations: [_pickupCtrl.text.trim()],
                       destinationLocations: [_dropCtrl.text.trim()],
                       totalFare:

@@ -341,6 +341,7 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                           ),
                                           Text(
                                             "dsfsdnfnsdhn",
+                                            overflow: TextOverflow.ellipsis,
                                          //   activeBooking[index].remark??"N/A",
                                             style: TextStyle(
                                               color: const Color(0xFFF45858),
