@@ -6,7 +6,7 @@ class PersonalInfoState extends Equatable {
   final String phone;
   final String licenseNumber;
   final String licenseNumber2;
-  final String role;
+  final String type;
   final File? image;
   final String? networkImage;
   final bool isSubmitting;
@@ -16,7 +16,7 @@ class PersonalInfoState extends Equatable {
     this.name = 'Name',
     this.company = 'Remark',
     this.phone = '11111111',
-    this.role = 'agent',
+    this.type = 'agent',
     this.licenseNumber2="Licence Number (optional)",
     this.licenseNumber="Licence Number (optional)",
     this.image,
@@ -31,7 +31,7 @@ class PersonalInfoState extends Equatable {
     String? phone,
     String? licenseNumber,
     String? licenseNumber2,
-    String? role,
+    String? type,
     File? image,
     String? networkImage,
     bool? isSubmitting,
@@ -40,7 +40,7 @@ class PersonalInfoState extends Equatable {
     return PersonalInfoState(
       name: name ?? this.name,
       company: company ?? this.company,
-      role: role ?? this.role,
+      type: type ?? this.type,
       image: image ?? this.image,
       networkImage: networkImage ?? this.networkImage,
       isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -53,5 +53,5 @@ class PersonalInfoState extends Equatable {
 
   @override
   List<Object?> get props =>
-      [name, company, role, image, networkImage, isSubmitting, isLoading,licenseNumber,licenseNumber2];
+      [name, company, type, image, networkImage, isSubmitting, isLoading,licenseNumber,licenseNumber2];
 }

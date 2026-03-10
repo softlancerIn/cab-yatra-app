@@ -11,8 +11,8 @@ class PersonalInfoBloc
 
     on<LoadProfile>(_onLoadProfile);
     on<SubmitPressed>(_onSubmit);
-    on<RoleChanged>((event, emit) {
-      emit(state.copyWith(role: event.role));
+    on<TypeChanged>((event, emit) {
+      emit(state.copyWith(type: event.type));
     });
     on<ImageChanged>((event, emit) {
       emit(state.copyWith(image: event.image));
@@ -31,20 +31,14 @@ class PersonalInfoBloc
       );
 
       final data = response.data;
-      print("😍😍😍😍😍😍😍 Name is : ${data!.name}");
-      print("😍😍😍😍😍😍😍 cInfo is : ${data.cInfo}");
-      print("😍😍😍😍😍😍😍 type is : ${data.type}");
-      print("😍😍😍😍😍😍😍 driverImageUrl is : ${data.driverImageUrl}");
-
       emit(state.copyWith(
-        name: data.name ?? "Name",
-        company: data.cInfo ?? "Remark",
-        phone: data.phone ?? "00000000",
-        role: data.type?.toLowerCase() ?? "agent",
-        networkImage: data.driverImageUrl,
-        licenseNumber2: data.licenseNumber2,
-        licenseNumber: data.licenseNumber,
-
+        name: data?.name ?? "Name",
+        company: data?.cInfo ?? "Remark",
+        phone: data?.phone ?? "00000000",
+        type: data?.type?.toLowerCase() ?? "agent",
+        networkImage: data?.driverImageUrl,
+        licenseNumber2: data?.licenseNumber2,
+        licenseNumber: data?.licenseNumber,
         isLoading: false,
       ));
     } catch (e) {
@@ -58,8 +52,7 @@ class PersonalInfoBloc
       ) async {
     try {
       emit(state.copyWith(isSubmitting: true));
-
-      await repo.updateProfile(
+      final updateResponse = await repo.updateProfile(
         context: event.context,
         type: event.type,
         name: event.name,
@@ -68,9 +61,17 @@ class PersonalInfoBloc
         cInfo: event.cInfo,
         driverImage: event.driverImage,
       );
-
-      emit(state.copyWith(isSubmitting: false));
-      on<LoadProfile>(_onLoadProfile);
+      // Update state with new profile info from API response
+      final updatedData = updateResponse.data;
+      emit(state.copyWith(
+        isSubmitting: false,
+        name: updatedData?.name ?? event.name,
+        company: updatedData?.cInfo ?? event.cInfo,
+        type: updatedData?.type?.toLowerCase() ?? event.type,
+        licenseNumber: updatedData?.licenseNumber ?? event.licenseNumber,
+        licenseNumber2: updatedData?.licenseNumber2 ?? event.licenseNumber2,
+        networkImage: updatedData?.driverImageUrl ?? state.networkImage,
+      ));
     } catch (e) {
       emit(state.copyWith(isSubmitting: false));
     }

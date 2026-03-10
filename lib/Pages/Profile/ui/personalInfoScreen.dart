@@ -128,20 +128,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("agent")),
-                          child: roleButton("agent", state.role),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("agent")),
+                          child: roleButton("agent", state.type),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("owner")),
-                          child: roleButton("owner", state.role),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("owner")),
+                          child: roleButton("owner", state.type),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("driver")),
-                          child: roleButton("driver", state.role),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("driver")),
+                          child: roleButton("driver", state.type),
                         ),
                       ),
                     ],
@@ -184,21 +184,21 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             duration: Duration(seconds: 2),
                           ),
                         );
-                        final imageToSend = state.image ?? (state.networkImage != null ? null : File('')); // avoid crash
-                        // If you want to keep old image when not changed → send null or handle in backend
-
+                        // Only send image if picked, otherwise null
+                        final imageToSend = state.image != null && (state.image?.path.isNotEmpty ?? false)
+                            ? state.image
+                            : null;
                         context.read<PersonalInfoBloc>().add(
                           SubmitPressed(
                             context: context,
-                            type: state.role,
+                            type: state.type,
                             name: nameController.text.trim(),
                             licenseNumber: license1Controller.text.trim(),
                             licenseNumber2: license2Controller.text.trim(),
                             cInfo: companyController.text.trim(),
-                            driverImage: imageToSend!, // or make nullable & handle
+                            driverImage: imageToSend,
                           ),
                         );
-
                       },
                       child: state.isSubmitting
                           ? const CircularProgressIndicator(color: Colors.white)
