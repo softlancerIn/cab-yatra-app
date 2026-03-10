@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../core/network_service.dart';
+
 
 
 class ReviewList extends StatefulWidget {
@@ -26,26 +26,10 @@ class _ReviewListState extends State<ReviewList> {
   @override
   void initState() {
     super.initState();
-    fetchReviewList();
+
   }
 
-  Future<void> fetchReviewList() async {
-    try {
-      final response = await NetworkService().getReviewList();
-      if (response != null && response['status'] == true) {
-        setState(() {
-          reviews = response['data'];
-          isLoading = false;
-        });
-      } else {
-        print('Failed to load reviews or status false');
-        setState(() => isLoading = false);
-      }
-    } catch (e) {
-      print('Error: $e');
-      setState(() => isLoading = false);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {

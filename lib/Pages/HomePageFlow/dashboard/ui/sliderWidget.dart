@@ -1,7 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/helperFunctions.dart';
+
+import '../../../../cores/utils/helperFunctions.dart';
 class SliderWidget extends StatefulWidget {
   const SliderWidget({super.key});
 

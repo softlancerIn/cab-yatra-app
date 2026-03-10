@@ -1,10 +1,9 @@
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
-import '../../core/network_service.dart';
 import '../HomePageFlow/home_controller.dart';
 
 class ReviewPage extends StatefulWidget {
@@ -42,54 +41,11 @@ class _ReviewPageState extends State<ReviewPage> {
   @override
   void initState() {
     super.initState();
-    _fetchDriverData();
+
   }
 
-  Future<void> _fetchDriverData() async {
-    final driverData = await NetworkService().getDriverDataForRatingReview(bookingId: widget.bookingId ?? '');
-    if (driverData != null) {
-      setState(() {
-        _driverName = driverData.name;
-      });
-    } else {
-      Fluttertoast.showToast(msg: 'Failed to fetch driver data');
-    }
-  }
 
-  Future<void> _submitReview() async {
-    if (_selectedStars == 0) {
-      Fluttertoast.showToast(msg: 'Please select a rating');
-      return;
-    }
-    final textReview = _reviewController.text.trim();
-    if (textReview.isEmpty) {
-      Fluttertoast.showToast(msg: 'Please write a review');
-      return;
-    }
 
-    final selectedCheckBoxes = _checkBoxValues
-        .asMap()
-        .entries
-        .where((entry) => entry.value)
-        .map((entry) => ['Neat & clean Cab.', 'Good Behavior.', 'On Time.', 'Good Music System.'][entry.key])
-        .toList();
-
-    final result = await NetworkService().sendReview(
-      bookingId: widget.bookingId ?? '',
-      rating: _selectedStars,
-      driver_Id: widget.driverId??0,
-      checkBoxReview: selectedCheckBoxes,
-      textReview: textReview,
-    );
-
-    if (result != null && result['status'] == true) {
-      Fluttertoast.showToast(msg: result['message']);
-      Get.offAll(() => MainHomeController());
-    } else {
-      await  Fluttertoast.showToast(msg: result?['message'],backgroundColor: Colors.green,textColor: Colors.white);
-      Get.offAll(() => MainHomeController());
-    }
-  }
 
 
   @override
@@ -276,7 +232,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
                   SizedBox(height: screenHeight * 0.02),
                   GestureDetector(
-                    onTap: _submitReview,
+                    onTap: (){},
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Container(

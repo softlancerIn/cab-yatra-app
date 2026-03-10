@@ -6,12 +6,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/network_service.dart';
-import '../../../models/dropdown_models.dart';
-import '../../../models/post_booking_model.dart';
-import '../../../services/location_search.dart';
 import '../../../widget/customTextField.dart';
-import '../../Custom_Widgets/custom_app_bar.dart';
+
 
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';

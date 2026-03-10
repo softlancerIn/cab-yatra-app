@@ -1,9 +1,16 @@
+
+
+
+
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:http/http.dart' as http;
+
+import '../../cores/services/secure_storage_service.dart';
 
 class ChatListingScreen extends StatefulWidget {
   const ChatListingScreen({super.key});
@@ -18,30 +25,52 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
     text: 'Guest_${DateTime.now().millisecond}',
   );
 
+  final TextEditingController _channelIdController = TextEditingController(
+    text: '546', // ← change to your booking_id or driver id
+  );
+  String? currentUserId;
   final List<Message> _messages = [];
   final ScrollController _scrollController = ScrollController();
 
   PusherChannelsFlutter? pusher;
-  late String channelName = 'private-chat-demo'; // ← changed to private-...
+  String channelName = ''; // will be set dynamically
 
   bool _isConnected = false;
   String? _username;
+  String? _authToken="251|ge2tcBrvHYt3sYIqMqBKdVDbj727s8CmxdVc7Pqrc1a027e9"; // ← add your auth token here (JWT / Sanctum / etc)
 
   @override
   void initState() {
     super.initState();
-    _connectToPusher();
+    loadUser();
+    getMessages();
   }
 
-  Future<void> _connectToPusher() async {
+  Future<void> loadUser() async {
+    currentUserId = await SecureStorageService.getUserId();
+    setState(() {});
+  }
+
+  Future<void> _connectAndSubscribe() async {
+    if (_username == null || _channelIdController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter name and channel ID")),
+      );
+      return;
+    }
+
+    setState(() {
+      channelName = 'private-chat.booking.${_channelIdController.text.trim()}';
+      // OR: 'private-App.Models.Driver.${_channelIdController.text.trim()}';
+    });
+
     try {
       pusher = PusherChannelsFlutter.getInstance();
 
       await pusher!.init(
         apiKey: '8a3c4b441150f546090a',
-        cluster: 'mt1',
-        authEndpoint: "https://cabyatra.com",
-
+        cluster: 'ap2',
+        // Do NOT set authEndpoint if using onAuthorizer
         onConnectionStateChange: (currentState, previousState) {
           debugPrint("Connection: $currentState");
           if (mounted) {
@@ -50,14 +79,16 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
             });
           }
         },
-        onError: (String message, int? code, dynamic error) {          // ← fixed signature
+        onError: (message, code, error) {
           debugPrint("Pusher error: $message (code: $code, error: $error)");
         },
         onSubscriptionSucceeded: (channelName, data) {
           debugPrint("Subscribed to $channelName successfully");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Joined $channelName")),
+          );
         },
         onEvent: (event) {
-          // Listen for client- prefixed event
           if (event.eventName == 'client-new-message') {
             try {
               final data = jsonDecode(event.data as String);
@@ -73,12 +104,49 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
             }
           }
         },
+        // ── Most important part for private channels ──
+        // Inside pusher!.init(...)
+
+        onAuthorizer: (channelName, socketId, options) async {
+          try {
+            // ← CHANGE THIS TO THE REAL AUTH ENDPOINT (most likely one of these)
+            final uri = Uri.parse('https://cabyatra.com/broadcasting/auth');
+            // OR: 'https://cabyatra.com/api/broadcasting/auth'
+            // OR: 'https://cabyatra.com/api/driver/V2/broadcast/auth'  ← ask backend team
+
+            final response = await http.post(
+              uri,
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': 'Bearer $_authToken',  // your token "251|ge2tcBrv..."
+              },
+              body: jsonEncode({
+                'socket_id': socketId,          // ← Pusher sends this
+                'channel_name': channelName,    // ← e.g. "private-chat.booking.505"
+              }),
+            );
+
+            if (response.statusCode == 200) {
+              final json = jsonDecode(response.body);
+              debugPrint("Auth success → ${response.body}");
+              return json;  // Must be {"auth": "8a3c4b441150f546090a:signature..."}
+            } else {
+              debugPrint("Auth failed → Status: ${response.statusCode} | Body: ${response.body}");
+              return null;
+            }
+          } catch (e) {
+            debugPrint("Authorizer error: $e");
+            return null;
+          }
+        },
       );
 
       await pusher!.connect();
 
-      // Subscribe to private channel
+      // Now subscribe
       await pusher!.subscribe(channelName: channelName);
+
     } catch (e) {
       debugPrint("Pusher init/subscribe error: $e");
       if (mounted) {
@@ -90,45 +158,92 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
   }
 
   Future<void> _sendMessage() async {
+
     final text = _messageController.text.trim();
-    if (text.isEmpty || !_isConnected) return;
 
-    final username = _username ?? _nameController.text.trim();
-    if (username.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter your name")),
-      );
-      return;
-    }
+    if (text.isEmpty) return;
 
-    final message = Message(
-      id: const Uuid().v4(),
-      username: username,
-      text: text,
-      timestamp: DateTime.now().toIso8601String(),
-    );
+    final url = "https://cabyatra.com/api/driver/V2/send-message";
+
+    final body = {
+      "receiver_id": "1",
+      "booking_id": _channelIdController.text.trim(),
+      "message": text
+    };
 
     try {
-      await pusher!.trigger(
-        PusherEvent(                              // ← This is the correct way
-          channelName: channelName,
-          eventName: 'client-new-message',
-          data: jsonEncode(message.toJson()),     // or pass Map: message.toJson()
-        ),
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          "Accept": "application/json",
+          "Authorization": "Bearer $_authToken",
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode(body),
       );
 
-      _messageController.clear();
+      debugPrint("SEND STATUS: ${response.statusCode}");
+      debugPrint("SEND BODY: ${response.body}");
 
-      // Optional: show your own message immediately (optimistic update)
-      setState(() {
-        _messages.add(message);
-      });
-      _scrollToBottom();
+      if (response.statusCode == 200) {
+
+        final newMsg = Message(
+          id: 0,
+          senderId: int.parse(currentUserId!),
+          receiverId: 1,
+          message: text,
+          createdAt: DateTime.now().toIso8601String(),
+        );
+
+        setState(() {
+          _messages.add(newMsg);
+        });
+
+        _messageController.clear();
+
+        _scrollToBottom();
+      }
+
     } catch (e) {
-      debugPrint("Trigger error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to send: $e")),
+      debugPrint("Send error $e");
+    }
+  }
+
+  Future<void> getMessages() async {
+
+    final url = "https://cabyatra.com/api/driver/V2/get-messages/${_channelIdController.text}";
+
+    try {
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          "Authorization": "Bearer $_authToken",
+          "Accept": "application/json"
+        },
       );
+
+      debugPrint("CHAT STATUS: ${response.statusCode}");
+      debugPrint("CHAT BODY: ${response.body}");
+
+      if (response.statusCode == 200) {
+
+        final List data = jsonDecode(response.body);
+
+        _messages.clear();
+
+        for (var item in data) {
+          _messages.add(Message.fromJson(item));
+        }
+
+        setState(() {});
+
+        _scrollToBottom();
+      }
+
+    } catch (e) {
+      debugPrint("Chat list error $e");
     }
   }
 
@@ -149,6 +264,7 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
     pusher?.disconnect();
     _messageController.dispose();
     _nameController.dispose();
+    _channelIdController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -157,7 +273,7 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pusher Private Chat'),
+        title: const Text('Private Chat (Pusher)'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -170,87 +286,96 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
       ),
       body: Column(
         children: [
-          // Name input (shown until joined)
+          // Join form
           if (_username == null)
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Your name',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (value) {
-                        final trimmed = value.trim();
-                        if (trimmed.isNotEmpty) {
-                          setState(() => _username = trimmed);
-                        }
-                      },
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Your name',
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _channelIdController,
+                    decoration: const InputDecoration(
+                      labelText: 'Booking ID / Driver ID',
+                      border: OutlineInputBorder(),
+                      hintText: 'e.g. 12345',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
                       final name = _nameController.text.trim();
-                      if (name.isNotEmpty) {
+                      if (name.isNotEmpty && _channelIdController.text.trim().isNotEmpty) {
                         setState(() => _username = name);
+                        _connectAndSubscribe();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Fill all fields")),
+                        );
                       }
                     },
-                    child: const Text('Join'),
+                    child: const Text('Join Chat'),
                   ),
                 ],
               ),
             ),
 
-          // Messages
+          // Messages list
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(8),
               itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                final isMe = msg.username == (_username ?? '');
+                itemBuilder: (context, index) {
 
-                return Align(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blue[100] : Colors.grey[200],
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment:
-                      isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          msg.username,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                  final msg = _messages[index];
+
+                  final isMe = msg.senderId.toString() == currentUserId;
+
+                  return Align(
+                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: isMe ? Colors.green[200] : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment:
+                        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+
+                          Text(msg.message),
+
+                          const SizedBox(height: 4),
+
+                          Text(
+                            msg.formattedTime,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(msg.text),
-                        const SizedBox(height: 4),
-                        Text(
-                          msg.formattedTime,
-                          style: const TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
+
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                }
             ),
           ),
 
-          // Message input
+          // Input
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
@@ -283,36 +408,32 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
 // Message model (unchanged)
 class Message {
-  final String id;
-  final String username;
-  final String text;
-  final String timestamp;
+  final int id;
+  final int senderId;
+  final int receiverId;
+  final String message;
+  final String createdAt;
 
   Message({
     required this.id,
-    required this.username,
-    required this.text,
-    required this.timestamp,
+    required this.senderId,
+    required this.receiverId,
+    required this.message,
+    required this.createdAt,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'] as String,
-      username: json['username'] as String,
-      text: json['text'] as String,
-      timestamp: json['timestamp'] as String,
+      id: json["id"],
+      senderId: json["sender_id"],
+      receiverId: json["receiver_id"],
+      message: json["message"],
+      createdAt: json["created_at"],
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'username': username,
-    'text': text,
-    'timestamp': timestamp,
-  };
-
   String get formattedTime {
-    final dt = DateTime.parse(timestamp);
-    return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
+    final dt = DateTime.parse(createdAt);
+    return "${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}";
   }
 }

@@ -1,4 +1,5 @@
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,15 +16,24 @@ import 'Pages/Payment Method/bloc/paymentBloc.dart';
 import 'Pages/Profile/bloc/personal_info_bloc.dart';
 import 'Pages/addDriver/bloc/driverBloc.dart';
 import 'Pages/bookingDetails/bloc/bookingDetailsBloc.dart';
+import 'Pages/cms/bloc/cms_bloc.dart';
 import 'Pages/editBooking/bloc/editBookingBloc.dart';
 import 'Pages/transection/bloc/transections_bloc.dart';
 import 'app/router/app_router.dart';
-import 'core/api_client.dart';
 
-void main() {
+import 'cores/services/notification_service.dart';
+import 'firebase_options.dart';
+
+void main()async  {
   WidgetsFlutterBinding.ensureInitialized();
-  final dioClient = DioClient();
-  dioClient.setupInterceptors();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  await NotificationService.initialize();
+  await FCMService.init();
+
+
   runApp(const MyApp());
 }
 
@@ -51,6 +61,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<DriverBloc>(create: (context) => DriverBloc(),),
     BlocProvider<PaymentBloc>(create: (context) => PaymentBloc(),),
         BlocProvider<TransectionsBloc>(create: (context) => TransectionsBloc(),),
+         BlocProvider<CmsBloc>(create: (context) => CmsBloc(),),
         // BlocProvider<SettingsBloc>(create: (context) => SettingsBloc(),),
         // BlocProvider<BookingHistoryBloc>(create: (context) => BookingHistoryBloc(),),
         // BlocProvider(create: (_) => AuthBloc()..add(CheckAuthStatusEvent())),

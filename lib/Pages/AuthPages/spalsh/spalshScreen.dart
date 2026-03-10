@@ -1,16 +1,11 @@
-import 'package:cab_taxi_app/Pages/AuthPages/otp/ui/verify_otp.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/app/router/app_router.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../../Controllers/auth_controller.dart';
+import 'package:flutter/material.dart';
+
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-import '../../../../core/api_client.dart';
+
 import '../../../cores/services/secure_storage_service.dart';
-import '../../HomePageFlow/home_controller.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

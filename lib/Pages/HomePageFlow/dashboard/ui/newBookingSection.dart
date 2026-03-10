@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+
 
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-import '../../../../core/network_service.dart';
-import '../../../../models/home_model.dart';
+
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
 import '../../custom/customSearchBar.dart';
 import '../bloc/dashboard_bloc.dart';

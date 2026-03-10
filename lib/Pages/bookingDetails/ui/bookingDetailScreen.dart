@@ -1,21 +1,15 @@
-import 'dart:convert';
+
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
+
 import 'package:cab_taxi_app/Pages/bookingDetails/bloc/bookingDetailsEvent.dart';
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/app/router/navigation/routes.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
+
 import 'package:intl/intl.dart';
 
-import '../../../Controllers/home_controller.dart';
-import '../../../Controllers/payment_service.dart';
-import '../../../core/utils/helperFunctions.dart';
-import '../../../models/home_model.dart';
-import '../../HomePageFlow/home_controller.dart';
 import '../bloc/bookingDetailsBloc.dart';
 import 'driverInfoCard.dart';
 
@@ -31,38 +25,23 @@ class BookingDetailScreen extends StatefulWidget {
 }
 
 class _BookingDetailScreenState extends State<BookingDetailScreen> {
-  late PaymentService _paymentService;
+  // late PaymentService _paymentService;
 
   @override
   void initState() {
-    _paymentService = PaymentService();
+    // _paymentService = PaymentService();
     super.initState();
     context.read<BookingDetailBloc>().add(GetBookingDetailEvent(context: context,bookingId: widget.bookingID));
   }
 
   @override
   void dispose() {
-    _paymentService.dispose();
+    // _paymentService.dispose();
     super.dispose();
   }
 
-  void _startPayment({
-    required String price,
-    required String orderId,
-    required BuildContext context,
-  }) {
-    _paymentService
-        .openCheckout(price: price, orderId: orderId, context: context)
-        .then((value) {
-      // controller.updateBookingOrder(
-      //     bookingId: widget.data.id.toString(), orderId: orderId);
-      //todo getHomeData();
-      controller.getHomeData();
-      Get.to(() => MainHomeController());
-    });
-  }
 
-  final controller = Get.put(HomeController());
+
 
   @override
   Widget build(BuildContext context) {

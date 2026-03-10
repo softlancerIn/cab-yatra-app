@@ -10,6 +10,7 @@
     static const String addBooking = 'api/driver/V2/booking';
     static const String home = 'api/driver/home';
     static const String registration = 'api/driver/registration';
+     static const String cmsPages = 'api/driver/cmsPages';
     static const String verifyOtp = 'api/driver/login';
     static const String settingData = 'api/driver/my_booking';
     static const String login = 'api/driver/login';
@@ -28,6 +29,7 @@
     static const String settingsEndpoint = 'settings';
     static const String uploadEndpoint = 'upload';
     static const String tokenKey = 'token';
+    static const String userID = 'userId';
     static const String isAgentKey = 'isAgent';
     static const String isdriverKey = 'isdriver';
   }

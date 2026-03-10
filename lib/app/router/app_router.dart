@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 
 
-import '../../Pages/Add Profile/add_profile.dart';
 import '../../Pages/AuthPages/login/ui/loginSelection.dart';
 
 import '../../Pages/AuthPages/otp/ui/verify_otp.dart';
@@ -20,6 +19,9 @@ import '../../Pages/Payment Method/ui/payment_method.dart';
 import '../../Pages/Profile/ui/personalInfoScreen.dart';
 import '../../Pages/Review/reviewSectionNew.dart';
 import '../../Pages/addDriver/ui/manageDriversScreen.dart';
+import '../../Pages/cms/ui/aboutPage.dart';
+import '../../Pages/cms/ui/privacy_policy.dart';
+import '../../Pages/cms/ui/term_condition.dart';
 import '../../Pages/editBooking/edit_new_booking.dart';
 import '../../Pages/transection/ui/transectionScreen.dart';
 import 'navigation/routes.dart';
@@ -156,6 +158,16 @@ class AppRouter {
         path: Routes.applyFilter,
         builder: (_, __) =>  ApplyFilterDialog(),
       ),
+      GoRoute(
+      path: Routes.aboutus,
+  builder: (_, __) =>  AboutUsPage(),
+  ),GoRoute(
+  path: Routes.termsCondition,
+  builder: (_, __) =>  TermsConditionPage(),
+  ),GoRoute(
+  path: Routes.privacyPolicy,
+  builder: (_, __) =>  PrivacyPolicyPage(),
+  ),
       GoRoute(
         path: Routes.editBooking,
         builder: (context, state) {

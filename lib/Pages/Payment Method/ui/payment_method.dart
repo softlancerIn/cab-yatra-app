@@ -3,10 +3,7 @@ import 'dart:io';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 
-import '../../../core/network_service.dart';
-import '../../../models/dirver_payment_method.dart';
 import '../../../widget/customTextField.dart';
 import '../bloc/paymentBloc.dart';
 import '../bloc/paymentEvent.dart';

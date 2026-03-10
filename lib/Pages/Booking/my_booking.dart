@@ -1,25 +1,16 @@
-import 'dart:convert';
-import 'package:cab_taxi_app/Pages/Add%20New%20Booking/add_new_booking.dart';
+
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
-import 'package:cab_taxi_app/app/router/app_router.dart';
+
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
-import 'package:cab_taxi_app/models/my_booking_model.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import '../../Controllers/home_controller.dart';
-import '../../Controllers/my_booking_controller.dart';
+
 import '../../app/router/navigation/routes.dart';
-import '../../core/network_service.dart';
-import '../../core/utils/helperFunctions.dart';
-import '../Custom_Widgets/custom_text_button.dart';
-import '../Custom_Widgets/CustomShimmer_widget.dart';
+
 import '../HomePageFlow/custom/customSearchBar.dart';
-import '../Review/write_review.dart';
+
+import '../bookingDetails/ui/bookingDetailScreen.dart';
 import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
@@ -126,6 +117,7 @@ class _BookingPageState extends State<BookingPage> {
                       var newBookingData = newBooking[index];
                       return GestureDetector(
                         onTap: () async {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBookingData.id.toString(),),));
 
                          // Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
 
@@ -472,14 +464,17 @@ class _BookingPageState extends State<BookingPage> {
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
-                                          Text( newBookingData.remark.toString(),
-                                            //newBooking[index].remark??"N/A",
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: const Color(0xFFF45858),
-                                              fontSize: 11,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
+                                          SizedBox(
+                                            width: 200,
+                                            child: Text( newBookingData.remark.toString(),
+                                              //newBooking[index].remark??"N/A",
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: const Color(0xFFF45858),
+                                                fontSize: 11,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
                                         ],

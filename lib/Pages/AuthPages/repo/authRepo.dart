@@ -173,6 +173,7 @@ class AuthRepo {
           );}
       }
       await SecureStorageService.saveToken(response['token']);
+
       await SecureStorageService.saveIsAgent(response['data']["isAgent"]);
      // await SecureStorageService.saveIsUser(response['data']["isUser"]);
       return VerifyOtpModel.fromJson(response);

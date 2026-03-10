@@ -57,6 +57,9 @@ dependencies:
   equatable: ^2.0.8
   provider: ^6.1.5
   pusher_channels_flutter: ^2.6.0
+  firebase_core: ^4.5.0
+  firebase_messaging: ^16.1.2
+  awesome_notifications: ^0.11.0
 
 
 dev_dependencies:

@@ -12,6 +12,9 @@ class Routes {
   static const chatListing = '/chatListing';
   static const success = '/success';
   static const support = '/support';
+  static const aboutus = '/aboutus';
+  static const termsCondition = '/termsCondition';
+  static const privacyPolicy = '/privacyPolicy';
   static const notification = '/notification';
   static const loginMobile = '/loginMobile';
   static const loginRegister = '/loginRegister';

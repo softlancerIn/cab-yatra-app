@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../models/home_model.dart';
+
 
 
 class HelperFunctions {

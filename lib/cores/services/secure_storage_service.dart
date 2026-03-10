@@ -16,10 +16,14 @@ class SecureStorageService {
   /// TOKEN
   static Future<void> saveToken(String token) async {
     await _storage.write(key: ApiConstants.tokenKey, value: token);
+  } static Future<void> saveUserID(String token) async {
+    await _storage.write(key: ApiConstants.userID, value: token);
   }
 
   static Future<String?> getToken() async {
     return await _storage.read(key: ApiConstants.tokenKey);
+  }  static Future<String?> getUserId() async {
+    return await _storage.read(key: ApiConstants.userID);
   }
 
   /// IS AGENT
@@ -29,7 +33,13 @@ class SecureStorageService {
       value: value.toString(), // true / false
     );
   }
+  static Future<void> saveFcmToken(String token) async {
+    await _storage.write(key: "fcm_token", value: token);
+  }
 
+  static Future<String?> getFcmToken() async {
+    return await _storage.read(key: "fcm_token");
+  }
   static Future<bool> getIsAgent() async {
     final value = await _storage.read(key: ApiConstants.isAgentKey);
     return value == 'true';
