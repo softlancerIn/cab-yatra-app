@@ -1,7 +1,5 @@
-import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../app/router/navigation/routes.dart';
 import '../../repo/authRepo.dart';
 import 'loginEvent.dart';
 import 'loginState.dart';
@@ -9,9 +7,9 @@ import 'loginState.dart';
 class SignInBloc extends Bloc<SignInEvent, SignInState> {
   AuthRepo authRepo = AuthRepo();
 
-  SignInBloc() : super(SignInState()) {
+  SignInBloc() : super(const SignInState()) {
     on<ResetSendOtpEvent>((event, emit) {
-      emit(SignInState()); // pura state reset
+      emit(const SignInState()); // pura state reset
     });
     on<SendOtpEvent>(_onSendOTPSubmitted);
   }
@@ -20,9 +18,7 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     SendOtpEvent event,
     Emitter<SignInState> emit,
   ) async {
-    if (event.mobileNumber == null ||
-        event.mobileNumber!.trim().isEmpty ||
-        event.mobileNumber!.length != 10) {
+    if (event.mobileNumber.trim().isEmpty || event.mobileNumber.length != 10) {
       emit(
         state.copyWith(
           isLoading: false,
@@ -39,12 +35,12 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         phone: event.mobileNumber,
         context: event.context,
       );
-      if (response != null && response.status == true) {
+      if (response.status == true) {
         // Nav.push(event.context,Routes.otp,extra: {
         //
         //
         // });
-      //  Nav.go(context, Router.)
+        //  Nav.go(context, Router.)
         emit(
           state.copyWith(
             errorMessage: "Send OTP Successfully",
@@ -52,7 +48,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
             isSuccess: true,
           ),
         );
-
       } else {
         emit(
           state.copyWith(

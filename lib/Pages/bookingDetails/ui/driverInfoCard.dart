@@ -50,7 +50,7 @@ class DriverInfoCard extends StatelessWidget {
                 /// Name
                 Text(
                   name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
@@ -75,7 +75,7 @@ class DriverInfoCard extends StatelessWidget {
                   children: [
                     ...List.generate(
                       5,
-                          (index) => Icon(
+                      (index) => Icon(
                         Icons.star,
                         size: 18,
                         color: index < rating.round()

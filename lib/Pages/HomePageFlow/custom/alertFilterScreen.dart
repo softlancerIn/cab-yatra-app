@@ -27,7 +27,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title:Text(
+        title: const Text(
           'Alert',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -40,11 +40,11 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading:  GestureDetector(
-          onTap: (){
-            Navigator.pop(context);
-          },
-            child: Icon(Icons.arrow_back_ios,color: Colors.black)),
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(Icons.arrow_back_ios, color: Colors.black)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -79,8 +79,9 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
               clipBehavior: Clip.antiAlias,
               decoration: ShapeDecoration(
                 color: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                shadows: [
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                shadows: const [
                   BoxShadow(
                     color: Color(0x3F000000),
                     blurRadius: 4,
@@ -91,27 +92,27 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
               ),
               child: Row(
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Select Your Pickup City Manually',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w500,color: Color(0xff3E4959)),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xff3E4959)),
                         ),
                         SizedBox(height: 4),
                         Text(
                           'this will help you to get one way and round trip Notifications',
-                          style:
-                          TextStyle(color: Colors.green, fontSize: 12),
+                          style: TextStyle(color: Colors.green, fontSize: 12),
                         ),
                       ],
                     ),
                   ),
                   Switch(
-
-                    activeColor: Colors.orange,
+                    activeThumbColor: Colors.orange,
                     value: manualPickup,
                     onChanged: (val) {
                       setState(() {
@@ -139,8 +140,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                           style: const TextStyle(color: Colors.white),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.close,
-                            size: 16, color: Colors.white)
+                        const Icon(Icons.close, size: 16, color: Colors.white)
                       ],
                     ),
                   )
@@ -163,11 +163,10 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
             //const Spacer(),
 
             /// BOTTOM BUTTONS
-
           ],
         ),
       ),
-      bottomSheet:         Container(
+      bottomSheet: Container(
         color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: Row(
@@ -175,7 +174,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
             Expanded(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff3E4959),
+                  backgroundColor: const Color(0xff3E4959),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -186,7 +185,10 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                     manualPickup = false;
                   });
                 },
-                child: const Text('Clear Filter',style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  'Clear Filter',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -199,7 +201,10 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                       borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () {},
-                child: const Text('Done',style: TextStyle(color: Colors.white),),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           ],
@@ -229,7 +234,6 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                   'assets/images/carMO.png', // replace with your image
                   height: 40,
                 ),
-
                 const SizedBox(height: 3),
                 Text(
                   title,
@@ -242,14 +246,13 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
             ),
           ),
           if (isSelected)
-            Positioned(
+            const Positioned(
               right: 8,
               top: 6,
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 8,
                 backgroundColor: Colors.white,
-                child: Icon(Icons.check,
-                    size: 12, color: Colors.orange),
+                child: Icon(Icons.check, size: 12, color: Colors.orange),
               ),
             ),
         ],

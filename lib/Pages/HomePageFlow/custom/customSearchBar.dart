@@ -19,7 +19,7 @@ class CustomSearchBar extends StatelessWidget {
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 0.50),
+          side: const BorderSide(width: 0.50),
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -51,8 +51,7 @@ class CustomSearchBar extends StatelessWidget {
           GestureDetector(
             onTap: onSearch,
             child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFB300), // orange/yellow
                 borderRadius: BorderRadius.circular(20),

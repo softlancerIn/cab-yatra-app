@@ -24,15 +24,18 @@ class ProfileRepo {
     required String licenseNumber,
     required String licenseNumber2,
     required String cInfo,
-    required File driverImage,
+    File? driverImage,
   }) async {
     try {
+      final files = <String, File>{};
+      if (driverImage != null) {
+        files["driver_image"] = driverImage;
+      }
+
       final response = await _api.uploadFiles(
         ApiConstants.profile,
         requiresAuth: true,
-        files: {
-          "driver_image": driverImage, // 👈 exact key
-        },
+        files: files,
         fields: {
           "type": type,
           "name": name,

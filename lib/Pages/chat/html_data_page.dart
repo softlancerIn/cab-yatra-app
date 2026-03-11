@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import '../../Controllers/cmsPages_controller.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-
 class HtmlDataPage extends StatefulWidget {
   final String title;
   final String section;
@@ -30,14 +29,14 @@ class _HtmlDataPageState extends State<HtmlDataPage> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: GestureDetector(
-            child: Icon(Icons.arrow_back_ios_new),
+            child: const Icon(Icons.arrow_back_ios_new),
             onTap: () {
               Get.back();
             }),
         title: Text(
           widget.title,
           textAlign: TextAlign.center,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 16,
             fontFamily: 'Poppins',
@@ -77,18 +76,18 @@ class _HtmlDataPageState extends State<HtmlDataPage> {
           print('Content for ${widget.section}: $content');
           return SingleChildScrollView(
             child: content.isNotEmpty
-            ? Html(
-              data: content,
-              style: {
-                "p": Style(
-                  color: Colors.black.withOpacity(0.8),
-                  fontSize: FontSize(14),
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w400,
-                ),
-              },
-            )
-                :const Center(child: CircularProgressIndicator()),
+                ? Html(
+                    data: content,
+                    style: {
+                      "p": Style(
+                        color: Colors.black.withOpacity(0.8),
+                        fontSize: FontSize(14),
+                        fontFamily: 'Roboto',
+                        fontWeight: FontWeight.w400,
+                      ),
+                    },
+                  )
+                : const Center(child: CircularProgressIndicator()),
           );
         }),
       ),

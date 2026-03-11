@@ -1,9 +1,7 @@
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Pages/Add Profile/add_profile.dart';
 import '../Pages/AuthPages/otp/ui/verify_otp.dart';
 import '../Pages/HomePageFlow/home_controller.dart';
 import '../core/api_client.dart';
@@ -183,7 +181,7 @@ class AuthController extends GetxController {
 
       if (response != null) {
         if (response.status == true) {
-          Get.offAll(() => MainHomeController());
+          Get.offAll(() => const MainHomeController());
           // nextSeen.value = true;
           // addDriverModel.value = response;
           //           // Get.to(() => VerifyOtpPage(

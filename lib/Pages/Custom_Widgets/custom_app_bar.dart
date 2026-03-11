@@ -77,12 +77,14 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showLeading;
   final bool showAction;
+  final List<BoxShadow>? customShadow;
 
   const AppBAR({
     super.key,
     required this.title,
     this.showLeading = true, // default true
     this.showAction = true,  // default true
+    this.customShadow,       // default null
   });
 
   @override
@@ -94,10 +96,13 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
 
     return Column(
       children: [
-        SizedBox(height: screenHeight * 0.02),
+        SizedBox(height: screenHeight * 0.05),
         Container(
           height: screenHeight * 0.08,
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: customShadow ,
+          ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [

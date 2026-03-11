@@ -5,13 +5,10 @@ import '../Booking/my_booking.dart';
 import '../Custom_Widgets/bottom_nav_bar.dart';
 import '../chat/chat_listing.dart';
 import '../Profile/profile.dart';
-import '../Review/reviewSectionNew.dart';
 import 'dashboard/ui/homepage.dart';
 
-
-
 class MainHomeController extends StatefulWidget {
-  const MainHomeController({Key? key}) : super(key: key);
+  const MainHomeController({super.key});
 
   @override
   _MainHomeControllerState createState() => _MainHomeControllerState();
@@ -44,6 +41,7 @@ class _MainHomeControllerState extends State<MainHomeController> {
     }
     return true;
   }
+
   @override
   void initState() {
     super.initState();
@@ -65,9 +63,9 @@ class _MainHomeControllerState extends State<MainHomeController> {
         bottomNavigationBar: _currentIndex == 2
             ? null // Hide the bottom navigation bar
             : CustomBottomNavBar(
-          currentIndex: _currentIndex,
-          onTap: _onItemTapped,
-        ),
+                currentIndex: _currentIndex,
+                onTap: _onItemTapped,
+              ),
       ),
     );
   }

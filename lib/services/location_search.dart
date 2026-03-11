@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 class CustomLocationSearchField extends StatefulWidget {
   final double width;
   final double? height;
@@ -14,7 +13,7 @@ class CustomLocationSearchField extends StatefulWidget {
   final String? locationType;
 
   const CustomLocationSearchField({
-    Key? key,
+    super.key,
     required this.width,
     this.height,
     required this.controller,
@@ -23,7 +22,7 @@ class CustomLocationSearchField extends StatefulWidget {
     this.readOnly,
     this.validator,
     this.locationType,
-  }) : super(key: key);
+  });
 
   @override
   _CustomLocationSearchFieldState createState() =>
@@ -46,8 +45,9 @@ class _CustomLocationSearchFieldState extends State<CustomLocationSearchField> {
       _isLoading = true;
     });
 
-    final apiKey = 'AIzaSyAsQryHkf5N7-bx_ZBMJ-X7yFMa9WTqwt0';
-    String url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$apiKey&components=country:in';
+    const apiKey = 'AIzaSyAsQryHkf5N7-bx_ZBMJ-X7yFMa9WTqwt0';
+    String url =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$query&key=$apiKey&components=country:in';
 
     // Added location type filter if specified
     if (widget.locationType != null && widget.locationType == 'airport') {
@@ -82,7 +82,7 @@ class _CustomLocationSearchFieldState extends State<CustomLocationSearchField> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x3F000000),
             blurRadius: 4,
@@ -102,7 +102,7 @@ class _CustomLocationSearchFieldState extends State<CustomLocationSearchField> {
                   decoration: InputDecoration(
                     hintText: widget.hintText,
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                   ),
                   onChanged: (value) {
                     _onSearchChanged(value);
@@ -118,9 +118,9 @@ class _CustomLocationSearchFieldState extends State<CustomLocationSearchField> {
               if (widget.iconButton != null) widget.iconButton!,
             ],
           ),
-          if (_isLoading) CircularProgressIndicator(),
+          if (_isLoading) const CircularProgressIndicator(),
           if (_suggestions.isNotEmpty)
-            Container(
+            SizedBox(
               height: 200,
               child: ListView.builder(
                 padding: EdgeInsets.zero,

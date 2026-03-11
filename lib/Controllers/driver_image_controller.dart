@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 
 class DriverImagePickerController extends GetxController {
@@ -42,7 +41,7 @@ class DriverImagePickerController extends GetxController {
     selectedImages.refresh();
   }
 
-  Future<bool> _checkPermissions() async {
+  Future<bool> checkPermissions() async {
     var status = await Permission.photos.status;
     if (!status.isGranted) {
       status = await Permission.photos.request();

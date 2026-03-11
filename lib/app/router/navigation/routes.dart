@@ -8,6 +8,7 @@ class Routes {
   static const manageDrivers = '/manageDrivers';
   static const alertFilter = '/alertFilter';
   static const applyFilter = '/applyFilter';
+  static const manageVehicles = '/manageVehicles';
   static const editBooking = '/editBooking';
   static const chatListing = '/chatListing';
   static const success = '/success';

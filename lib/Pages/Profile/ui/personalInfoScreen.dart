@@ -9,9 +9,8 @@ import '../bloc/personal_info_bloc.dart';
 import '../bloc/personal_info_event.dart';
 import '../bloc/personal_info_state.dart';
 
-
 class PersonalInfoScreen extends StatefulWidget {
-  PersonalInfoScreen({super.key});
+  const PersonalInfoScreen({super.key});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -51,7 +50,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(title: "Personal information", showLeading: true, showAction: true),
+      appBar: const AppBAR(
+          title: "Personal information", showLeading: true, showAction: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -89,15 +89,19 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       GestureDetector(
                         onTap: () => pickImage(context),
                         child: CircleAvatar(
-                          radius: 45,
+                          radius: 50,
                           backgroundColor: Colors.grey[200],
                           backgroundImage: state.image != null
                               ? FileImage(state.image!)
-                              : (state.networkImage != null && state.networkImage!.isNotEmpty)
-                              ? NetworkImage(state.networkImage!)
-                              : null,
-                          child: (state.image == null && (state.networkImage == null || state.networkImage!.isEmpty))
-                              ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                              : (state.networkImage != null &&
+                                      state.networkImage!.isNotEmpty)
+                                  ? NetworkImage(state.networkImage!)
+                                  : null,
+                          child: (state.image == null &&
+                                  (state.networkImage == null ||
+                                      state.networkImage!.isEmpty))
+                              ? const Icon(Icons.camera_alt,
+                                  size: 40, color: Colors.grey)
                               : null,
                         ),
                       ),
@@ -109,7 +113,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   CommonTextFormField(
                     controller: nameController,
                     hintText: "Name",
-                    onChanged: (val) => context.read<PersonalInfoBloc>().add(NameChanged(val)),
+                    onChanged: (val) =>
+                        context.read<PersonalInfoBloc>().add(NameChanged(val)),
                   ),
 
                   const SizedBox(height: 15),
@@ -117,7 +122,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   CommonTextFormField(
                     controller: companyController,
                     hintText: "Remark",
-                    onChanged: (val) => context.read<PersonalInfoBloc>().add(CompanyChanged(val)),
+                    onChanged: (val) => context
+                        .read<PersonalInfoBloc>()
+                        .add(CompanyChanged(val)),
                   ),
 
                   const SizedBox(height: 20),
@@ -128,19 +135,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("agent")),
+                          onTap: () => context
+                              .read<PersonalInfoBloc>()
+                              .add(RoleChanged("agent")),
                           child: roleButton("agent", state.role),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("owner")),
+                          onTap: () => context
+                              .read<PersonalInfoBloc>()
+                              .add(RoleChanged("owner")),
                           child: roleButton("owner", state.role),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context.read<PersonalInfoBloc>().add(RoleChanged("driver")),
+                          onTap: () => context
+                              .read<PersonalInfoBloc>()
+                              .add(RoleChanged("driver")),
                           child: roleButton("driver", state.role),
                         ),
                       ),
@@ -172,37 +185,38 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xffF4A100),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: state.isSubmitting
                           ? null
                           : () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Profile updated successfully"),
-                            backgroundColor: Colors.green,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                        final imageToSend = state.image ?? (state.networkImage != null ? null : File('')); // avoid crash
-                        // If you want to keep old image when not changed → send null or handle in backend
-
-                        context.read<PersonalInfoBloc>().add(
-                          SubmitPressed(
-                            context: context,
-                            type: state.role,
-                            name: nameController.text.trim(),
-                            licenseNumber: license1Controller.text.trim(),
-                            licenseNumber2: license2Controller.text.trim(),
-                            cInfo: companyController.text.trim(),
-                            driverImage: imageToSend!, // or make nullable & handle
-                          ),
-                        );
-
-                      },
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Profile updated successfully"),
+                                  backgroundColor: Colors.green,
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                              context.read<PersonalInfoBloc>().add(
+                                    SubmitPressed(
+                                      context: context,
+                                      type: state.role,
+                                      name: nameController.text.trim(),
+                                      licenseNumber:
+                                          license1Controller.text.trim(),
+                                      licenseNumber2:
+                                          license2Controller.text.trim(),
+                                      cInfo: companyController.text.trim(),
+                                      driverImage: state.image, // removed ! and complex logic
+                                    ),
+                                  );
+                            },
                       child: state.isSubmitting
                           ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Update", style: TextStyle(fontSize: 16, color: Colors.white)),
+                          : const Text("Update",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white)),
                     ),
                   ),
 
@@ -228,7 +242,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        role,  // small letter show karega
+        role, // small letter show karega
         style: TextStyle(
           color: isSelected ? Colors.white : Colors.black,
           fontWeight: FontWeight.w500,

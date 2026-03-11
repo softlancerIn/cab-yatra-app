@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../Controllers/wallet_controller.dart';
 
-
 class WalletPage extends StatelessWidget {
   const WalletPage({super.key});
 
@@ -21,7 +20,7 @@ class WalletPage extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: Colors.white,
             leading: GestureDetector(
-              child: Icon(Icons.arrow_back_ios_new),
+              child: const Icon(Icons.arrow_back_ios_new),
               onTap: () {
                 Get.back();
               },
@@ -47,7 +46,8 @@ class WalletPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  balanceSection(context, controller, screenWidth, screenHeight, addAmount, focusNode),
+                  balanceSection(context, controller, screenWidth, screenHeight,
+                      addAmount, focusNode),
                   SizedBox(height: screenHeight * 0.01),
                   transactionSection(context, controller, screenWidth)
                 ],
@@ -59,9 +59,16 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Widget balanceSection(BuildContext context, WalletController controller, double screenWidth, double screenHeight, TextEditingController addAmount, FocusNode focusNode) {
+  Widget balanceSection(
+      BuildContext context,
+      WalletController controller,
+      double screenWidth,
+      double screenHeight,
+      TextEditingController addAmount,
+      FocusNode focusNode) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(screenWidth * 0.05, 5, screenWidth * 0.05, 5),
+      padding:
+          EdgeInsets.fromLTRB(screenWidth * 0.05, 5, screenWidth * 0.05, 5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -75,7 +82,7 @@ class WalletPage extends StatelessWidget {
               letterSpacing: -0.24,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Obx(() {
             final wallet = controller.walletResponse.value;
             return Text(
@@ -88,13 +95,13 @@ class WalletPage extends StatelessWidget {
               ),
             );
           }),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Stack(
             alignment: Alignment.topLeft,
             children: [
               Column(
                 children: [
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Container(
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(7),
@@ -110,7 +117,7 @@ class WalletPage extends StatelessWidget {
                             icon: Text(
                               '₹',
                               style: TextStyle(
-                                color: Color(0xFF919191),
+                                color: const Color(0xFF919191),
                                 fontSize: screenWidth * 0.04,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w600,
@@ -141,7 +148,7 @@ class WalletPage extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           GestureDetector(
             onTap: () async {
               // Print the amount entered in the text field
@@ -156,7 +163,8 @@ class WalletPage extends StatelessWidget {
             child: Container(
               width: double.infinity,
               height: screenHeight * 0.07,
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.25, vertical: 13),
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.25, vertical: 13),
               clipBehavior: Clip.antiAlias,
               decoration: ShapeDecoration(
                 color: Colors.black,
@@ -177,14 +185,14 @@ class WalletPage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Container(
             width: double.infinity,
             height: screenHeight * 0.07,
-            padding: EdgeInsets.symmetric(vertical: 13),
+            padding: const EdgeInsets.symmetric(vertical: 13),
             clipBehavior: Clip.antiAlias,
             decoration: ShapeDecoration(
-              color: Color(0xFFFCB117),
+              color: const Color(0xFFFCB117),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6)),
             ),
@@ -205,7 +213,8 @@ class WalletPage extends StatelessWidget {
     );
   }
 
-  Widget transactionSection(BuildContext context, WalletController controller, double screenWidth) {
+  Widget transactionSection(
+      BuildContext context, WalletController controller, double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -219,11 +228,11 @@ class WalletPage extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
         Obx(() {
           final transactions = controller.walletResponse.value.transactionData;
           return ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: transactions.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
@@ -233,8 +242,7 @@ class WalletPage extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Color(0xFFFFFFE0)
-                  ),
+                      color: const Color(0xFFFFFFE0)),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Row(
@@ -254,7 +262,7 @@ class WalletPage extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Text(
                               'Transaction Id : ${transaction.transactionId}',
                               textAlign: TextAlign.center,
@@ -275,14 +283,14 @@ class WalletPage extends StatelessWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: transaction.type == '1'
-                                    ? Color(0xFF006C17)
+                                    ? const Color(0xFF006C17)
                                     : Colors.red,
                                 fontSize: screenWidth * 0.045,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Text(
                               '${transaction.createdAt.substring(11, 16)} | ${transaction.createdAt.substring(0, 10)}',
                               textAlign: TextAlign.center,

@@ -13,6 +13,7 @@ class ProfileController extends GetxController {
     super.onInit();
     getProfileData();
   }
+
   Future<void> getProfileData() async {
     try {
       profileLoading.value = true;
@@ -91,8 +92,8 @@ class ProfileController extends GetxController {
   }) async {
     try {
       profileLoading.value = true;
-      final bool? updateSuccess = await service.updateCarDetails(
-        // driverId: driverId,
+      final bool updateSuccess = await service.updateCarDetails(
+          // driverId: driverId,
           carBrand: carBrand,
           carName: carName,
           carRcFrontImage: carRcFrontImage,
@@ -102,8 +103,7 @@ class ProfileController extends GetxController {
           seat: seat,
           expiryDate: expiryDate,
           insuranceImage: insuranceImage,
-          carImage: carImage
-      );
+          carImage: carImage);
 
       if (updateSuccess == true) {
         await getProfileData();

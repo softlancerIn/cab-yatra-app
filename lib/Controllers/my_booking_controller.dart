@@ -1,11 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import '../Pages/HomePageFlow/home_controller.dart';
+// import '../Pages/HomePageFlow/home_controller.dart';
 import '../core/api_client.dart';
 import '../core/network_service.dart';
 import '../models/my_booking_model.dart';
 import '../models/post_booking_model.dart';
-
 
 class MyBookingController extends GetxController {
   NetworkService service = NetworkService();
@@ -74,7 +73,8 @@ class MyBookingController extends GetxController {
     }
   }
 
-  Future<ApiResponse?> updateBooking({required AddBookingModel tripData, required int bookingId}) async {
+  Future<ApiResponse?> updateBooking(
+      {required AddBookingModel tripData, required int bookingId}) async {
     try {
       myBookingLoading.value = true;
       final response = await service.updateTripData(tripData, bookingId);

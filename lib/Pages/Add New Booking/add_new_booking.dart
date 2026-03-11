@@ -1,19 +1,6 @@
-
 import 'package:cab_taxi_app/Pages/Add%20New%20Booking/ui/addBookingRoundTripScreen.dart';
-import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-import '../../Controllers/home_controller.dart';
-import '../../Controllers/my_booking_controller.dart';
-import '../../core/network_service.dart';
-import '../../models/dropdown_models.dart';
-import '../../models/post_booking_model.dart';
-import '../../services/location_search.dart';
-import '../Custom_Widgets/CustomShimmer_widget.dart';
-import '../HomePageFlow/home_controller.dart';
 import 'ui/addBookingOneWayScreen.dart';
 
 //todo special req: text size bigger
@@ -27,7 +14,8 @@ class AddBookingScreen extends StatefulWidget {
   State<AddBookingScreen> createState() => _AddBookingScreenState();
 }
 
-class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerProviderStateMixin  {
+class _AddBookingScreenState extends State<AddBookingScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   @override
   void initState() {
@@ -39,26 +27,21 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
     // selectedDate = DateTime.now();
     // selectedTime = TimeOfDay.now();
   }
-  @override
-  void dispose() {
-    super.dispose();
-  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-
-
         toolbarHeight: 50,
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
-            // color: Color.fromRGBO(0, 0, 0, 1),
+              // color: Color.fromRGBO(0, 0, 0, 1),
               color: Colors.white),
         ),
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'Add New Booking',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -68,17 +51,16 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
             fontWeight: FontWeight.w500,
           ),
         ),
-
         bottom: TabBar(
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.tab,
           onTap: (value) {
-           // controller.getHomeData();
+            // controller.getHomeData();
           },
-          indicator: BoxDecoration(
+          indicator: const BoxDecoration(
             border: Border(
-              bottom: const BorderSide(
-                  color: Color.fromRGBO(255, 216, 0, 1), width: 4),
+              bottom:
+                  BorderSide(color: Color.fromRGBO(255, 216, 0, 1), width: 4),
             ),
           ),
           labelColor: Colors.black,
@@ -101,10 +83,9 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
         children: [
           Expanded(
             child: GestureDetector(
-
               child: TabBarView(
                 controller: _tabController,
-                children: [
+                children: const [
                   AddBookingOneWayScreen(),
                   AddBookingRoundTripScreen(),
                 ],
@@ -117,8 +98,6 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
     );
   }
 }
-
-
 
 ///////////////////////////////////////drop dowan screen code
 
@@ -134,7 +113,7 @@ class CustomDropdown<T> extends StatefulWidget {
   final bool? isReadOnly; // nullable
 
   const CustomDropdown({
-    Key? key,
+    super.key,
     required this.selectedValue,
     required this.items,
     required this.itemLabel,
@@ -144,7 +123,7 @@ class CustomDropdown<T> extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.width = 150.0,
     this.isReadOnly,
-  }) : super(key: key);
+  });
 
   @override
   _CustomDropdownState<T> createState() => _CustomDropdownState<T>();
@@ -169,7 +148,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
           onTap: readOnly ? null : _toggleDropdown,
           child: commonBox(
             text: widget.selectedValue != null
-                ? widget.itemLabel(widget.selectedValue!)
+                ? widget.itemLabel(widget.selectedValue as T)
                 : widget.hint,
             backgroundColor: widget.backgroundColor,
             width: widget.width,
@@ -182,8 +161,8 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
             clipBehavior: Clip.antiAlias,
             decoration: ShapeDecoration(
               color: Colors.white,
-              shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
               shadows: const [
                 BoxShadow(
                   color: Color(0x3F000000),
@@ -201,14 +180,14 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
                   onTap: readOnly
                       ? null
                       : () {
-                    widget.onChanged(item);
-                    setState(() {
-                      _isDropdownOpen = false;
-                    });
-                  },
+                          widget.onChanged(item);
+                          setState(() {
+                            _isDropdownOpen = false;
+                          });
+                        },
                   child: Padding(
                     padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                     child: Text(
                       widget.itemLabel(item),
                       style: const TextStyle(
@@ -236,7 +215,7 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
     return Container(
       height: 45,
       width: width,
-      padding: EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         color: Colors.white,
@@ -257,13 +236,13 @@ class _CustomDropdownState<T> extends State<CustomDropdown<T>> {
             Text(
               text,
               style: const TextStyle(
-                color:  Colors.black,
+                color: Colors.black,
                 fontSize: 15,
                 fontFamily: 'SF Pro Display',
                 fontWeight: FontWeight.w400,
               ),
             ),
-            Icon(Icons.arrow_drop_down, color: Color(0xFF86888A)),
+            const Icon(Icons.arrow_drop_down, color: Color(0xFF86888A)),
           ],
         ),
       ),
@@ -284,18 +263,17 @@ class CustomContainer extends StatelessWidget {
   final VoidCallback? onPress;
 
   const CustomContainer(
-      {Key? key,
+      {super.key,
       required this.width,
       required this.height,
       required this.controller,
       required this.hintText,
-         this.onPress,
+      this.onPress,
       this.iconButton,
-        this.icon,
+      this.icon,
       this.readOnly,
       this.validator,
-      this.keyboardType})
-      : super(key: key);
+      this.keyboardType});
 
   @override
   Widget build(BuildContext context) {
@@ -308,7 +286,7 @@ class CustomContainer extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x3F000000),
             blurRadius: 4,
@@ -327,7 +305,7 @@ class CustomContainer extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: hintText,
                 border: InputBorder.none, // Removes underline
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
               ),
               keyboardType: keyboardType,
               maxLines: null,
@@ -342,10 +320,11 @@ class CustomContainer extends StatelessWidget {
             ),
           ),
           if (iconButton != null) iconButton!,
-          if (icon != null) Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: icon!,
-          ),
+          if (icon != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: icon!,
+            ),
         ],
       ),
     );

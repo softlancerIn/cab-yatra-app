@@ -1,13 +1,13 @@
-import 'dart:convert';
+// import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+// import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class PaymentService {
   Razorpay? _razorpay;
-  BuildContext? _context;
+  BuildContext? context;
 
   PaymentService() {
     _razorpay = Razorpay();
@@ -42,7 +42,7 @@ class PaymentService {
     String? bookingId,
     required BuildContext context,
   }) async {
-    _context = context;
+    context = context;
     // final ByteData bytes =
     //     await rootBundle.load('assets/images/splashImage.png');
     // final List<int> imageBytes = bytes.buffer.asUint8List();

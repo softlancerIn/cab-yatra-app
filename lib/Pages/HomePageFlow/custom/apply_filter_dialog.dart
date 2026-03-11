@@ -17,9 +17,8 @@ class ApplyFilterDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             /// Title
-            Center(
+            const Center(
               child: Text(
                 "Apply Filter",
                 style: TextStyle(
@@ -67,7 +66,6 @@ class ApplyFilterDialog extends StatelessWidget {
             /// Buttons
             Row(
               children: [
-
                 /// Clear Filter
                 Expanded(
                   child: SizedBox(
@@ -85,7 +83,10 @@ class ApplyFilterDialog extends StatelessWidget {
                       },
                       child: const Text(
                         "Clear Filter",
-                        style: TextStyle(fontSize: 14,color: Colors.white,),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),
@@ -153,7 +154,7 @@ class ApplyFilterDialog extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          shadows: [
+          shadows: const [
             BoxShadow(
               color: Color(0x3F000000),
               blurRadius: 4,
@@ -189,7 +190,7 @@ class ApplyFilterDialog extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          shadows: [
+          shadows: const [
             BoxShadow(
               color: Color(0x3F000000),
               blurRadius: 4,

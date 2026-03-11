@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import '../../Controllers/my_booking_controller.dart';
 import '../../core/network_service.dart';
-import 'dart:ui';
 import 'package:get/get.dart';
 import '../../Controllers/home_controller.dart';
-import '../Booking/my_booking.dart';
 
 class OtpDialog extends StatefulWidget {
   final String bookingId;
 
-  OtpDialog({required this.bookingId});
+  const OtpDialog({super.key, required this.bookingId});
 
   @override
   _OtpDialogState createState() => _OtpDialogState();
@@ -36,12 +34,11 @@ class _OtpDialogState extends State<OtpDialog> {
         );
 
         if (result != null && result['status'] == true) {
-         // await myBookingController?.getMyBookingData();
-         await homeController?.getHomeData();
+          // await myBookingController?.getMyBookingData();
+          await homeController?.getHomeData();
           Get.back();
           print("OTP Verified and Ride Started Successfully!");
           // Get.off(() => BookingPage());
-
         } else {
           setState(() {
             _errorMessage =
@@ -84,7 +81,7 @@ class _OtpDialogState extends State<OtpDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
-      title: Center(
+      title: const Center(
         child: Text(
           'Enter Pick Up OTP',
           style: TextStyle(
@@ -145,7 +142,7 @@ class _OtpDialogState extends State<OtpDialog> {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.red,
                         fontSize: 14,
                       ),
@@ -161,7 +158,7 @@ class _OtpDialogState extends State<OtpDialog> {
           children: [
             TextButton(
               onPressed: _resendOtp,
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
@@ -177,14 +174,14 @@ class _OtpDialogState extends State<OtpDialog> {
             ),
             TextButton(
               style: TextButton.styleFrom(
-                backgroundColor: Color(0xFFFFB900),
+                backgroundColor: const Color(0xFFFFB900),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: _submitOtp,
-              child: Center(
+              child: const Center(
                 child: Text(
                   'Start Ride',
                   style: TextStyle(

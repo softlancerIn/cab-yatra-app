@@ -1,25 +1,9 @@
-import 'dart:convert';
-import 'package:cab_taxi_app/Pages/Add%20New%20Booking/add_new_booking.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
-import 'package:cab_taxi_app/app/router/app_router.dart';
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
-import 'package:cab_taxi_app/models/my_booking_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
-import '../../Controllers/home_controller.dart';
-import '../../Controllers/my_booking_controller.dart';
 import '../../app/router/navigation/routes.dart';
-import '../../core/network_service.dart';
-import '../../core/utils/helperFunctions.dart';
-import '../Custom_Widgets/custom_text_button.dart';
-import '../Custom_Widgets/CustomShimmer_widget.dart';
 import '../HomePageFlow/custom/customSearchBar.dart';
-import '../Review/write_review.dart';
 import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
@@ -36,12 +20,10 @@ class _BookingPageState extends State<BookingPage> {
   // final MyBookingController controller = Get.put(MyBookingController());
   // final HomeController homeController = Get.put(HomeController());
 
-
   @override
   void initState() {
     super.initState();
     context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
-
   }
 
   @override
@@ -50,34 +32,35 @@ class _BookingPageState extends State<BookingPage> {
     //controller.getMyBookingData();
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(title: "Posted Booking",showLeading: false,showAction: false,),
+      appBar: const AppBAR(
+        title: "Posted Booking",
+        showLeading: false,
+        showAction: false,
+      ),
       body: RefreshIndicator(
-        onRefresh: ()async {
+        onRefresh: () async {
           //await controller.getMyBookingData();
         },
-        child: BlocBuilder<BookingBloc,BookingState>(
-            builder: (context,state) {
-              if(state.isLoading){
-                return SizedBox(
-                    height: size.height,
-                    width: size.width,
-                    child: Center(child: const CircularProgressIndicator()));
+        child:
+            BlocBuilder<BookingBloc, BookingState>(builder: (context, state) {
+          if (state.isLoading) {
+            return SizedBox(
+                height: size.height,
+                width: size.width,
+                child: const Center(child: CircularProgressIndicator()));
+          }
+          if (state.postedBookingModel == null) {
+            return SizedBox(
+                height: size.height,
+                width: size.width,
+                child: const Center(child: CircularProgressIndicator()));
+          }
 
-              }
-              if(state.postedBookingModel==null){
-                return SizedBox(
-                    height: size.height,
-                    width: size.width,
-                    child: Center(child: const CircularProgressIndicator()));
+          final newBooking = state.postedBookingModel!.data;
 
-              }
-
-              final newBooking=state.postedBookingModel!.data;
-
-
-              return SingleChildScrollView(
+          return SingleChildScrollView(
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -85,14 +68,14 @@ class _BookingPageState extends State<BookingPage> {
                     children: [
                       Expanded(
                           child: CustomSearchBar(
-                            controller: searchController,
-                            onSearch: () {},
-                          )),
-                      SizedBox(
+                        controller: searchController,
+                        onSearch: () {},
+                      )),
+                      const SizedBox(
                         width: 10,
                       ),
                       GestureDetector(
-                        onTap: (){
+                        onTap: () {
                           //Nav.push(context,Routes.applyFilter);
                         },
                         child: Container(
@@ -103,7 +86,7 @@ class _BookingPageState extends State<BookingPage> {
                             decoration: ShapeDecoration(
                               color: Colors.white,
                               shape: RoundedRectangleBorder(
-                                side: BorderSide(width: 0.50),
+                                side: const BorderSide(width: 0.50),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
@@ -115,20 +98,18 @@ class _BookingPageState extends State<BookingPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10,),
-
-
+                const SizedBox(
+                  height: 10,
+                ),
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount:newBooking!.length,
+                    itemCount: newBooking!.length,
                     itemBuilder: (context, index) {
                       var newBookingData = newBooking[index];
                       return GestureDetector(
                         onTap: () async {
-
-                         // Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
-
+                          // Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
 
                           //Fluttertoast.showToast(
                           //   msg: 'Please add the Account Details!',
@@ -138,7 +119,8 @@ class _BookingPageState extends State<BookingPage> {
                           // );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -146,8 +128,9 @@ class _BookingPageState extends State<BookingPage> {
                                 clipBehavior: Clip.antiAlias,
                                 decoration: ShapeDecoration(
                                   color: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                  shadows: [
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6)),
+                                  shadows: const [
                                     BoxShadow(
                                       color: Color(0x3F000000),
                                       blurRadius: 2,
@@ -160,15 +143,17 @@ class _BookingPageState extends State<BookingPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 7, left: 7, right: 7),
+                                      padding: const EdgeInsets.only(
+                                          top: 7, left: 7, right: 7),
                                       child: Row(
                                         children: [
                                           RichText(
                                             text: TextSpan(
                                               children: [
-                                                 TextSpan(
-                                                  text: 'ID : ${newBookingData.orderId}',
-                                                  style: TextStyle(
+                                                TextSpan(
+                                                  text:
+                                                      'ID : ${newBookingData.orderId}',
+                                                  style: const TextStyle(
                                                     fontSize: 12,
                                                     fontWeight: FontWeight.w500,
                                                     color: Colors.black,
@@ -194,60 +179,73 @@ class _BookingPageState extends State<BookingPage> {
                                     ),
                                     SizedBox(height: size.height * 0.005),
                                     Padding(
-                                      padding: const EdgeInsets.only(left: 7, right: 7),
+                                      padding: const EdgeInsets.only(
+                                          left: 7, right: 7),
                                       child: Row(
                                         children: [
                                           Row(
                                             children: [
                                               InkWell(
                                                 child: Text(
-                                                  newBookingData.pickUpDate.toString(),
+                                                  newBookingData.pickUpDate
+                                                      .toString(),
                                                   style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500),
                                                 ),
                                               ),
-                                              SizedBox(
+                                              const SizedBox(
                                                 width: 5,
                                               ),
-                                              Text(
+                                              const Text(
                                                 "@ ",
-                                                style: const TextStyle(
-                                                    fontSize: 12, fontWeight: FontWeight.w500),
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        FontWeight.w500),
                                               ),
                                               InkWell(
                                                 // onTap: () => _selectTime(context), // Pick the time
-                                                child: Text( newBookingData.pickUpTime.toString(),
+                                                child: Text(
+                                                  newBookingData.pickUpTime
+                                                      .toString(),
                                                   // newBooking[index].pickupTime,
                                                   //data.pickUpTime.toString(),
                                                   // selectedTime != null
                                                   //     ? selectedTime!.format(context)
                                                   //     : TimeOfDay.now().format(context),
                                                   style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffF45858)),
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Color(0xffF45858)),
                                                 ),
                                               ),
                                             ],
                                           ),
                                           const Spacer(),
                                           Text(
-                                            //data.subTypeLabel.toString(),
+                                              //data.subTypeLabel.toString(),
                                               ' ${newBookingData.subTypeLabel}',
                                               style: const TextStyle(
-                                                  fontSize: 12, fontWeight: FontWeight.w600)),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600)),
                                         ],
                                       ),
                                     ),
                                     const Divider(
-                                        thickness: 1, color: Color.fromRGBO(0, 0, 0, 0.2)),
+                                        thickness: 1,
+                                        color: Color.fromRGBO(0, 0, 0, 0.2)),
                                     SizedBox(
-                                      width: size.width ,
+                                      width: size.width,
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-
                                               Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
@@ -255,35 +253,41 @@ class _BookingPageState extends State<BookingPage> {
                                                     width: size.width * 0.035,
                                                     height: size.height * 0.017,
                                                     decoration: BoxDecoration(
-                                                      color: const Color.fromRGBO(
-                                                          212, 119, 22, 1),
+                                                      color:
+                                                          const Color.fromRGBO(
+                                                              212, 119, 22, 1),
                                                       borderRadius:
-                                                      BorderRadius.circular(30),
+                                                          BorderRadius.circular(
+                                                              30),
                                                     ),
                                                   ),
-                                                  SizedBox(width: size.width * 0.02),
+                                                  SizedBox(
+                                                      width: size.width * 0.02),
                                                   SizedBox(
                                                     width: size.width * 0.4,
                                                     child: Text(
-                                                      newBookingData.pickUpLoc.toString(),
-                                                 //     newBooking[index].pickupLocation,
+                                                      newBookingData.pickUpLoc
+                                                          .toString(),
+                                                      //     newBooking[index].pickupLocation,
                                                       maxLines: 1,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontSize: 12,
                                                         fontFamily: 'Poppins',
-                                                        fontWeight: FontWeight.w500,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
-                                                                                Spacer(),
+                                              const Spacer(),
 
                                               Container(
                                                 width: 168,
                                                 height: 30,
                                                 clipBehavior: Clip.antiAlias,
-                                                decoration: BoxDecoration(),
+                                                decoration:
+                                                    const BoxDecoration(),
                                                 child: Stack(
                                                   children: [
                                                     Positioned(
@@ -292,13 +296,24 @@ class _BookingPageState extends State<BookingPage> {
                                                       child: Container(
                                                         width: 82,
                                                         height: 27,
-                                                        clipBehavior: Clip.antiAlias,
-                                                        decoration: ShapeDecoration(
-                                                          color: const Color(0xFFFCB117),
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.only(
-                                                              topRight: Radius.circular(2000),
-                                                              bottomRight: Radius.circular(2000),
+                                                        clipBehavior:
+                                                            Clip.antiAlias,
+                                                        decoration:
+                                                            const ShapeDecoration(
+                                                          color:
+                                                              Color(0xFFFCB117),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topRight: Radius
+                                                                  .circular(
+                                                                      2000),
+                                                              bottomRight:
+                                                                  Radius
+                                                                      .circular(
+                                                                          2000),
                                                             ),
                                                           ),
                                                         ),
@@ -309,24 +324,35 @@ class _BookingPageState extends State<BookingPage> {
                                                               top: 3,
                                                               child: Text(
                                                                 '₹ ${newBookingData.driverCommission}',
-                                                                style: TextStyle(
-                                                                  color: Colors.white,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  color: Colors
+                                                                      .white,
                                                                   fontSize: 12,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
+                                                                  fontFamily:
+                                                                      'Poppins',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
                                                                 ),
                                                               ),
                                                             ),
-                                                            Positioned(
+                                                            const Positioned(
                                                               left: 23,
                                                               top: 16,
                                                               child: Text(
                                                                 'Commission',
-                                                                style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 5.50,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontSize:
+                                                                      5.50,
+                                                                  fontFamily:
+                                                                      'Poppins',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
                                                                 ),
                                                               ),
                                                             ),
@@ -340,13 +366,23 @@ class _BookingPageState extends State<BookingPage> {
                                                       child: Container(
                                                         width: 82,
                                                         height: 27,
-                                                        clipBehavior: Clip.antiAlias,
-                                                        decoration: ShapeDecoration(
-                                                          color: const Color(0xFFEFEFEF),
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.only(
-                                                              topLeft: Radius.circular(2000),
-                                                              bottomLeft: Radius.circular(2000),
+                                                        clipBehavior:
+                                                            Clip.antiAlias,
+                                                        decoration:
+                                                            const ShapeDecoration(
+                                                          color:
+                                                              Color(0xFFEFEFEF),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topLeft: Radius
+                                                                  .circular(
+                                                                      2000),
+                                                              bottomLeft: Radius
+                                                                  .circular(
+                                                                      2000),
                                                             ),
                                                           ),
                                                         ),
@@ -357,24 +393,35 @@ class _BookingPageState extends State<BookingPage> {
                                                               top: 3,
                                                               child: Text(
                                                                 '₹ ${newBookingData.totalFaire}',
-                                                                style: TextStyle(
-                                                                  color: Colors.black,
+                                                                style:
+                                                                    const TextStyle(
+                                                                  color: Colors
+                                                                      .black,
                                                                   fontSize: 12,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
+                                                                  fontFamily:
+                                                                      'Poppins',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
                                                                 ),
                                                               ),
                                                             ),
-                                                            Positioned(
+                                                            const Positioned(
                                                               left: 22,
                                                               top: 16,
                                                               child: Text(
                                                                 'Total Amount',
-                                                                style: TextStyle(
-                                                                  color: Colors.black,
-                                                                  fontSize: 5.50,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
+                                                                style:
+                                                                    TextStyle(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize:
+                                                                      5.50,
+                                                                  fontFamily:
+                                                                      'Poppins',
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
                                                                 ),
                                                               ),
                                                             ),
@@ -386,17 +433,14 @@ class _BookingPageState extends State<BookingPage> {
                                                 ),
                                               )
 
-
-
-                                                                                       // Icon(Icons.arrow_forward_ios_sharp)
-
-
+                                              // Icon(Icons.arrow_forward_ios_sharp)
                                             ],
                                           ),
 
                                           //  if (data.typeLabel != 'Local')
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
                                             children: [
                                               //  if (dropCities.length == 1)
                                               Row(
@@ -406,28 +450,33 @@ class _BookingPageState extends State<BookingPage> {
                                                     width: size.width * 0.035,
                                                     height: size.height * 0.017,
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xFFC51C1C),
+                                                      color: const Color(
+                                                          0xFFC51C1C),
                                                       borderRadius:
-                                                      BorderRadius.circular(30),
+                                                          BorderRadius.circular(
+                                                              30),
                                                     ),
                                                   ),
-                                                  SizedBox(width: size.width * 0.02),
+                                                  SizedBox(
+                                                      width: size.width * 0.02),
                                                   SizedBox(
                                                     width: size.width * 0.6,
-                                                    child: Text( newBookingData.destinationLoc.toString(),
-                                                //      newBooking[index].destinationLocation,
+                                                    child: Text(
+                                                      newBookingData
+                                                          .destinationLoc
+                                                          .toString(),
+                                                      //      newBooking[index].destinationLocation,
                                                       maxLines: 1,
-                                                      style: TextStyle(
-                                                        fontSize:12,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
                                                         fontFamily: 'Poppins',
-                                                        fontWeight: FontWeight.w500,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
-
-
                                             ],
                                           )
                                         ],
@@ -437,33 +486,46 @@ class _BookingPageState extends State<BookingPage> {
 
                                     // SizedBox(height: 10,),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 7.0),
                                       child: Row(
                                         children: [
-                                          Image.network("car image",scale: 4,errorBuilder: (context, error, stackTrace) {
-                                            return Image.asset("assets/images/carMO.png",scale: 4,);
-                                          },),
+                                          Image.network(
+                                            "car image",
+                                            scale: 4,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Image.asset(
+                                                "assets/images/carMO.png",
+                                                scale: 4,
+                                              );
+                                            },
+                                          ),
                                           //  Image.asset("assets/images/carMO.png",scale: 4,),
-                                          SizedBox(width: 5,),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
                                           Text(
-                                              newBookingData.carCategory!.name.toString(),
+                                            newBookingData.carCategory!.name
+                                                .toString(),
                                             //newBooking[index].carCategoryName,
                                             style: TextStyle(
-                                              color: Colors.black.withValues(alpha: 0.50),
+                                              color: Colors.black
+                                                  .withValues(alpha: 0.50),
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w500,
                                             ),
-
                                           )
                                         ],
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 7.0),
                                       child: Row(
                                         children: [
-                                          Text(
+                                          const Text(
                                             'Extra Requirement : ',
                                             style: TextStyle(
                                               color: Colors.black,
@@ -472,11 +534,12 @@ class _BookingPageState extends State<BookingPage> {
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
-                                          Text( newBookingData.remark.toString(),
+                                          Text(
+                                            newBookingData.remark.toString(),
                                             //newBooking[index].remark??"N/A",
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: const Color(0xFFF45858),
+                                            style: const TextStyle(
+                                              color: Color(0xFFF45858),
                                               fontSize: 11,
                                               fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w500,
@@ -485,49 +548,67 @@ class _BookingPageState extends State<BookingPage> {
                                         ],
                                       ),
                                     ),
-                                    SizedBox(height: 3,),
+                                    const SizedBox(
+                                      height: 3,
+                                    ),
                                     Padding(
                                       padding: const EdgeInsets.all(7),
                                       child: Container(
                                         width: size.width *
                                             0.9, // Adjust the container width as needed
-                                        height: 45, // Adjust the container height as needed
+                                        height:
+                                            45, // Adjust the container height as needed
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(6),
+                                          borderRadius:
+                                              BorderRadius.circular(6),
                                           border: Border.all(
                                               color: Colors.white,
-                                              width: 2), // Outer border for entire container
+                                              width:
+                                                  2), // Outer border for entire container
                                         ),
                                         child: Row(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.stretch, // Ensure equal height
+                                          crossAxisAlignment: CrossAxisAlignment
+                                              .stretch, // Ensure equal height
                                           children: [
                                             // First part
                                             Expanded(
                                               child: Container(
                                                 clipBehavior: Clip.antiAlias,
                                                 decoration: ShapeDecoration(
-                                                  color: const Color(0xADEFEFEF),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                  color:
+                                                      const Color(0xADEFEFEF),
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              6)),
                                                 ),
                                                 child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
                                                   children: [
-                                                    Image.asset("assets/images/chatNew.png",scale: 3,),
-                                                    SizedBox(width: 10),   Text(
+                                                    Image.asset(
+                                                      "assets/images/chatNew.png",
+                                                      scale: 3,
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    Text(
                                                       "Chat",
                                                       //"₹${newBooking[index].totalFare}",
                                                       style: TextStyle(
-                                                          fontSize: size.width * 0.035,
-                                                          fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
+                                                          fontSize: size.width *
+                                                              0.035,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color: const Color(
+                                                              0xffFCB117)),
                                                     ),
-
-
                                                   ],
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(width: 5,),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
 
                                             // Second part
                                             GestureDetector(
@@ -535,63 +616,104 @@ class _BookingPageState extends State<BookingPage> {
                                                 Nav.push(
                                                   context,
                                                   Routes.editBooking,
-                                                  extra: newBookingData, // 👈 FULL OBJECT PASS
+                                                  extra:
+                                                      newBookingData, // 👈 FULL OBJECT PASS
                                                 );
 
-                                                print("Booking Type 🙌 ${newBookingData.subTypeLabel}");
+                                                print(
+                                                    "Booking Type 🙌 ${newBookingData.subTypeLabel}");
                                               },
                                               child: Expanded(
                                                 child: Container(
                                                   width: 100,
                                                   clipBehavior: Clip.antiAlias,
                                                   decoration: ShapeDecoration(
-                                                    color: const Color(0xADEFEFEF),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                    color:
+                                                        const Color(0xADEFEFEF),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6)),
                                                   ),
                                                   child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
-                                                      Image.asset("assets/images/pencil 1.png",scale: 3,),
-                                                      SizedBox(width: 10,),
-                                                      Text("Edit",
-                                                    //    "₹${newBooking[index].driverCommission}",
+                                                      Image.asset(
+                                                        "assets/images/pencil 1.png",
+                                                        scale: 3,
+                                                      ),
+                                                      const SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(
+                                                        "Edit",
+                                                        //    "₹${newBooking[index].driverCommission}",
                                                         style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontWeight: FontWeight.w500),
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.035,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .w500),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                            SizedBox(width: 5,),
+                                            const SizedBox(
+                                              width: 5,
+                                            ),
 
                                             // Third part
                                             Expanded(
                                               child: GestureDetector(
-                                                onTap: (){
+                                                onTap: () {
                                                   print("delete CCOUNT");
-                                                  showDialog(context: context, builder: (context) {
-                                                    return    DeleteBookingDialog(bookingId: newBookingData.id.toString(),);
-                                                  },);
-
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return DeleteBookingDialog(
+                                                        bookingId:
+                                                            newBookingData.id
+                                                                .toString(),
+                                                      );
+                                                    },
+                                                  );
                                                 },
                                                 child: Container(
                                                   clipBehavior: Clip.antiAlias,
                                                   decoration: ShapeDecoration(
-                                                    color: const Color(0xADEFEFEF),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                                    color:
+                                                        const Color(0xADEFEFEF),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6)),
                                                   ),
                                                   child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
-                                                      Text("Delete",
-                                                       // "₹${newBooking[index].driverCommission}",
+                                                      Text(
+                                                        "Delete",
+                                                        // "₹${newBooking[index].driverCommission}",
                                                         style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontWeight: FontWeight.w500,color: Color(0xffF45858)),
+                                                            fontSize:
+                                                                size.width *
+                                                                    0.035,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color: const Color(
+                                                                0xffF45858)),
                                                       ),
-
                                                     ],
                                                   ),
                                                 ),
@@ -601,57 +723,72 @@ class _BookingPageState extends State<BookingPage> {
                                         ),
                                       ),
                                     ),
-                                  ///Chat wala section with Icons
+
+                                    ///Chat wala section with Icons
                                     Container(
                                       clipBehavior: Clip.antiAlias,
                                       height: 45,
-                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 12),
                                       decoration: ShapeDecoration(
                                         color: const Color(0xADEFEFEF),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6)),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-                                          Image.asset("assets/images/chatNew.png",scale: 3,),
-                                          SizedBox(width: 10),   Text(
+                                          Image.asset(
+                                            "assets/images/chatNew.png",
+                                            scale: 3,
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Text(
                                             "Chat",
                                             //"₹${newBooking[index].totalFare}",
                                             style: TextStyle(
                                                 fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
+                                                fontWeight: FontWeight.w500,
+                                                color: const Color(0xffFCB117)),
                                           ),
-
-
                                         ],
                                       ),
                                     ),
+
                                     ///Share with section with Icons
                                     Container(
                                       clipBehavior: Clip.antiAlias,
                                       height: 45,
-                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 12),
                                       decoration: ShapeDecoration(
                                         color: const Color(0xffFCB117),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6)),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
-
-                                        Text(
+                                          Text(
                                             "Chat",
                                             //"₹${newBooking[index].totalFare}",
                                             style: TextStyle(
                                                 fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500,color: Colors.white),
-                                          ),   SizedBox(width: 10),  Image.asset("assets/images/paper-plane 1.png",scale: 3,),
-
-
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.white),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          Image.asset(
+                                            "assets/images/paper-plane 1.png",
+                                            scale: 3,
+                                          ),
                                         ],
                                       ),
                                     ),
-
                                   ],
                                 ),
                               ),
@@ -662,14 +799,11 @@ class _BookingPageState extends State<BookingPage> {
                     }),
               ],
             ),
-                    );
-          }
-        ),
+          );
+        }),
       ),
     );
   }
-
-
 
   Future<bool?> _showConfirmationDialog(BuildContext context) {
     return showDialog<bool>(
@@ -677,24 +811,24 @@ class _BookingPageState extends State<BookingPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('Are you sure?'),
-          content: Text('Do you want to complete the booking?'),
+          title: const Text('Are you sure?'),
+          content: const Text('Do you want to complete the booking?'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFFFB900),
+                backgroundColor: const Color(0xFFFFB900),
               ),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: Text('Confirm'),
+              child: const Text('Confirm'),
             )
           ],
         );
@@ -702,16 +836,14 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 }
+
 //////
 class DeleteBookingDialog extends StatelessWidget {
   var bookingId;
 
-
-
-
   DeleteBookingDialog({super.key, required this.bookingId});
 
- // final controller = Get.put(MyBookingController());
+  // final controller = Get.put(MyBookingController());
 
   @override
   Widget build(BuildContext context) {
@@ -725,20 +857,20 @@ class DeleteBookingDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Delete Booking ',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: const Color(0xFF3E4959),
+                color: Color(0xFF3E4959),
                 fontSize: 18,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Text(
+            const Text(
               'Are you sure you want to delete this booking? ',
               style: TextStyle(
-                color: const Color(0xFF3E4959),
+                color: Color(0xFF3E4959),
                 fontSize: 15,
                 fontFamily: 'Roboto',
                 fontWeight: FontWeight.w400,
@@ -758,16 +890,16 @@ class DeleteBookingDialog extends StatelessWidget {
                     width: screenWidth * 0.27,
                     height: screenHeight * 0.045,
                     decoration: ShapeDecoration(
-                      color: Color(0xff3E4959),
+                      color: const Color(0xff3E4959),
                       shape: RoundedRectangleBorder(
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 2,
                           color: Color(0xff3E4959),
                         ),
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'Go back',
                         style: TextStyle(
@@ -782,14 +914,12 @@ class DeleteBookingDialog extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-
                     context.read<BookingBloc>().add(
-                      DeleteBooingEvent(
-                        context: context,
-                        bookingId: bookingId,
-
-                      ),
-                    );
+                          DeleteBooingEvent(
+                            context: context,
+                            bookingId: bookingId,
+                          ),
+                        );
                     Navigator.of(context).pop();
                     // controller.deleteBooking(
                     //     bookingId: bookingId);
@@ -815,7 +945,6 @@ class DeleteBookingDialog extends StatelessWidget {
                     ),
                   ),
                 ),
-
               ],
             ),
           ],
@@ -915,9 +1044,3 @@ class DeleteBookingDialog extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-

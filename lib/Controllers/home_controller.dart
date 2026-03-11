@@ -1,4 +1,4 @@
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
+// import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
 import 'package:cab_taxi_app/models/pickup_booking_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,6 @@ class HomeController extends GetxController {
   var orderLoading = false.obs;
   @override
   void onInit() {
-
     super.onInit();
     getHomeData();
     print("gfazhjgHome data");
@@ -46,7 +45,8 @@ class HomeController extends GetxController {
 
           // Save numericPart to SharedPreferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('numericPart', numericPart); // Use a key to store the value
+          await prefs.setString(
+              'numericPart', numericPart); // Use a key to store the value
 
           update();
         } else {}
@@ -90,7 +90,10 @@ class HomeController extends GetxController {
     }
   }
 
-  Future<void> pickUpBookingOrder({required var bookingId, Function(BuildContext, String)? onDialogShow,t}) async {
+  Future<void> pickUpBookingOrder(
+      {required var bookingId,
+      Function(BuildContext, String)? onDialogShow,
+      t}) async {
     try {
       print("11");
       homeLoading.value = true;
@@ -107,10 +110,7 @@ class HomeController extends GetxController {
           getHomeData();
           update();
           // Get.back();
-
-        } else {
-
-        }
+        } else {}
       } else {
         if (kDebugMode) {
           print('Failed to get hone data');
@@ -135,9 +135,7 @@ class HomeController extends GetxController {
           orderCreateData.value = response;
           getHomeData();
           update();
-        } else {
-
-        }
+        } else {}
       } else {
         if (kDebugMode) {
           print('Failed to get hone data');

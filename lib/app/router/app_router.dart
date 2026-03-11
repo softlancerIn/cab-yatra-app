@@ -2,9 +2,7 @@ import 'package:cab_taxi_app/Pages/AuthPages/login/ui/loginScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-
-
-import '../../Pages/Add Profile/add_profile.dart';
+// import '../../Pages/Add Profile/add_profile.dart';
 import '../../Pages/AuthPages/login/ui/loginSelection.dart';
 
 import '../../Pages/AuthPages/otp/ui/verify_otp.dart';
@@ -20,6 +18,7 @@ import '../../Pages/Payment Method/ui/payment_method.dart';
 import '../../Pages/Profile/ui/personalInfoScreen.dart';
 import '../../Pages/Review/reviewSectionNew.dart';
 import '../../Pages/addDriver/ui/manageDriversScreen.dart';
+import '../../Pages/Add Vehicles/ui/manage_vehicles.dart';
 import '../../Pages/editBooking/edit_new_booking.dart';
 import '../../Pages/transection/ui/transectionScreen.dart';
 import 'navigation/routes.dart';
@@ -48,9 +47,9 @@ class AppRouter {
       // /// Login (Fade)
       GoRoute(
         path: Routes.login,
-        pageBuilder: (_, state) => CustomTransitionPage(
+        pageBuilder: (_, state) => const CustomTransitionPage(
           transitionsBuilder: fadeTransition,
-          child: const LoginSelectionScreen(),
+          child: LoginSelectionScreen(),
         ),
       ),
 
@@ -58,10 +57,11 @@ class AppRouter {
         path: Routes.otp,
         pageBuilder: (_, state) => CustomTransitionPage(
           transitionsBuilder: fadeTransition,
-          child:  VerifyOtpPage(mobile:state.extra as String??"111111111" ,),
+          child: VerifyOtpPage(
+            mobile: (state.extra as String?) ?? "111111111",
+          ),
         ),
       ),
-
 
       //RideSelect
       // GoRoute(
@@ -90,12 +90,14 @@ class AppRouter {
       //   ),
       // ),
 
-
       GoRoute(
         path: Routes.loginMobile,
-        pageBuilder: (_, state) => CustomTransitionPage(
+        pageBuilder: (_, state) => const CustomTransitionPage(
           transitionsBuilder: fadeTransition,
-          child:  LoginScreen(phone:"7666667676",isRegister: false,),
+          child: LoginScreen(
+            phone: "7666667676",
+            isRegister: false,
+          ),
         ),
       ),
 
@@ -111,14 +113,19 @@ class AppRouter {
         path: Routes.newRegister,
         pageBuilder: (_, state) => CustomTransitionPage(
           transitionsBuilder: fadeTransition,
-          child:  NewRegisterScreen(mobile:state.extra as String??"111111111" ,),
+          child: NewRegisterScreen(
+            mobile: state.extra as String? ?? "111111111",
+          ),
         ),
       ),
       GoRoute(
         path: Routes.loginRegister,
-        pageBuilder: (_, state) => CustomTransitionPage(
+        pageBuilder: (_, state) => const CustomTransitionPage(
           transitionsBuilder: fadeTransition,
-          child:  LoginScreen(phone:"7666667676",isRegister: true,),
+          child: LoginScreen(
+            phone: "7666667676",
+            isRegister: true,
+          ),
         ),
       ),
 
@@ -140,26 +147,31 @@ class AppRouter {
 
       GoRoute(
         path: Routes.home,
-        builder: (_, __) =>  MainHomeController(),
-      ), GoRoute(
+        builder: (_, __) => const MainHomeController(),
+      ),
+      GoRoute(
         path: Routes.paymentMethod,
-        builder: (_, __) =>  PaymentMethodScreen(),
+        builder: (_, __) => const PaymentMethodScreen(),
       ),
       GoRoute(
         path: Routes.manageDrivers,
-        builder: (_, __) =>  ManageDriversScreen(),
-      ),GoRoute(
+        builder: (_, __) => const ManageDriversScreen(),
+      ),
+      GoRoute(
+        path: Routes.manageVehicles,
+        builder: (_, __) => const ManageVehicles(),
+      ),
+      GoRoute(
         path: Routes.transection,
-        builder: (_, __) =>  TransectionScreen(),
+        builder: (_, __) => const TransectionScreen(),
       ),
       GoRoute(
         path: Routes.applyFilter,
-        builder: (_, __) =>  ApplyFilterDialog(),
+        builder: (_, __) => const ApplyFilterDialog(),
       ),
       GoRoute(
         path: Routes.editBooking,
         builder: (context, state) {
-
           final bookingData = state.extra as SeeBookingData; // 👈 your model
 
           return EditBookingScreen(
@@ -176,24 +188,22 @@ class AppRouter {
         },
       ),
 
-
       GoRoute(
         path: Routes.reviewScreen,
-        builder: (_, __) =>  AgentReviewScreen(),
-      ),    GoRoute(
+        builder: (_, __) => const AgentReviewScreen(),
+      ),
+      GoRoute(
         path: Routes.profile,
-        builder: (_, __) =>  PersonalInfoScreen (),
+        builder: (_, __) => const PersonalInfoScreen(),
       ),
       GoRoute(
         path: Routes.chatListing,
-        builder: (_, __) =>  ChatListingScreen(),
+        builder: (_, __) => const ChatListingScreen(),
       ),
       GoRoute(
         path: Routes.alertFilter,
-        builder: (_, __) =>  AlertFilterScreen(),
+        builder: (_, __) => const AlertFilterScreen(),
       ),
-
-
 
       /// Dashboard with Bottom Navigation
       // GoRoute(
@@ -210,8 +220,8 @@ class AppRouter {
 
   static Widget slideTransition(context, animation, secondary, child) =>
       SlideTransition(
-        position:
-        Tween(begin: const Offset(1, 0), end: Offset.zero).animate(animation),
+        position: Tween(begin: const Offset(1, 0), end: Offset.zero)
+            .animate(animation),
         child: child,
       );
 
@@ -220,8 +230,8 @@ class AppRouter {
 
   static Widget bottomToTopTransition(context, animation, secondary, child) =>
       SlideTransition(
-        position:
-        Tween(begin: const Offset(0, 1), end: Offset.zero).animate(animation),
+        position: Tween(begin: const Offset(0, 1), end: Offset.zero)
+            .animate(animation),
         child: child,
       );
 }

@@ -20,17 +20,16 @@ class OtpVerifyModel {
     isRegistered = json['is_registered'];
     userType = json['user_type'];
     token = json['token'];
-    data =
-        json['data'] != null ? new OtpVerifyData.fromJson(json['data']) : null;
+    data = json['data'] != null ? OtpVerifyData.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    data['is_registered'] = this.isRegistered;
-    data['user_type'] = this.userType;
-    data['token'] = this.token;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    data['is_registered'] = isRegistered;
+    data['user_type'] = userType;
+    data['token'] = token;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -109,28 +108,28 @@ class OtpVerifyData {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['uniqId'] = this.uniqId;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['phone'] = this.phone;
-    data['aadhar_no'] = this.aadharNo;
-    data['pan_no'] = this.panNo;
-    data['dl_no'] = this.dlNo;
-    data['driver_image'] = this.driverImage;
-    data['aadhar_frontImage'] = this.aadharFrontImage;
-    data['aadhar_backImage'] = this.aadharBackImage;
-    data['dl_image'] = this.dlImage;
-    data['is_verified'] = this.isVerified;
-    data['is_registered'] = this.isRegistered;
-    data['status'] = this.status;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    data['driver_image_url'] = this.driverImageUrl;
-    data['aadhar_frontImage_url'] = this.aadharFrontImageUrl;
-    data['aadhar_backImage_url'] = this.aadharBackImageUrl;
-    data['dl_image_url'] = this.dlImageUrl;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['uniqId'] = uniqId;
+    data['name'] = name;
+    data['email'] = email;
+    data['phone'] = phone;
+    data['aadhar_no'] = aadharNo;
+    data['pan_no'] = panNo;
+    data['dl_no'] = dlNo;
+    data['driver_image'] = driverImage;
+    data['aadhar_frontImage'] = aadharFrontImage;
+    data['aadhar_backImage'] = aadharBackImage;
+    data['dl_image'] = dlImage;
+    data['is_verified'] = isVerified;
+    data['is_registered'] = isRegistered;
+    data['status'] = status;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
+    data['driver_image_url'] = driverImageUrl;
+    data['aadhar_frontImage_url'] = aadharFrontImageUrl;
+    data['aadhar_backImage_url'] = aadharBackImageUrl;
+    data['dl_image_url'] = dlImageUrl;
     return data;
   }
 }

@@ -8,13 +8,13 @@ class CreatePaymentModel {
   CreatePaymentModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -40,19 +40,19 @@ class Data {
 
   Data(
       {this.driverId,
-        this.type,
-        this.bankName,
-        this.accountNumber,
-        this.ifscCode,
-        this.accountHolderName,
-        this.upiId,
-        this.paymentNumber,
-        this.qrImage,
-        this.status,
-        this.updatedAt,
-        this.createdAt,
-        this.id,
-        this.qrImageUrl});
+      this.type,
+      this.bankName,
+      this.accountNumber,
+      this.ifscCode,
+      this.accountHolderName,
+      this.upiId,
+      this.paymentNumber,
+      this.qrImage,
+      this.status,
+      this.updatedAt,
+      this.createdAt,
+      this.id,
+      this.qrImageUrl});
 
   Data.fromJson(Map<String, dynamic> json) {
     driverId = json['driver_id'];
@@ -72,21 +72,21 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['driver_id'] = this.driverId;
-    data['type'] = this.type;
-    data['bank_name'] = this.bankName;
-    data['account_number'] = this.accountNumber;
-    data['ifsc_code'] = this.ifscCode;
-    data['account_holderName'] = this.accountHolderName;
-    data['upi_id'] = this.upiId;
-    data['payment_number'] = this.paymentNumber;
-    data['qr_image'] = this.qrImage;
-    data['status'] = this.status;
-    data['updated_at'] = this.updatedAt;
-    data['created_at'] = this.createdAt;
-    data['id'] = this.id;
-    data['qr_image_url'] = this.qrImageUrl;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['driver_id'] = driverId;
+    data['type'] = type;
+    data['bank_name'] = bankName;
+    data['account_number'] = accountNumber;
+    data['ifsc_code'] = ifscCode;
+    data['account_holderName'] = accountHolderName;
+    data['upi_id'] = upiId;
+    data['payment_number'] = paymentNumber;
+    data['qr_image'] = qrImage;
+    data['status'] = status;
+    data['updated_at'] = updatedAt;
+    data['created_at'] = createdAt;
+    data['id'] = id;
+    data['qr_image_url'] = qrImageUrl;
     return data;
   }
 }

@@ -8,7 +8,8 @@ import '../../../widget/customTextField.dart';
 import '../bloc/driverBloc.dart';
 import '../bloc/driverState.dart';
 import '../bloc/submitDriver.dart';
-import '../imagePickerProvider.dart';
+
+// import '../imagePickerProvider.dart';
 //
 // class AddDriverScreen extends StatelessWidget {
 //   AddDriverScreen({super.key});
@@ -97,13 +98,10 @@ class AddDriverBottomSheet extends StatefulWidget {
   const AddDriverBottomSheet({super.key});
 
   @override
-  State<AddDriverBottomSheet> createState() =>
-      _AddDriverBottomSheetState();
+  State<AddDriverBottomSheet> createState() => _AddDriverBottomSheetState();
 }
 
-class _AddDriverBottomSheetState
-    extends State<AddDriverBottomSheet> {
-
+class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
   final nameCtrl = TextEditingController();
   final phoneCtrl = TextEditingController();
   final licenseCtrl = TextEditingController();
@@ -113,34 +111,30 @@ class _AddDriverBottomSheetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding:
+          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             /// Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text("Add Driver",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600)),
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 InkWell(
                   onTap: () => Navigator.pop(context),
                   child: const CircleAvatar(
                     radius: 14,
                     backgroundColor: Colors.black,
-                    child: Icon(Icons.close,
-                        size: 16, color: Colors.white),
+                    child: Icon(Icons.close, size: 16, color: Colors.white),
                   ),
                 )
               ],
@@ -151,14 +145,15 @@ class _AddDriverBottomSheetState
             /// Profile Circle
             Center(
               child: Container(
-                height: 80,
-                width: 80,
+                height: 90,
+                width: 90,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   shape: BoxShape.circle,
+
                 ),
-                child: const Icon(Icons.person_add,
-                    size: 40, color: Colors.black),
+                child:
+                    const Icon(Icons.person_add, size: 40, color: Colors.black),
               ),
             ),
 
@@ -166,36 +161,28 @@ class _AddDriverBottomSheetState
 
             /// Text Fields
             CommonTextFormField(
-                controller: nameCtrl,
-                hintText: "Driver Full Name"),
+                controller: nameCtrl, hintText: "Driver Full Name"),
             const SizedBox(height: 15),
 
             CommonTextFormField(
-                controller: phoneCtrl,
-                hintText: "Contact Number"),
+                controller: phoneCtrl, hintText: "Contact Number"),
             const SizedBox(height: 15),
 
             CommonTextFormField(
-                controller: licenseCtrl,
-                hintText: "Licence Number"),
+                controller: licenseCtrl, hintText: "Licence Number"),
+            const SizedBox(height: 15),
+
+            CommonTextFormField(controller: cityCtrl, hintText: "City Name"),
             const SizedBox(height: 15),
 
             CommonTextFormField(
-                controller: cityCtrl,
-                hintText: "City Name"),
-            const SizedBox(height: 15),
-
-            CommonTextFormField(
-                controller: addressCtrl,
-                hintText: "Enter Full Address"),
+                controller: addressCtrl, hintText: "Enter Full Address"),
 
             const SizedBox(height: 25),
 
             /// DL Section
             const Text("DL Front & Back",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
 
             BlocBuilder<DriverBloc, DriverState>(
@@ -226,14 +213,11 @@ class _AddDriverBottomSheetState
               },
             ),
 
-
             const SizedBox(height: 25),
 
             /// Aadhar Section
             const Text("Aadhar Front & Back",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500)),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 10),
 
             BlocBuilder<DriverBloc, DriverState>(
@@ -264,27 +248,26 @@ class _AddDriverBottomSheetState
               },
             ),
 
-
             const SizedBox(height: 30),
-            CommonAppButton(          onPressed: () {
-              final fields = {
-                "driver_id": "1",
-                "name": nameCtrl.text,
-                "phone_number": phoneCtrl.text,
-                "license_number": licenseCtrl.text,
-                "city_name": cityCtrl.text,
-                "address": addressCtrl.text,
-              };
+            CommonAppButton(
+              onPressed: () {
+                final fields = {
+                  "driver_id": "1",
+                  "name": nameCtrl.text,
+                  "phone_number": phoneCtrl.text,
+                  "license_number": licenseCtrl.text,
+                  "city_name": cityCtrl.text,
+                  "address": addressCtrl.text,
+                };
 
-              context
-                  .read<DriverBloc>()
-                  .add(SubmitDriver(fields, {}));
+                context.read<DriverBloc>().add(SubmitDriver(fields, {}));
 
-              Navigator.pop(context);
-            },text: "Add +",),
+                Navigator.pop(context);
+              },
+              text: "Add +",
+            ),
 
             /// Add Button
-
 
             const SizedBox(height: 20),
           ],
@@ -308,24 +291,23 @@ class _AddDriverBottomSheetState
         ),
         child: file == null
             ? Center(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-        )
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              )
             : ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.file(
-            file,
-            fit: BoxFit.cover,
-            width: double.infinity,
-          ),
-        ),
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  file,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
+              ),
       ),
     );
   }
-
 }

@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../Controllers/home_controller.dart';
-import '../../core/utils/helperFunctions.dart';
 import '../HomePageFlow/dashboard/ui/homepage.dart';
 
 class ChatDeatils extends StatefulWidget {
@@ -31,8 +30,8 @@ class _ChatDeatilsState extends State<ChatDeatils> {
             onTap: () {
               Navigator.pop(context);
             },
-            child: Icon(Icons.arrow_back_ios_new)),
-        title: Text(
+            child: const Icon(Icons.arrow_back_ios_new)),
+        title: const Text(
           'Trust Travels',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -43,9 +42,9 @@ class _ChatDeatilsState extends State<ChatDeatils> {
           ),
         ),
         centerTitle: true,
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 8),
             child: Icon(Icons.call),
           )
         ],
@@ -55,7 +54,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
         child: ListView(
           children: [
             cardSection(context, widget.data),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             // msgSection(context)//todo enable chatting
@@ -69,24 +68,24 @@ class _ChatDeatilsState extends State<ChatDeatils> {
           child: Container(
             child: Row(
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 ),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(35),
-                      color: Color(0xFFEBEAEA),
+                      color: const Color(0xFFEBEAEA),
                     ),
                     child: TextFormField(
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           contentPadding: EdgeInsets.symmetric(horizontal: 15),
                           hintText: "Type a message",
                           border: InputBorder.none),
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 10,
                 ),
                 Image.asset(
@@ -94,7 +93,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                   height: 50,
                   width: 50,
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 5,
                 )
               ],
@@ -242,11 +241,11 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                             ],
                           )
                         else
-                          Container(
+                          SizedBox(
                             width: size.width * 0.7,
                             child: ListView.builder(
                               shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: pickCities.length,
                               itemBuilder: (context, index) {
                                 return Row(
@@ -301,7 +300,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                                 width: size.width * 0.035,
                                 height: size.height * 0.017,
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFC51C1C),
+                                  color: const Color(0xFFC51C1C),
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
@@ -320,12 +319,12 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                             ],
                           )
                         else
-                          Container(
+                          SizedBox(
                             width: size.width * 0.7,
                             child: ListView.builder(
                               shrinkWrap: true,
                               // Prevents overflow
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               // Disable scrolling for the ListView
                               itemCount: dropCities.length,
                               itemBuilder: (context, index) {
@@ -337,7 +336,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                                       height: size.height * 0.017,
                                       decoration: BoxDecoration(
                                         color: index == dropCities.length - 1
-                                            ? Color(0xFFC51C1C)
+                                            ? const Color(0xFFC51C1C)
                                             : Colors.green,
                                         borderRadius: BorderRadius.circular(30),
                                       ),
@@ -397,9 +396,9 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                     side: BorderSide(
                       width: 1,
                       color: data.fuel_type == "0"
-                          ? Color(0xFFC51C1C)
+                          ? const Color(0xFFC51C1C)
                           : data.fuel_type == "1"
-                              ? Color(0xFF45B129)
+                              ? const Color(0xFF45B129)
                               : Colors.yellow,
                     ),
                     borderRadius: BorderRadius.circular(8),
@@ -415,9 +414,9 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: data.fuel_type == "0"
-                          ? Color(0xFFC51C1C)
+                          ? const Color(0xFFC51C1C)
                           : data.fuel_type == "1"
-                              ? Color(0xFF45B129)
+                              ? const Color(0xFF45B129)
                               : Colors.yellow,
                       fontSize: 10,
                       fontFamily: 'Poppins',
@@ -426,7 +425,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Text("${data.car?.name ?? ""} or Similar",
@@ -449,7 +448,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              decoration: ShapeDecoration(
+              decoration: const ShapeDecoration(
                 color: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
@@ -467,8 +466,8 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                   )
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
                 child: Text(
                   'What do you mean?',
                   style: TextStyle(
@@ -482,7 +481,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
             ),
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         Row(
@@ -490,7 +489,7 @@ class _ChatDeatilsState extends State<ChatDeatils> {
           children: [
             Container(
               width: 300,
-              decoration: ShapeDecoration(
+              decoration: const ShapeDecoration(
                 color: Color(0xFFEAE9E9),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
@@ -500,8 +499,8 @@ class _ChatDeatilsState extends State<ChatDeatils> {
                   ),
                 ),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
+              child: const Padding(
+                padding: EdgeInsets.all(10.0),
                 child: Text(
                   'I think the idea that things are chaning isnt good',
                   style: TextStyle(

@@ -1,7 +1,3 @@
-
-import 'dart:ui';
-
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,9 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../Controllers/home_controller.dart';
 
 import '../../../../core/utils/helperFunctions.dart';
-
-
-import '../../StartRide_otp_widget.dart';
 
 import '../../custom/customToggleSwitch.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -52,18 +45,12 @@ class _HomepageState extends State<Homepage>
     selectedTime = TimeOfDay.now();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> _loadNumericPart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedNumericPart = prefs.getString('numericPart');
     if (storedNumericPart != null) {
       setState(() {
-        numericPart =
-            storedNumericPart;
+        numericPart = storedNumericPart;
       });
     }
   }
@@ -87,7 +74,7 @@ class _HomepageState extends State<Homepage>
               color: Colors.white),
         ),
         centerTitle: false,
-        title: Text(
+        title: const Text(
           'CabYatra',
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -109,7 +96,7 @@ class _HomepageState extends State<Homepage>
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   height: 28,
                   clipBehavior: Clip.antiAlias,
                   decoration: ShapeDecoration(
@@ -118,7 +105,7 @@ class _HomepageState extends State<Homepage>
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -140,7 +127,7 @@ class _HomepageState extends State<Homepage>
                 ),
                 SizedBox(width: size.width * 0.03),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   height: 28,
                   clipBehavior: Clip.antiAlias,
                   decoration: ShapeDecoration(
@@ -152,7 +139,7 @@ class _HomepageState extends State<Homepage>
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Help',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -162,7 +149,7 @@ class _HomepageState extends State<Homepage>
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       GestureDetector(
@@ -171,7 +158,7 @@ class _HomepageState extends State<Homepage>
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return ServiceCallDialog();
+                              return const ServiceCallDialog();
                             },
                           );
                         },
@@ -189,10 +176,10 @@ class _HomepageState extends State<Homepage>
           onTap: (value) {
             controller.getHomeData();
           },
-          indicator: BoxDecoration(
+          indicator: const BoxDecoration(
             border: Border(
-              bottom: const BorderSide(
-                  color: Color.fromRGBO(255, 216, 0, 1), width: 4),
+              bottom:
+                  BorderSide(color: Color.fromRGBO(255, 216, 0, 1), width: 4),
             ),
           ),
           labelColor: Colors.black,
@@ -211,61 +198,43 @@ class _HomepageState extends State<Homepage>
           ],
         ),
       ),
-      body: BlocBuilder<DashboardBloc,DashboardState>(
-          builder: (context,state) {
-            if(state.isLoading){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));;
-
-            }
-            if(state.homeDataResponseModel==null){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));;
-
-            }
-            final activeBookings=state.homeDataResponseModel!.activeBooking.data;
-            final newBooking=state.homeDataResponseModel!.newBooking.data;
-
-
-            return  Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        NewBookingSection(),
-                        ActiveBookingSection(),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
+      body:
+          BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
+        if (state.isLoading) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
         }
-      ),
+        if (state.homeDataResponseModel == null) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
+        final activeBookings = state.homeDataResponseModel!.activeBooking.data;
+        final newBooking = state.homeDataResponseModel!.newBooking.data;
+
+        return Column(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    NewBookingSection(),
+                    ActiveBookingSection(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
       drawerEnableOpenDragGesture: true,
     );
   }
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
 
 class DashedLinePainter extends CustomPainter {
   @override
@@ -289,6 +258,8 @@ class DashedLinePainter extends CustomPainter {
 }
 
 class ServiceCallDialog extends StatelessWidget {
+  const ServiceCallDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

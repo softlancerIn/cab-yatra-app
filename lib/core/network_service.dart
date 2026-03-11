@@ -28,11 +28,8 @@ class NetworkService {
     final response = await DioClient.post('/send-otp', data: data);
     print('response: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
-    if (response != null) {
-      return OtpSendModel.fromJson(response.data);
-    } else {
-      print('Failed to create user');
-    }
+    return OtpSendModel.fromJson(response.data);
+    return null;
   }
 
   Future<HomePageModel?> getHomeData() async {
@@ -40,22 +37,16 @@ class NetworkService {
     final response = await DioClient.post('/home', data: data);
     log('response home data: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
-    if (response != null) {
-      return HomePageModel.fromJson(response.data);
-    } else {
-      print('Failed to get HomeData');
-    }
+    return HomePageModel.fromJson(response.data);
+    return null;
   }
 
   Future<BookingResponse?> getMybookingData() async {
     final response = await DioClient.get('/my_booking');
     log('API response home data: ${response!.data}');
     print('API responseStatusCode: ${response.statusCode}');
-    if (response != null) {
-      return BookingResponse.fromJson(response.data);
-    } else {
-      print('Failed to get HomeData');
-    }
+    return BookingResponse.fromJson(response.data);
+    return null;
   }
 
   Future<WalletResponse?> getWalletData() async {
@@ -63,12 +54,7 @@ class NetworkService {
     print('response: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
 
-    if (response != null) {
-      return WalletResponse.fromJson(response.data);
-    } else {
-      print('Failed to get wallet data');
-      return null;
-    }
+    return WalletResponse.fromJson(response.data);
   }
 
   Future<DriverProfile?> getProfileData() async {
@@ -76,25 +62,17 @@ class NetworkService {
     print('profile response: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
 
-    if (response != null) {
-      return DriverProfile.fromJson(response.data);
-    } else {
-      print('Failed to get DriverProfile data');
-      return null;
-    }
+    return DriverProfile.fromJson(response.data);
   }
+
   Future<DriverPaymentMethod?> getPayementMethodData() async {
     final response = await DioClient.get('/driverPaymentMethod');
     print('response: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
 
-    if (response != null) {
-      return DriverPaymentMethod.fromJson(response.data);
-    } else {
-      print('Failed to get paymentMethod data');
-      return null;
-    }
+    return DriverPaymentMethod.fromJson(response.data);
   }
+
   Future<dynamic> getReviewList() async {
     final response = await DioClient.get('/ratin_driverReviewList');
 
@@ -106,7 +84,6 @@ class NetworkService {
       return null;
     }
   }
-
 
   Future<CmsPageModel?> getCmsPage() async {
     try {
@@ -132,11 +109,8 @@ class NetworkService {
     final response = await DioClient.post('/login', data: data);
     print('response: ${response!.data}');
     print('responseStatusCode: ${response.statusCode}');
-    if (response != null) {
-      return OtpVerifyModel.fromJson(response.data);
-    } else {
-      print('Failed to create user');
-    }
+    return OtpVerifyModel.fromJson(response.data);
+    return null;
   }
 
   Future<Map<String, dynamic>?> verifyStartRideOtp({
@@ -252,7 +226,8 @@ class NetworkService {
     }
   }
 
-  Future<DriverPaymentMethod?> postPaymentMethod(PayMethodData paymentData) async {
+  Future<DriverPaymentMethod?> postPaymentMethod(
+      PayMethodData paymentData) async {
     final data = paymentData.toJson(); // Convert the Data object to JSON
     final response = await DioClient.post('/driverPaymentMethod', data: data);
 
@@ -264,9 +239,11 @@ class NetworkService {
     }
   }
 
-  Future<DriverDataModel?> getDriverDataForRatingReview({required String bookingId}) async {
+  Future<DriverDataModel?> getDriverDataForRatingReview(
+      {required String bookingId}) async {
     try {
-      final response = await DioClient.get('/getDriverDataForRatingReview/$bookingId');
+      final response =
+          await DioClient.get('/getDriverDataForRatingReview/$bookingId');
 
       if (response != null && response.data['status'] == true) {
         return DriverDataModel.fromJson(response.data['data']);
@@ -353,7 +330,6 @@ class NetworkService {
       return false;
     }
   }
-
 
   Future<ApiResponse?> postTripData(AddBookingModel tripData) async {
     final data = tripData.toJson();
@@ -445,15 +421,13 @@ class NetworkService {
     return PickUpBookingModel.fromJson(response.data);
   }
 
-  Future<void> uploadQR({
-    required String qrImagePath, required PayMethodData paymentData
-  }) async {
+  Future<void> uploadQR(
+      {required String qrImagePath, required PayMethodData paymentData}) async {
     const String uploadUrl = '/driverPaymentMethod';
 
     final Map<String, String> fileKeyPathMap = {
       'qr_image': qrImagePath,
     };
-
 
     void onProgress(int sent, int total) {
       final progress = (sent / total * 100).toStringAsFixed(2);
@@ -478,7 +452,6 @@ class NetworkService {
       debugPrint('Error uploading QR image: $e');
     }
   }
-
 
   Future<AddDriverModel?> uploadDriverDetails({
     // required String profileType,
@@ -602,6 +575,7 @@ class NetworkService {
     } else {
       print('Failed to upload files. ${response!.data}');
     }
+    return null;
   }
 
   Future<bool?> updateDriverDetails({
@@ -674,9 +648,9 @@ class NetworkService {
     const String uploadUrl = '/profile';
 
     final Map<String, String> fileKeyPathMap = {};
-    if (carImage != null) fileKeyPathMap['car_image'] = carImage;
-    if (carRcFrontImage != null) fileKeyPathMap['car_rc_frontImage'] = carRcFrontImage;
-    if (insuranceImage != null) fileKeyPathMap['insurence_image'] = insuranceImage;
+    fileKeyPathMap['car_image'] = carImage;
+    fileKeyPathMap['car_rc_frontImage'] = carRcFrontImage;
+    fileKeyPathMap['insurence_image'] = insuranceImage;
 
     final Map<String, dynamic> additionalData = {
       'type': 'car_details',

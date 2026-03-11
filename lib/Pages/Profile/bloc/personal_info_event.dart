@@ -46,9 +46,9 @@ class SubmitPressed extends PersonalInfoEvent {
   final String name;
   final String licenseNumber;
   final String licenseNumber2;
-  final File driverImage;
+  final File? driverImage;
   final String cInfo;
-  SubmitPressed({required this.licenseNumber,required this.context,required this.name,required this.type,required this.cInfo,required this.driverImage,required this.licenseNumber2});
+  SubmitPressed({required this.licenseNumber,required this.context,required this.name,required this.type,required this.cInfo, this.driverImage,required this.licenseNumber2});
 
   @override
   List<Object?> get props => [licenseNumber,name,type,cInfo,driverImage,licenseNumber2,context];}

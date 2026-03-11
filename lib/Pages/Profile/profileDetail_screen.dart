@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../Controllers/profile_controller.dart';
-import '../Add Profile/add_profile.dart';
 import '../Custom_Widgets/custom_app_bar.dart';
 
 class ProfileDetails extends StatefulWidget {
@@ -70,11 +69,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     carNameController.text = profile?.driverCarDetails?.carName ?? '';
     carNumberController.text = profile?.driverCarDetails?.carNo ?? '';
     noOfSeats.text = profile?.driverCarDetails?.noSeat ?? '';
-    driverImagePath =profile?.driverImageUrl??'';
-    carImagePath = profile?.driverCarDetails?.carImageUrl??'';
-    insuranceImagePath = profile?.driverCarDetails?.insurenceImageUrl??'';
-    carRcFrontImagePath = profile?.driverCarDetails?.carRcFrontImageUrl??'';
-    expiryController.text = profile?.driverCarDetails?.insurenceExpiry??'';
+    driverImagePath = profile?.driverImageUrl ?? '';
+    carImagePath = profile?.driverCarDetails?.carImageUrl ?? '';
+    insuranceImagePath = profile?.driverCarDetails?.insurenceImageUrl ?? '';
+    carRcFrontImagePath = profile?.driverCarDetails?.carRcFrontImageUrl ?? '';
+    expiryController.text = profile?.driverCarDetails?.insurenceExpiry ?? '';
     String? fetchedFuelType = profile?.driverCarDetails?.fuelType;
     print(profile?.driverCarDetails?.fuelType);
     print('fetchedFuelType');
@@ -89,6 +88,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
     setState(() {});
   }
+
   void _showImageSourceDialog(String type) {
     showDialog(
       context: context,
@@ -116,9 +116,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       },
     );
   }
+
   Future<void> _pickImage(String type, ImageSource source) async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: source);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: source);
 
     if (image != null) {
       setState(() {
@@ -150,7 +151,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(title: "Profile"),
+      appBar: const AppBAR(title: "Profile"),
       body: GetBuilder<ProfileController>(
         builder: (controller) {
           if (controller.profileLoading.value) {
@@ -165,12 +166,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildToggleButton('Driver Details', isDriverDetailsSelected, () {
+                  _buildToggleButton('Driver Details', isDriverDetailsSelected,
+                      () {
                     setState(() {
                       isDriverDetailsSelected = true;
                     });
                   }),
-                  _buildToggleButton('Car Details', !isDriverDetailsSelected, () {
+                  _buildToggleButton('Car Details', !isDriverDetailsSelected,
+                      () {
                     setState(() {
                       isDriverDetailsSelected = false;
                     });
@@ -194,7 +197,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
   }
 
-
   Widget _buildToggleButton(String title, bool isSelected, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -202,10 +204,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFCB117) : Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: title == 'Driver Details' ? const Radius.circular(16) : Radius.zero,
-            bottomLeft: title == 'Driver Details' ? const Radius.circular(16) : Radius.zero,
-            topRight: title == 'Car Details' ? const Radius.circular(16) : Radius.zero,
-            bottomRight: title == 'Car Details' ? const Radius.circular(16) : Radius.zero,
+            topLeft: title == 'Driver Details'
+                ? const Radius.circular(16)
+                : Radius.zero,
+            bottomLeft: title == 'Driver Details'
+                ? const Radius.circular(16)
+                : Radius.zero,
+            topRight: title == 'Car Details'
+                ? const Radius.circular(16)
+                : Radius.zero,
+            bottomRight: title == 'Car Details'
+                ? const Radius.circular(16)
+                : Radius.zero,
           ),
           border: Border.all(color: Colors.grey.shade300),
         ),
@@ -236,32 +246,35 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           },
           child: driverImagePath.isEmpty
               ? CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey[300],
-            child: const Icon(Icons.upload, size: 40),
-          )
+                  radius: 50,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.upload, size: 40),
+                )
               : CircleAvatar(
-            radius: 50,
-            backgroundImage: driverImagePath.startsWith('http')
-                ? NetworkImage(driverImagePath) // Use NetworkImage for URLs
-                : FileImage(File(driverImagePath)), // Use FileImage for local images
-          ),
+                  radius: 50,
+                  backgroundImage: driverImagePath.startsWith('http')
+                      ? NetworkImage(
+                          driverImagePath) // Use NetworkImage for URLs
+                      : FileImage(File(
+                          driverImagePath)), // Use FileImage for local images
+                ),
         ),
         const SizedBox(height: 8),
         const Text("Upload Driver’s Photo"),
         const SizedBox(height: 16),
-        _buildTextField('Enter your Name', nameController,false),
-        _buildTextField('Email Id', emailController,false),
-        _buildTextField('Phone Number', mobileController,false),
-        _buildTextField('Aadhar Card Number', aadharController,true),
-        _buildTextField('Pan Card Number', panController,true),
-        _buildTextField('DL Number', dlController,false),
+        _buildTextField('Enter your Name', nameController, false),
+        _buildTextField('Email Id', emailController, false),
+        _buildTextField('Phone Number', mobileController, false),
+        _buildTextField('Aadhar Card Number', aadharController, true),
+        _buildTextField('Pan Card Number', panController, true),
+        _buildTextField('DL Number', dlController, false),
         const SizedBox(height: 16),
         _buildSaveButton(),
       ],
     );
   }
-  Widget _buildCarDetails(BuildContext context, screenWidth, screenHeight ) {
+
+  Widget _buildCarDetails(BuildContext context, screenWidth, screenHeight) {
     return Column(
       children: [
         const Text(
@@ -276,25 +289,25 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           },
           child: carImagePath.isEmpty
               ? CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey[300],
-            child: const Icon(Icons.upload, size: 40),
-          )
+                  radius: 50,
+                  backgroundColor: Colors.grey[300],
+                  child: const Icon(Icons.upload, size: 40),
+                )
               : CircleAvatar(
-            radius: 50,
-            backgroundImage: carImagePath.startsWith('http')
-                ? NetworkImage(carImagePath)
-                : FileImage(File(carImagePath)) as ImageProvider,
-          ),
+                  radius: 50,
+                  backgroundImage: carImagePath.startsWith('http')
+                      ? NetworkImage(carImagePath)
+                      : FileImage(File(carImagePath)) as ImageProvider,
+                ),
         ),
         const SizedBox(height: 8),
         const Text("Upload Car’s Photo"),
         const SizedBox(height: 16),
 
-        _buildTextField('Car Brand', carBrandController,false),
-        _buildTextField('Car Name', carNameController,false),
-        _buildTextField('Car Number', carNumberController,false),
-        _buildTextField('Expiry Date', expiryController,false),
+        _buildTextField('Car Brand', carBrandController, false),
+        _buildTextField('Car Name', carNameController, false),
+        _buildTextField('Car Number', carNumberController, false),
+        _buildTextField('Expiry Date', expiryController, false),
         // DropdownField(
         //   items: fuelTypes,
         //   selectedValue: selectedFuelType,
@@ -306,23 +319,27 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         //     });
         //   },
         // ),
-        _buildTextField('No. of Seats', noOfSeats,false),
+        _buildTextField('No. of Seats', noOfSeats, false),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Column(
               children: [
-                _buildImageContainer(context, insuranceImagePath, 'Upload Insurance Photo', screenWidth, screenHeight),
+                _buildImageContainer(context, insuranceImagePath,
+                    'Upload Insurance Photo', screenWidth, screenHeight),
                 const SizedBox(height: 8),
-                const Text('Insurance', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Insurance',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
             Column(
               children: [
-                _buildImageContainer(context, carRcFrontImagePath, 'Upload Car RC Photo', screenWidth, screenHeight),
+                _buildImageContainer(context, carRcFrontImagePath,
+                    'Upload Car RC Photo', screenWidth, screenHeight),
                 const SizedBox(height: 8),
-                const Text('Car RC', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('Car RC',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
           ],
@@ -334,17 +351,19 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
   }
 
-  Widget _buildTextField(String hint, TextEditingController controller, bool? isReadonly) {
+  Widget _buildTextField(
+      String hint, TextEditingController controller, bool? isReadonly) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
-        readOnly: isReadonly??false,
+        readOnly: isReadonly ?? false,
         decoration: InputDecoration(
           hintText: hint,
           label: Text(hint),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         ),
       ),
     );
@@ -411,37 +430,42 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
   }
 
-  Widget _buildImageContainer(BuildContext context, String imagePath, String uploadButtonText, double screenWidth, double screenHeight) {
+  Widget _buildImageContainer(BuildContext context, String imagePath,
+      String uploadButtonText, double screenWidth, double screenHeight) {
     return GestureDetector(
       onTap: () {
-        _showFullScreenImage(context, imagePath, uploadButtonText, screenWidth, screenHeight);
+        _showFullScreenImage(
+            context, imagePath, uploadButtonText, screenWidth, screenHeight);
       },
       child: imagePath.isEmpty
           ? Container(
-        width: screenWidth * 0.4,
-        height: screenHeight * 0.3,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.upload, size: 40),
-      )
+              width: screenWidth * 0.4,
+              height: screenHeight * 0.3,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.upload, size: 40),
+            )
           : Container(
-        width: screenWidth * 0.4,
-        height: screenHeight * 0.3,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(
-            image: imagePath.startsWith('http')
-                ? NetworkImage(imagePath) // Use NetworkImage for URLs
-                : FileImage(File(imagePath)), // Use FileImage for local images
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
+              width: screenWidth * 0.4,
+              height: screenHeight * 0.3,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: imagePath.startsWith('http')
+                      ? NetworkImage(imagePath) // Use NetworkImage for URLs
+                      : FileImage(
+                          File(imagePath)), // Use FileImage for local images
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
     );
   }
-  void _showFullScreenImage(BuildContext context, String imagePath, String uploadButtonText, double screenWidth, double screenHeight) {
+
+  void _showFullScreenImage(BuildContext context, String imagePath,
+      String uploadButtonText, double screenWidth, double screenHeight) {
     showDialog(
       context: context,
       builder: (context) {
@@ -450,7 +474,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.zero,
           ),
-          child: Container(
+          child: SizedBox(
             width: screenWidth * 0.9,
             height: screenHeight * 0.8,
             child: Column(
@@ -460,9 +484,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     child: imagePath.isEmpty
                         ? const Icon(Icons.upload, size: 40)
                         : Image.network(
-                      imagePath,
-                      fit: BoxFit.cover,
-                    ),
+                            imagePath,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
                 Row(

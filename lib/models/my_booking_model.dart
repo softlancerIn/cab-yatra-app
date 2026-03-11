@@ -11,19 +11,20 @@ class BookingResponse {
     status = json['status'];
     message = json['message'];
     myBooking = json['my_booking'] != null
-        ? new MyBooking.fromJson(json['my_booking'])
+        ? MyBooking.fromJson(json['my_booking'])
         : null;
   }
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    if (this.myBooking != null) {
-      data['active_booking'] = this.myBooking!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    if (myBooking != null) {
+      data['active_booking'] = myBooking!.toJson();
     }
     return data;
   }
 }
+
 class MyBooking {
   var currentPage;
   List<MyBookingData>? data;
@@ -41,25 +42,25 @@ class MyBooking {
 
   MyBooking(
       {this.currentPage,
-        this.data,
-        this.firstPageUrl,
-        this.from,
-        this.lastPage,
-        this.lastPageUrl,
-        this.links,
-        this.nextPageUrl,
-        this.path,
-        this.perPage,
-        this.prevPageUrl,
-        this.to,
-        this.total});
+      this.data,
+      this.firstPageUrl,
+      this.from,
+      this.lastPage,
+      this.lastPageUrl,
+      this.links,
+      this.nextPageUrl,
+      this.path,
+      this.perPage,
+      this.prevPageUrl,
+      this.to,
+      this.total});
 
   MyBooking.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
     if (json['data'] != null) {
       data = <MyBookingData>[];
       json['data'].forEach((v) {
-        data!.add(new MyBookingData.fromJson(v));
+        data!.add(MyBookingData.fromJson(v));
       });
     }
     firstPageUrl = json['first_page_url'];
@@ -69,7 +70,7 @@ class MyBooking {
     if (json['links'] != null) {
       links = <Links>[];
       json['links'].forEach((v) {
-        links!.add(new Links.fromJson(v));
+        links!.add(Links.fromJson(v));
       });
     }
     nextPageUrl = json['next_page_url'];
@@ -81,27 +82,28 @@ class MyBooking {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['current_page'] = this.currentPage;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['current_page'] = currentPage;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
-    data['first_page_url'] = this.firstPageUrl;
-    data['from'] = this.from;
-    data['last_page'] = this.lastPage;
-    data['last_page_url'] = this.lastPageUrl;
-    if (this.links != null) {
-      data['links'] = this.links!.map((v) => v.toJson()).toList();
+    data['first_page_url'] = firstPageUrl;
+    data['from'] = from;
+    data['last_page'] = lastPage;
+    data['last_page_url'] = lastPageUrl;
+    if (links != null) {
+      data['links'] = links!.map((v) => v.toJson()).toList();
     }
-    data['next_page_url'] = this.nextPageUrl;
-    data['path'] = this.path;
-    data['per_page'] = this.perPage;
-    data['prev_page_url'] = this.prevPageUrl;
-    data['to'] = this.to;
-    data['total'] = this.total;
+    data['next_page_url'] = nextPageUrl;
+    data['path'] = path;
+    data['per_page'] = perPage;
+    data['prev_page_url'] = prevPageUrl;
+    data['to'] = to;
+    data['total'] = total;
     return data;
   }
 }
+
 class MyBookingData {
   int? id;
   int? driver_id;
@@ -114,7 +116,7 @@ class MyBookingData {
   String? totalFaire;
   String? remark;
   String? destination_date;
-  String? include_km ;
+  String? include_km;
   String? onlinePayment;
   String? offlinePayment;
   String? driverComission;
@@ -138,37 +140,37 @@ class MyBookingData {
 
   MyBookingData(
       {this.id,
-        this.orderId,
-        this.type,
-        this.subType,
-        this.isAirpotToFrom,
-        this.pickUpDate,
-        this.pickUpTime,
-        this.totalFaire,
-        this.remark,
-        this.destination_date,
-        this.is_show_phoneNumber,
-        this.include_km,
-        this.onlinePayment,
-        this.offlinePayment,
-        this.driverComission,
-        this.pickUpLoc,
-        this.destinationLoc,
-        this.carCategoryId,
-        this.addOnService,
-        this.fuel_type,
-        this.extra_fair_perKm,
-        this.toll,
-        this.tax,
-        this.driver_number,
-        this.driver_id,
-        this.status,
-        this.typeLabel,
-        this.subTypeLabel,
-        this.isAirportLabel,
-        this.carCategory,
-        this.timeScheduleData,
-        this.car});
+      this.orderId,
+      this.type,
+      this.subType,
+      this.isAirpotToFrom,
+      this.pickUpDate,
+      this.pickUpTime,
+      this.totalFaire,
+      this.remark,
+      this.destination_date,
+      this.is_show_phoneNumber,
+      this.include_km,
+      this.onlinePayment,
+      this.offlinePayment,
+      this.driverComission,
+      this.pickUpLoc,
+      this.destinationLoc,
+      this.carCategoryId,
+      this.addOnService,
+      this.fuel_type,
+      this.extra_fair_perKm,
+      this.toll,
+      this.tax,
+      this.driver_number,
+      this.driver_id,
+      this.status,
+      this.typeLabel,
+      this.subTypeLabel,
+      this.isAirportLabel,
+      this.carCategory,
+      this.timeScheduleData,
+      this.car});
 
   MyBookingData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -182,7 +184,7 @@ class MyBookingData {
     totalFaire = json['total_faire'];
     remark = json['remark'];
     destination_date = json['destination_date'];
-    include_km  = json['include_km'];
+    include_km = json['include_km'];
     onlinePayment = json['online_payment'];
     offlinePayment = json['offline_payment'];
     driverComission = json['driver_comission'];
@@ -205,7 +207,7 @@ class MyBookingData {
     timeScheduleData = json['time_schadule_data'] != null
         ? TimeScheduleData.fromJson(json['time_schadule_data'])
         : null;
-    car = json['car'] != null ? new Car.fromJson(json['car']) : null;
+    car = json['car'] != null ? Car.fromJson(json['car']) : null;
 
     final rawPickUpLoc = json['pickUpLoc'];
     if (rawPickUpLoc is String) {
@@ -237,30 +239,30 @@ class MyBookingData {
     data['total_faire'] = totalFaire;
     data['remark'] = remark;
     data['destination_date'] = destination_date;
-    data['include_km'] = include_km ;
+    data['include_km'] = include_km;
     data['online_payment'] = onlinePayment;
     data['offline_payment'] = offlinePayment;
     data['driver_comission'] = driverComission;
     data['pickUpLoc'] = pickUpLoc;
     data['destinationLoc'] = destinationLoc;
     data['carCategory_id'] = carCategoryId;
-    data['add_onService'] = this.addOnService;
-    data['fuel_type'] = this.fuel_type;
-    data['extra_fair_perKm'] = this.extra_fair_perKm;
-    data['toll'] = this.toll;
-    data['tax'] = this.tax;
-    data['driver_number'] = this.driver_number;
-    data['driver_id'] = this.driver_id;
-    data['is_show_phoneNumber'] = this.is_show_phoneNumber;
-    data['status'] = this.status;
+    data['add_onService'] = addOnService;
+    data['fuel_type'] = fuel_type;
+    data['extra_fair_perKm'] = extra_fair_perKm;
+    data['toll'] = toll;
+    data['tax'] = tax;
+    data['driver_number'] = driver_number;
+    data['driver_id'] = driver_id;
+    data['is_show_phoneNumber'] = is_show_phoneNumber;
+    data['status'] = status;
     data['type_label'] = typeLabel;
     data['sub_type_label'] = subTypeLabel;
     data['is_airport_label'] = isAirportLabel;
     if (carCategory != null) {
       data['car_category'] = carCategory!.toJson();
     }
-    if (this.car != null) {
-      data['car'] = this.car!.toJson();
+    if (car != null) {
+      data['car'] = car!.toJson();
     }
     if (timeScheduleData != null) {
       data['time_schadule_data'] = timeScheduleData!.toJson(); // Add this line
@@ -268,6 +270,7 @@ class MyBookingData {
     return data;
   }
 }
+
 class Links {
   String? url;
   String? label;
@@ -282,13 +285,14 @@ class Links {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['url'] = this.url;
-    data['label'] = this.label;
-    data['active'] = this.active;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['url'] = url;
+    data['label'] = label;
+    data['active'] = active;
     return data;
   }
 }
+
 class CarCategory {
   int? id;
   String? name;
@@ -303,15 +307,15 @@ class CarCategory {
 
   CarCategory(
       {this.id,
-        this.name,
-        this.extraFairPerKm,
-        this.extraFairPerHour,
-        this.fuelCharge,
-        this.driverCharge,
-        this.nightCharge,
-        this.toll,
-        this.tax,
-        this.parking});
+      this.name,
+      this.extraFairPerKm,
+      this.extraFairPerHour,
+      this.fuelCharge,
+      this.driverCharge,
+      this.nightCharge,
+      this.toll,
+      this.tax,
+      this.parking});
 
   CarCategory.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -327,17 +331,17 @@ class CarCategory {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['extra_fair_perKm'] = this.extraFairPerKm;
-    data['extra_fair_perHour'] = this.extraFairPerHour;
-    data['fuel_charge'] = this.fuelCharge;
-    data['driver_charge'] = this.driverCharge;
-    data['night_charge'] = this.nightCharge;
-    data['toll'] = this.toll;
-    data['tax'] = this.tax;
-    data['parking'] = this.parking;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['extra_fair_perKm'] = extraFairPerKm;
+    data['extra_fair_perHour'] = extraFairPerHour;
+    data['fuel_charge'] = fuelCharge;
+    data['driver_charge'] = driverCharge;
+    data['night_charge'] = nightCharge;
+    data['toll'] = toll;
+    data['tax'] = tax;
+    data['parking'] = parking;
     return data;
   }
 }
@@ -356,14 +360,13 @@ class Car {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['category'] = this.category;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['category'] = category;
     return data;
   }
 }
-
 
 class TimeScheduleData {
   int? id;

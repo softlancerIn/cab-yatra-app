@@ -17,6 +17,13 @@ class PersonalInfoBloc
     on<ImageChanged>((event, emit) {
       emit(state.copyWith(image: event.image));
     });
+    on<NameChanged>((event, emit) {
+      emit(state.copyWith(name: event.name));
+    });
+    on<CompanyChanged>((event, emit) {
+      emit(state.copyWith(company: event.company));
+    });
+    
   }
 
   Future<void> _onLoadProfile(
@@ -31,19 +38,19 @@ class PersonalInfoBloc
       );
 
       final data = response.data;
-      print("😍😍😍😍😍😍😍 Name is : ${data!.name}");
-      print("😍😍😍😍😍😍😍 cInfo is : ${data.cInfo}");
-      print("😍😍😍😍😍😍😍 type is : ${data.type}");
-      print("😍😍😍😍😍😍😍 driverImageUrl is : ${data.driverImageUrl}");
+      print("😍😍😍😍😍😍😍 Name is : ${data?.name}");
+      print("😍😍😍😍😍😍😍 cInfo is : ${data?.cInfo}");
+      print("😍😍😍😍😍😍😍 type is : ${data?.type}");
+      print("😍😍😍😍😍😍😍 driverImageUrl is : ${data?.driverImageUrl}");
 
       emit(state.copyWith(
-        name: data.name ?? "Name",
-        company: data.cInfo ?? "Remark",
-        phone: data.phone ?? "00000000",
-        role: data.type?.toLowerCase() ?? "agent",
-        networkImage: data.driverImageUrl,
-        licenseNumber2: data.licenseNumber2,
-        licenseNumber: data.licenseNumber,
+        name: data?.name ?? "Name",
+        company: data?.cInfo ?? "Remark",
+        phone: data?.phone ?? "00000000",
+        role: data?.type?.toLowerCase() ?? "agent",
+        networkImage: data?.driverImageUrl,
+        licenseNumber2: data?.licenseNumber2,
+        licenseNumber: data?.licenseNumber,
 
         isLoading: false,
       ));
