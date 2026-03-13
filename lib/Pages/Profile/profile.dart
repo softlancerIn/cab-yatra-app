@@ -1,4 +1,3 @@
-
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
 import 'package:cab_taxi_app/app/router/navigation/routes.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +37,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       throw 'Could not launch $url';
     }
   }
+
   void showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -147,6 +147,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
@@ -161,29 +162,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  LogOutButton(title: 'Logout',image: 'assets/images/logoutIcon.png',onTap: (){
-                    showLogoutDialog(context);
-                  }),
-                  LogOutButton(title: 'Help',image: 'assets/images/helpIcon.png',onTap: (){
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => ServiceCallDialog(),
-                    );
-                  }),
+                  LogOutButton(
+                      title: 'Logout',
+                      image: 'assets/images/logoutIcon.png',
+                      onTap: () {
+                        showLogoutDialog(context);
+                      }),
+                  LogOutButton(
+                      title: 'Help',
+                      image: 'assets/images/helpIcon.png',
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) =>
+                              ServiceCallDialog(),
+                        );
+                      }),
                 ],
               ),
-              SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               BlocConsumer<PersonalInfoBloc, PersonalInfoState>(
-                  listener: (context, state) {
-
-
-
-
-                  },
+                  listener: (context, state) {},
                   builder: (context, state) {
                     if (state.isLoading) {
                       return const SizedBox(
@@ -199,7 +206,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(50), // adjust for more/less roundness
+                              borderRadius: BorderRadius.circular(
+                                  50), // adjust for more/less roundness
                               child: Container(
                                 width: 100,
                                 height: 100,
@@ -223,40 +231,45 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       ),
                                     );
                                   },
-                                  loadingBuilder: (context, child, loadingProgress) {
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
                                     if (loadingProgress == null) return child;
                                     return const Center(
                                       child: CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFCB117)),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Color(0xFFFCB117)),
                                       ),
                                     );
                                   },
                                 ),
                               ),
                             ),
-                            SizedBox(height: 5,),
+                            const SizedBox(
+                              height: 5,
+                            ),
                             Text(
-                              state.name?? 'Brijesh',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600
-                              ),
+                              state.name ?? 'Brijesh',
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
                             ),
                             //SizedBox(height: 5,),
                             Text(
-                              state.phone??     '6389716535',
-                              style: TextStyle(
+                              state.phone ?? '6389716535',
+                              style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.grey
-                              ),
-                            ),SizedBox(height: 5,),
+                                  color: Colors.grey),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
                             GestureDetector(
-                              onTap: (){
+                              onTap: () {
                                 Nav.push(context, Routes.reviewScreen);
                               },
                               behavior: HitTestBehavior.opaque,
-                              child: Row(
+                              child: const Row(
                                 children: [
                                   Text(
                                     '4.9',
@@ -267,7 +280,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                  Icon(
+                                    Icons.star,
+                                    color: Color(0xFFFCB117),
+                                    size: 16,
+                                  ),
                                   // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
                                   // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
                                   // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
@@ -275,64 +292,106 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   Text(
                                     '(1 review)',
                                     style: TextStyle(
-                                      color: const Color(0xFF787878),
+                                      color: Color(0xFF787878),
                                       fontSize: 10,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w500,
                                     ),
                                   )
-
                                 ],
                               ),
                             )
-
                           ],
                         ),
                       ],
                     );
-                  }
+                  }),
+              const SizedBox(
+                height: 10,
               ),
-
-
-
-
-              SizedBox(height: 10,),
               titleData(title: 'Account'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.profile);
-              }, image: 'assets/images/personalIcon.png', title: 'Personal Information'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.manageDrivers);
-              }, image: 'assets/images/ManageDriver.png', title: 'Manage Drivers'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.manageVehicles);
-              }, image: 'assets/images/manageVahical.png', title: 'Manage Vehicles'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.paymentMethod);
-              }, image: 'assets/images/paymentVahical.png', title: 'Payment Methods'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.transection,);
-              }, image: 'assets/images/BookingIcon.png', title: 'Booking Transactions'),
-              SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.profile);
+                  },
+                  image: 'assets/images/personalIcon.png',
+                  title: 'Personal Information'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.manageDrivers);
+                  },
+                  image: 'assets/images/ManageDriver.png',
+                  title: 'Manage Drivers'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.manageVehicles);
+                  },
+                  image: 'assets/images/manageVahical.png',
+                  title: 'Manage Vehicles'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.paymentMethod);
+                  },
+                  image: 'assets/images/paymentVahical.png',
+                  title: 'Payment Methods'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(
+                      context,
+                      Routes.transection,
+                    );
+                  },
+                  image: 'assets/images/BookingIcon.png',
+                  title: 'Booking Transactions'),
+              const SizedBox(
+                height: 10,
+              ),
               titleData(title: 'Policies'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.aboutus);
-              }, image: 'assets/images/aboutUs.png', title: 'About Us'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.privacyPolicy);
-              }, image: 'assets/images/privacyPolicy.png', title: 'Privacy Policy'),
-              SizedBox(height: 10,),
-              titleCardData(onTap: (){
-                Nav.push(context, Routes.termsCondition);
-              }, image: 'assets/images/termsIcon.png', title: 'Term & Conditions'),
-              SizedBox(height: 30,),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.aboutus);
+                  },
+                  image: 'assets/images/aboutUs.png',
+                  title: 'About Us'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.privacyPolicy);
+                  },
+                  image: 'assets/images/privacyPolicy.png',
+                  title: 'Privacy Policy'),
+              const SizedBox(
+                height: 10,
+              ),
+              titleCardData(
+                  onTap: () {
+                    Nav.push(context, Routes.termsCondition);
+                  },
+                  image: 'assets/images/termsIcon.png',
+                  title: 'Term & Conditions'),
+              const SizedBox(
+                height: 30,
+              ),
               Row(
                 children: [
                   GestureDetector(
@@ -345,9 +404,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       width: 27,
                     ),
                   ),
-
                   const SizedBox(width: 15),
-
                   GestureDetector(
                     onTap: () {
                       launchURL("https://www.instagram.com/cabyatra/");
@@ -358,9 +415,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       width: 27,
                     ),
                   ),
-
                   const SizedBox(width: 15),
-
                   GestureDetector(
                     onTap: () {
                       launchURL("https://www.facebook.com/share/15gpYtg4uG/");
@@ -379,11 +434,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
+
   Widget titleCardData({
     required String image,
     required String title,
     required VoidCallback onTap,
-  }){
+  }) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -391,11 +447,31 @@ class _EditProfilePageState extends State<EditProfilePage> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Image.asset(image,width: 20,height: 20,fit: BoxFit.cover,),
-            SizedBox(width: 12,),
-            Expanded(child: Text(title,style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500,color: Color(0xff4B4B4B)),)),
-            Icon(Icons.arrow_forward_ios,size: 16,color: Color(0xFFFCB117),),
-            SizedBox(width: 5,),
+            Image.asset(
+              image,
+              width: 20,
+              height: 20,
+              fit: BoxFit.cover,
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Expanded(
+                child: Text(
+              title,
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xff4B4B4B)),
+            )),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Color(0xFFFCB117),
+            ),
+            const SizedBox(
+              width: 5,
+            ),
           ],
         ),
       ),
@@ -406,31 +482,35 @@ class _EditProfilePageState extends State<EditProfilePage> {
     required String title,
     required String image,
     required VoidCallback onTap,
-  }){
-    return  GestureDetector(
+  }) {
+    return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8,vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          color:Color(0xADEFEFEF),
+          color: const Color(0xADEFEFEF),
         ),
         child: Row(
           children: [
             Text(
               title,
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400
-              ),
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
             ),
-            SizedBox(width: 5,),
-            Image(image: AssetImage(image), height: 18,fit: BoxFit.cover,),
+            const SizedBox(
+              width: 5,
+            ),
+            Image(
+              image: AssetImage(image),
+              height: 18,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),
     );
   }
+
   Widget titleData({
     required String title,
     TextAlign? textAlign = TextAlign.center,

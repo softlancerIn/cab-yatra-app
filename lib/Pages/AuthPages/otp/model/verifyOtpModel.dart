@@ -7,10 +7,10 @@ class VerifyOtpModel {
 
   VerifyOtpModel(
       {this.status,
-        this.message,
-        this.isRegistered,
-        this.userType,
-        this.token});
+      this.message,
+      this.isRegistered,
+      this.userType,
+      this.token});
 
   VerifyOtpModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -21,12 +21,12 @@ class VerifyOtpModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
-    data['is_registered'] = this.isRegistered;
-    data['user_type'] = this.userType;
-    data['token'] = this.token;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
+    data['is_registered'] = isRegistered;
+    data['user_type'] = userType;
+    data['token'] = token;
     return data;
   }
 }

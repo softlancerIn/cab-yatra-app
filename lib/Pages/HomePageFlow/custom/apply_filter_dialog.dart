@@ -54,9 +54,8 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               /// Title
-              Center(
+              const Center(
                 child: Text(
                   "Apply Filter",
                   style: TextStyle(
@@ -100,7 +99,6 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
               /// Buttons
               Row(
                 children: [
-
                   /// Clear Filter
                   Expanded(
                     child: SizedBox(
@@ -113,7 +111,9 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
                           ),
                         ),
                         onPressed: () {
-                          context.read<DashboardBloc>().add(ClearFilterEvent());
+                          context
+                              .read<DashboardBloc>()
+                              .add(const ClearFilterEvent());
                           Navigator.pop(context);
                         },
                         child: const Text(
@@ -231,7 +231,7 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
             borderRadius: BorderRadius.circular(10),
             side: const BorderSide(color: Colors.black12),
           ),
-          shadows: [
+          shadows: const [
             BoxShadow(
               color: Color(0x1F000000),
               blurRadius: 4,
@@ -255,7 +255,8 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
   }
 
   /// Input field
-  Widget _inputField({required TextEditingController controller, required String hint}) {
+  Widget _inputField(
+      {required TextEditingController controller, required String hint}) {
     return Container(
       height: 45,
       padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -265,7 +266,7 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
           borderRadius: BorderRadius.circular(10),
           side: const BorderSide(color: Colors.black12),
         ),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x1F000000),
             blurRadius: 4,

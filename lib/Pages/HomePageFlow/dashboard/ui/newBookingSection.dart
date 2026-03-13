@@ -22,85 +22,83 @@ class _NewBookingSectionState extends State<NewBookingSection> {
       onRefresh: () async {
         //await controller.getHomeData();
       },
-      child: BlocBuilder<DashboardBloc,DashboardState>(
-          builder: (context,state) {
-            if(state.isLoading){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));
+      child:
+          BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
+        if (state.isLoading) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
+        if (state.homeDataResponseModel == null) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
 
-            }
-            if(state.homeDataResponseModel==null){
-              return SizedBox(
-                height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));
+        final allBookings = state.homeDataResponseModel!.newBooking.data;
 
-            }
+        final newBooking = allBookings.where((booking) {
+          final query = state.searchQuery.trim().toLowerCase();
+          final queryWords =
+              query.split(' ').where((word) => word.isNotEmpty).toList();
 
-            final allBookings = state.homeDataResponseModel!.newBooking.data;
+          bool matchesSearch = true;
+          if (queryWords.isNotEmpty) {
+            matchesSearch = queryWords.every((word) {
+              return booking.bookingId.toLowerCase().contains(word) ||
+                  booking.pickupLocation.toLowerCase().contains(word) ||
+                  booking.destinationLocation.toLowerCase().contains(word);
+            });
+          }
 
-            final newBooking = allBookings.where((booking) {
-              final query = state.searchQuery.trim().toLowerCase();
-              final queryWords = query.split(' ').where((word) => word.isNotEmpty).toList();
+          final matchesVehicle = state.selectedVehicleType == null ||
+              booking.carCategoryName.toLowerCase() ==
+                  state.selectedVehicleType!.toLowerCase();
 
-              bool matchesSearch = true;
-              if (queryWords.isNotEmpty) {
-                matchesSearch = queryWords.every((word) {
-                  return booking.bookingId.toLowerCase().contains(word) ||
-                      booking.pickupLocation.toLowerCase().contains(word) ||
-                      booking.destinationLocation.toLowerCase().contains(word);
-                });
-              }
+          final matchesPickup = state.pickupLocationFilter == null ||
+              booking.pickupLocation
+                  .toLowerCase()
+                  .contains(state.pickupLocationFilter!.toLowerCase());
 
-              final matchesVehicle = state.selectedVehicleType == null ||
-                  booking.carCategoryName.toLowerCase() ==
-                      state.selectedVehicleType!.toLowerCase();
+          final matchesDrop = state.dropLocationFilter == null ||
+              booking.destinationLocation
+                  .toLowerCase()
+                  .contains(state.dropLocationFilter!.toLowerCase());
 
-              final matchesPickup = state.pickupLocationFilter == null ||
-                  booking.pickupLocation
-                      .toLowerCase()
-                      .contains(state.pickupLocationFilter!.toLowerCase());
+          return matchesSearch &&
+              matchesVehicle &&
+              matchesPickup &&
+              matchesDrop;
+        }).toList();
 
-              final matchesDrop = state.dropLocationFilter == null ||
-                  booking.destinationLocation
-                      .toLowerCase()
-                      .contains(state.dropLocationFilter!.toLowerCase());
-
-              return matchesSearch &&
-                  matchesVehicle &&
-                  matchesPickup &&
-                  matchesDrop;
-            }).toList();
-
-
-            return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            // child: controller.homeLoading.value
-            //     ? CircularProgressIndicator()
-            //     : Column(
-            child: Column(
-              children: [
+        return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          // child: controller.homeLoading.value
+          //     ? CircularProgressIndicator()
+          //     : Column(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                child: SliderWidget(),
+              ),
+              if (newBooking.isEmpty)
                 const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: SliderWidget(),
-                ),
-                if (newBooking.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 40.0),
-                    child: Center(
-                      child: Text(
-                        "No bookings found",
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                  padding: EdgeInsets.only(top: 40.0),
+                  child: Center(
+                    child: Text(
+                      "No bookings found",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  )
-                else
+                  ),
+                )
+              else
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -121,13 +119,15 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                           );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
                           child: Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: ShapeDecoration(
                               color: Colors.white,
                               shape: RoundedRectangleBorder(
-                                side: BorderSide(color: Colors.grey.shade300, width: 0.5),
+                                side: BorderSide(
+                                    color: Colors.grey.shade300, width: 0.5),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               shadows: [
@@ -145,22 +145,33 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                 Padding(
                                   padding: const EdgeInsets.all(12),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           RichText(
                                             text: TextSpan(
-                                              style: const TextStyle(fontSize: 12, fontFamily: 'Poppins'),
+                                              style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily: 'Poppins'),
                                               children: [
                                                 const TextSpan(
                                                   text: 'ID : ',
-                                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
+                                                  style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontWeight:
+                                                          FontWeight.normal),
                                                 ),
                                                 TextSpan(
-                                                  text: newBooking[index].bookingId,
-                                                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                                                  text: newBooking[index]
+                                                      .bookingId,
+                                                  style: const TextStyle(
+                                                      color: Colors.orange,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
                                               ],
                                             ),
@@ -178,13 +189,24 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                       const SizedBox(height: 4),
                                       RichText(
                                         text: TextSpan(
-                                          style: const TextStyle(fontSize: 12, fontFamily: 'Poppins', color: Colors.black),
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              fontFamily: 'Poppins',
+                                              color: Colors.black),
                                           children: [
-                                            TextSpan(text: '${newBooking[index].pickupDate} '),
-                                            const TextSpan(text: '@', style: TextStyle(color: Colors.black)),
                                             TextSpan(
-                                              text: newBooking[index].pickupTime,
-                                              style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
+                                                text:
+                                                    '${newBooking[index].pickupDate} '),
+                                            const TextSpan(
+                                                text: '@',
+                                                style: TextStyle(
+                                                    color: Colors.black)),
+                                            TextSpan(
+                                              text:
+                                                  newBooking[index].pickupTime,
+                                              style: const TextStyle(
+                                                  color: Color(0xFFF45858),
+                                                  fontWeight: FontWeight.w500),
                                             ),
                                           ],
                                         ),
@@ -193,39 +215,54 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                   ),
                                 ),
 
-                                const Divider(height: 1, thickness: 0.5, color: Colors.grey),
+                                const Divider(
+                                    height: 1,
+                                    thickness: 0.5,
+                                    color: Colors.grey),
 
                                 /// ROUTE: Pickup & Drop with Dotted Line
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 12),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Column(
                                         children: [
-                                          const Icon(Icons.circle, size: 14, color: Colors.orange),
-                                          Container(
+                                          const Icon(Icons.circle,
+                                              size: 14, color: Colors.orange),
+                                          SizedBox(
                                             width: 1,
                                             height: 30,
-                                            child: CustomPaint(painter: DashLinePainter()),
+                                            child: CustomPaint(
+                                                painter: DashLinePainter()),
                                           ),
-                                          const Icon(Icons.circle, size: 14, color: Color(0xFFC51C1C)),
+                                          const Icon(Icons.circle,
+                                              size: 14,
+                                              color: Color(0xFFC51C1C)),
                                         ],
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             const SizedBox(height: 2),
                                             Text(
                                               newBooking[index].pickupLocation,
-                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                              style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                             const SizedBox(height: 28),
                                             Text(
-                                              newBooking[index].destinationLocation,
-                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                              newBooking[index]
+                                                  .destinationLocation,
+                                              style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600),
                                             ),
                                           ],
                                         ),
@@ -233,7 +270,8 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                       const Center(
                                         child: Padding(
                                           padding: EdgeInsets.only(top: 20),
-                                          child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                          child: Icon(Icons.arrow_forward_ios,
+                                              size: 16, color: Colors.grey),
                                         ),
                                       ),
                                     ],
@@ -242,20 +280,26 @@ class _NewBookingSectionState extends State<NewBookingSection> {
 
                                 /// VEHICLE INFO
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   child: Row(
                                     children: [
                                       Image.network(
                                         newBooking[index].carImage,
                                         height: 30,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            Image.asset("assets/images/carMO.png", height: 30),
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                Image.asset(
+                                                    "assets/images/carMO.png",
+                                                    height: 30),
                                       ),
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
                                           newBooking[index].carCategoryName,
-                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600),
                                         ),
                                       ),
                                     ],
@@ -264,18 +308,25 @@ class _NewBookingSectionState extends State<NewBookingSection> {
 
                                 /// EXTRA REQUIREMENTS / NOTES
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(12, 8, 12, 0),
                                   child: RichText(
                                     text: TextSpan(
-                                      style: const TextStyle(fontSize: 11, fontFamily: 'Poppins'),
+                                      style: const TextStyle(
+                                          fontSize: 11, fontFamily: 'Poppins'),
                                       children: [
                                         const TextSpan(
                                           text: 'Extra Requirement: ',
-                                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w500),
                                         ),
                                         TextSpan(
-                                          text: newBooking[index].remark ?? "N/A",
-                                          style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
+                                          text:
+                                              newBooking[index].remark ?? "N/A",
+                                          style: const TextStyle(
+                                              color: Color(0xFFF45858),
+                                              fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
@@ -287,11 +338,18 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                   padding: const EdgeInsets.all(12),
                                   child: Row(
                                     children: [
-                                      _priceBox("₹${newBooking[index].totalFare}", "Total Amount"),
+                                      _priceBox(
+                                          "₹${newBooking[index].totalFare}",
+                                          "Total Amount"),
                                       const SizedBox(width: 8),
-                                      _priceBox("₹${newBooking[index].driverCommission}", "Driver's Earning", isEarning: true),
+                                      _priceBox(
+                                          "₹${newBooking[index].driverCommission}",
+                                          "Driver's Earning",
+                                          isEarning: true),
                                       const SizedBox(width: 8),
-                                      _priceBox("₹${newBooking[index].driverCommission}", "Commission"),
+                                      _priceBox(
+                                          "₹${newBooking[index].driverCommission}",
+                                          "Commission"),
                                     ],
                                   ),
                                 ),
@@ -301,10 +359,10 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                         ),
                       );
                     }),
-              ],
-            ),
-          );
-        }),
+            ],
+          ),
+        );
+      }),
     );
   }
 

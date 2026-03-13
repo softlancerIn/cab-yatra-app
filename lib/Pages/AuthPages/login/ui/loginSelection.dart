@@ -21,13 +21,16 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
-          image: DecorationImage(image: AssetImage("assets/images/loginSelection.png"),fit: BoxFit.fill)
-        ),
-        child:SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+            image: DecorationImage(
+                image: AssetImage("assets/images/loginSelection.png"),
+                fit: BoxFit.fill)),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height*0.62,),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.62,
+              ),
               const Text(
                 'Welcome to Cabyatra',
                 style: TextStyle(
@@ -43,8 +46,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   GestureDetector(
-                    onTap: (){
-                      Nav.push(context,Routes.loginMobile);
+                    onTap: () {
+                      Nav.push(context, Routes.loginMobile);
                     },
                     child: Container(
                       width: 150,
@@ -52,7 +55,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                       clipBehavior: Clip.antiAlias,
                       decoration: ShapeDecoration(
                         color: const Color(0xFF3E4959),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: const Stack(
                         children: [
@@ -74,8 +78,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: (){
-                      Nav.push(context,Routes.loginRegister);
+                    onTap: () {
+                      Nav.push(context, Routes.loginRegister);
                     },
                     child: Container(
                       width: 150,
@@ -83,7 +87,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                       clipBehavior: Clip.antiAlias,
                       decoration: ShapeDecoration(
                         color: const Color(0xFFFCB117),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
                       child: const Stack(
                         children: [
@@ -106,7 +111,9 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                   )
                 ],
               ),
-              SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               SizedBox(
                 width: 300,
                 child: Text.rich(
@@ -129,7 +136,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                      //    textDecoration: TextDecoration.underline,
+                          //    textDecoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),
@@ -150,7 +157,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                        //  textDecoration: TextDecoration.underline,
+                          //  textDecoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),
@@ -161,7 +168,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
               )
             ],
           ),
-        ) ,
+        ),
       ),
     );
   }

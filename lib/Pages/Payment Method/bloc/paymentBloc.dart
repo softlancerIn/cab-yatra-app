@@ -12,8 +12,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   final PaymentRepo repo = PaymentRepo();
   final ImagePicker _picker = ImagePicker();
 
-  PaymentBloc() : super(PaymentState()) {
-
+  PaymentBloc() : super(const PaymentState()) {
     on<SubmitPayment>(_submitPayment);
     on<LoadPayment>(_loadPayment);
 
@@ -26,9 +25,9 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   }
 
   Future<void> _submitPayment(
-      SubmitPayment event,
-      Emitter<PaymentState> emit,
-      ) async {
+    SubmitPayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     emit(state.copyWith(loading: true, error: null));
 
     try {
@@ -48,7 +47,6 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
       // Reload payment list
       add(LoadPayment());
-
     } catch (e) {
       emit(state.copyWith(
         loading: false,
@@ -59,18 +57,14 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   }
 
   Future<void> _loadPayment(
-      LoadPayment event,
-      Emitter<PaymentState> emit,
-      ) async {
+    LoadPayment event,
+    Emitter<PaymentState> emit,
+  ) async {
     emit(state.copyWith(loading: true));
 
     try {
       final result = await repo.getPaymentApi();
-      emit(state.copyWith(
-          loading: false, success: true,
-
-          payment: result
-      ));
+      emit(state.copyWith(loading: false, success: true, payment: result));
     } catch (e) {
       emit(state.copyWith(loading: false));
     }

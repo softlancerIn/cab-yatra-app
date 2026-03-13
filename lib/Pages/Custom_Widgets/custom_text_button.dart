@@ -11,7 +11,7 @@ class CustomTextButton extends StatelessWidget {
   final double borderRadius;
 
   const CustomTextButton({
-    Key? key,
+    super.key,
     required this.title,
     required this.color,
     required this.textColor,
@@ -20,7 +20,7 @@ class CustomTextButton extends StatelessWidget {
     this.width,
     this.height,
     this.borderRadius = 6.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +39,9 @@ class CustomTextButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
             border: borderColor != null
                 ? Border.all(
-              color: borderColor!,
-              width: 1.0,
-            )
+                    color: borderColor!,
+                    width: 1.0,
+                  )
                 : null,
           ),
           child: Center(

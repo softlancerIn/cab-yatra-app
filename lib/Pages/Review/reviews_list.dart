@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
-
 class ReviewList extends StatefulWidget {
   final String profileName;
   final String profileEmail;
   final String profileImageUrl;
 
   const ReviewList({
-    Key? key,
+    super.key,
     required this.profileName,
     required this.profileEmail,
     required this.profileImageUrl,
-  }) : super(key: key);
+  });
 
   @override
   State<ReviewList> createState() => _ReviewListState();
@@ -26,10 +24,7 @@ class _ReviewListState extends State<ReviewList> {
   @override
   void initState() {
     super.initState();
-
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +47,7 @@ class _ReviewListState extends State<ReviewList> {
                   Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -66,10 +61,10 @@ class _ReviewListState extends State<ReviewList> {
                         CircleAvatar(
                           radius: width * 0.15,
                           foregroundImage:
-                          widget.profileImageUrl.startsWith('http')
-                              ? NetworkImage(widget.profileImageUrl)
-                              : AssetImage(widget.profileImageUrl)
-                          as ImageProvider,
+                              widget.profileImageUrl.startsWith('http')
+                                  ? NetworkImage(widget.profileImageUrl)
+                                  : AssetImage(widget.profileImageUrl)
+                                      as ImageProvider,
                         ),
                         SizedBox(height: height * 0.01),
                         Text(
@@ -97,7 +92,7 @@ class _ReviewListState extends State<ReviewList> {
             if (isLoading)
               Padding(
                 padding: EdgeInsets.symmetric(vertical: height * 0.1),
-                child: Center(child: CircularProgressIndicator()),
+                child: const Center(child: CircularProgressIndicator()),
               )
             else if (reviews.isEmpty)
               Padding(
@@ -115,7 +110,7 @@ class _ReviewListState extends State<ReviewList> {
             else
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.all(width * 0.04),
                 itemCount: reviews.length,
                 itemBuilder: (context, index) {
@@ -148,7 +143,7 @@ class ReviewCard extends StatelessWidget {
   final double height;
 
   const ReviewCard({
-    Key? key,
+    super.key,
     required this.name,
     required this.comment,
     required this.date,
@@ -156,7 +151,7 @@ class ReviewCard extends StatelessWidget {
     required this.imageUrl,
     required this.width,
     required this.height,
-  }) : super(key: key);
+  });
 
   String formatDate(String rawDate) {
     try {
@@ -218,7 +213,7 @@ class ReviewCard extends StatelessWidget {
                       Row(
                         children: List.generate(
                           5,
-                              (index) => Icon(
+                          (index) => Icon(
                             Icons.star,
                             color: index < rating ? Colors.amber : Colors.grey,
                             size: width * 0.04,

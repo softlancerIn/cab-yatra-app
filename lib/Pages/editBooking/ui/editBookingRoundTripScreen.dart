@@ -6,15 +6,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-
 import '../../../widget/customTextField.dart';
-
 
 import '../bloc/editBookingBloc.dart';
 import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
 import '../repo/editBookingRepo.dart';
-
 
 class EditBookingRoundTripScreen extends StatefulWidget {
   final String vehicalType;
@@ -26,9 +23,16 @@ class EditBookingRoundTripScreen extends StatefulWidget {
   final String driverCommission;
   final String remark;
 
-  const EditBookingRoundTripScreen({super.key,required this.pickUpTime,required this.remark,required this.driverCommission,required this.pickUpDate,required this.totalFare,required this.dropLocation,required this.pickUpLocation,required this.vehicalType});
-
-
+  const EditBookingRoundTripScreen(
+      {super.key,
+      required this.pickUpTime,
+      required this.remark,
+      required this.driverCommission,
+      required this.pickUpDate,
+      required this.totalFare,
+      required this.dropLocation,
+      required this.pickUpLocation,
+      required this.vehicalType});
 
   @override
   State<EditBookingRoundTripScreen> createState() =>
@@ -46,7 +50,7 @@ class EditBookingRoundTripScreenState
   final _driverCommCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
 
-  String? _selectedTripType = 'One Way';
+  final String? _selectedTripType = 'One Way';
   bool _showPhoneNumber = false;
   @override
   void initState() {
@@ -87,7 +91,9 @@ class EditBookingRoundTripScreenState
         builder: (context, state) {
           return RefreshIndicator(
             onRefresh: () async {
-              context.read<EditBookingBloc>().add(EditLoadCarCategories(context));
+              context
+                  .read<EditBookingBloc>()
+                  .add(EditLoadCarCategories(context));
             },
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -102,46 +108,56 @@ class EditBookingRoundTripScreenState
                   state.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : state.carCategories == null ||
-                      state.carCategories!.data!.isEmpty
-                      ? const Text("No categories available",
-                      style: TextStyle(color: Colors.red))
-                      : containerShadow(
-                    child: DropdownButtonFormField<int>(
-                      value: state.selectedCarCategoryId,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 14),
-                      ),
-                      hint: const Text("Choose vehicle",style: TextStyle(fontSize: 13,fontWeight: FontWeight.w400),),
-                      items: state.carCategories!.data!.map((car) {
-                        return DropdownMenuItem<int>(
-                          value: car.id,
-                          child: Text(
-                            car.name ?? "Unknown",
-                            style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          context
-                              .read<EditBookingBloc>()
-                              .add(EditSelectCarCategory(value));
-                        }
-                      },
-                    ),
-                  ),
+                              state.carCategories!.data!.isEmpty
+                          ? const Text("No categories available",
+                              style: TextStyle(color: Colors.red))
+                          : containerShadow(
+                              child: DropdownButtonFormField<int>(
+                                initialValue: state.selectedCarCategoryId,
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 14),
+                                ),
+                                hint: const Text(
+                                  "Choose vehicle",
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                                items: state.carCategories!.data!.map((car) {
+                                  return DropdownMenuItem<int>(
+                                    value: car.id,
+                                    child: Text(
+                                      car.name ?? "Unknown",
+                                      style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    context
+                                        .read<EditBookingBloc>()
+                                        .add(EditSelectCarCategory(value));
+                                  }
+                                },
+                              ),
+                            ),
 
                   const SizedBox(height: 24),
 
-                  CommonTextFormField(controller: _pickupCtrl,hintText: "Pickup Location",),
+                  CommonTextFormField(
+                    controller: _pickupCtrl,
+                    hintText: "Pickup Location",
+                  ),
                   const SizedBox(height: 16),
-                  CommonTextFormField(controller: _dropCtrl,hintText: "Drop Location",),
-
+                  CommonTextFormField(
+                    controller: _dropCtrl,
+                    hintText: "Drop Location",
+                  ),
 
                   const SizedBox(height: 24),
 
@@ -173,11 +189,17 @@ class EditBookingRoundTripScreenState
                   // ── Total Fare & Driver Commission ──────────────────────────
                   Row(
                     children: [
-                      Expanded(child: CommonTextFormField(controller: _totalFareCtrl,hintText: "Total Fare",)),
-
+                      Expanded(
+                          child: CommonTextFormField(
+                        controller: _totalFareCtrl,
+                        hintText: "Total Fare",
+                      )),
                       const SizedBox(width: 12),
-                      Expanded(child: CommonTextFormField(controller: _driverCommCtrl,hintText: "Driver Commission",)),
-
+                      Expanded(
+                          child: CommonTextFormField(
+                        controller: _driverCommCtrl,
+                        hintText: "Driver Commission",
+                      )),
                     ],
                   ),
 
@@ -193,7 +215,7 @@ class EditBookingRoundTripScreenState
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      shadows: [
+                      shadows: const [
                         BoxShadow(
                           color: Color(0x3F000000),
                           blurRadius: 4,
@@ -225,7 +247,7 @@ class EditBookingRoundTripScreenState
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      shadows: [
+                      shadows: const [
                         BoxShadow(
                           color: Color(0x3F000000),
                           blurRadius: 4,
@@ -237,8 +259,9 @@ class EditBookingRoundTripScreenState
                     child: TextField(
                       controller: _remarksCtrl,
                       maxLines: 4,
-                      decoration:  InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+                      decoration: const InputDecoration(
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         labelText: "Remarks / Special Instructions",
                         hintStyle: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w400),
@@ -251,59 +274,62 @@ class EditBookingRoundTripScreenState
                   ),
 
                   const SizedBox(height: 40),
-                  CommonTextFormField(controller: _remarksCtrl,),
+                  CommonTextFormField(
+                    controller: _remarksCtrl,
+                  ),
                   const SizedBox(height: 40),
                   CommonAppButton(
                     isLoading: state.isSubmitting,
-                    text: "Update Booking",    onPressed: state.isSubmitting
-                      ? null
-                      : () {
-                    if (state.selectedCarCategoryId == null) {
-                      Fluttertoast.showToast(
-                          msg: "Please select vehicle category");
-                      return;
-                    }
-                    if (_pickupCtrl.text.trim().isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Pickup location is required");
-                      return;
-                    }
-                    if (_dropCtrl.text.trim().isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Drop location is required");
-                      return;
-                    }
-                    if (_startDateCtrl.text.isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Pickup date is required");
-                      return;
-                    }
-                    if (_totalFareCtrl.text.trim().isEmpty) {
-                      Fluttertoast.showToast(
-                          msg: "Total fare is required");
-                      return;
-                    }
+                    text: "Update Booking",
+                    onPressed: state.isSubmitting
+                        ? null
+                        : () {
+                            if (state.selectedCarCategoryId == null) {
+                              Fluttertoast.showToast(
+                                  msg: "Please select vehicle category");
+                              return;
+                            }
+                            if (_pickupCtrl.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                  msg: "Pickup location is required");
+                              return;
+                            }
+                            if (_dropCtrl.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                  msg: "Drop location is required");
+                              return;
+                            }
+                            if (_startDateCtrl.text.isEmpty) {
+                              Fluttertoast.showToast(
+                                  msg: "Pickup date is required");
+                              return;
+                            }
+                            if (_totalFareCtrl.text.trim().isEmpty) {
+                              Fluttertoast.showToast(
+                                  msg: "Total fare is required");
+                              return;
+                            }
 
-                    final booking = EditSubmitBooking(
-                      subType: "1",
-                      // hardcoded as per requirement
-                      carCategoryId: state.selectedCarCategoryId!,
-                      pickUpDate: _startDateCtrl.text,
-                      pickUpTime: _startTimeCtrl.text,
-                      pickUpLocations: [_pickupCtrl.text.trim()],
-                      destinationLocations: [_dropCtrl.text.trim()],
-                      totalFare:
-                      double.tryParse(_totalFareCtrl.text) ?? 0.0,
-                      driverCommission:
-                      double.tryParse(_driverCommCtrl.text) ??
-                          0.0,
-                      showPhoneNumber: _showPhoneNumber,
-                      remarks: _remarksCtrl.text.trim(),
-                      context: context,
-                    );
+                            final booking = EditSubmitBooking(
+                              subType: "1",
+                              // hardcoded as per requirement
+                              carCategoryId: state.selectedCarCategoryId!,
+                              pickUpDate: _startDateCtrl.text,
+                              pickUpTime: _startTimeCtrl.text,
+                              pickUpLocations: [_pickupCtrl.text.trim()],
+                              destinationLocations: [_dropCtrl.text.trim()],
+                              totalFare:
+                                  double.tryParse(_totalFareCtrl.text) ?? 0.0,
+                              driverCommission:
+                                  double.tryParse(_driverCommCtrl.text) ?? 0.0,
+                              showPhoneNumber: _showPhoneNumber,
+                              remarks: _remarksCtrl.text.trim(),
+                              context: context,
+                            );
 
-                    context.read<EditBookingBloc>().add(booking);
-                  },),
+                            context.read<EditBookingBloc>().add(booking);
+                          },
+                  ),
 
                   // ── Submit Button ───────────────────────────────────────────
                   // SizedBox(
@@ -390,10 +416,6 @@ class EditBookingRoundTripScreenState
 
   // ── Helper Widgets ──────────────────────────────────────────────────────────────
 
-
-
-
-
   Widget _buildDateField({
     required String label,
     required TextEditingController controller,
@@ -416,8 +438,10 @@ class EditBookingRoundTripScreenState
           readOnly: true,
           decoration: InputDecoration(
             labelText: label,
-            hintStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+            hintStyle:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+            labelStyle:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
             suffixIcon: const Icon(Icons.calendar_month),
             border: InputBorder.none,
           ),
@@ -449,8 +473,10 @@ class EditBookingRoundTripScreenState
           readOnly: true,
           decoration: InputDecoration(
             labelText: label,
-            hintStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+            hintStyle:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+            labelStyle:
+                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
             suffixIcon: const Icon(Icons.access_time),
             border: InputBorder.none,
           ),
@@ -463,14 +489,14 @@ class EditBookingRoundTripScreenState
     return Container(
       // width: 333,
       height: 50,
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x3F000000),
             blurRadius: 4,
@@ -495,7 +521,7 @@ class EditBookingRoundTripScreenState
         Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           isExpanded: true,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),

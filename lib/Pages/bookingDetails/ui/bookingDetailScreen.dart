@@ -1,4 +1,3 @@
-
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 
 import 'package:cab_taxi_app/Pages/bookingDetails/bloc/bookingDetailsEvent.dart';
@@ -17,9 +16,7 @@ import 'driverInfoCard.dart';
 class BookingDetailScreen extends StatefulWidget {
   final String bookingID;
 
-
-  const BookingDetailScreen(
-      {super.key, required this.bookingID});
+  const BookingDetailScreen({super.key, required this.bookingID});
 
   @override
   State<BookingDetailScreen> createState() => _BookingDetailScreenState();
@@ -32,7 +29,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
   void initState() {
     // _paymentService = PaymentService();
     super.initState();
-    context.read<BookingDetailBloc>().add(GetBookingDetailEvent(context: context,bookingId: widget.bookingID));
+    context.read<BookingDetailBloc>().add(
+        GetBookingDetailEvent(context: context, bookingId: widget.bookingID));
   }
 
   @override
@@ -40,9 +38,6 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     // _paymentService.dispose();
     super.dispose();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +82,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     clipBehavior: Clip.antiAlias,
                     decoration: ShapeDecoration(
                       color: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                       shadows: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
@@ -104,22 +100,28 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           padding: const EdgeInsets.all(12),
                           child: RichText(
                             text: TextSpan(
-                              style: const TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+                              style: const TextStyle(
+                                  fontSize: 14, fontFamily: 'Poppins'),
                               children: [
                                 const TextSpan(
                                   text: 'ID : ',
-                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
+                                  style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.normal),
                                 ),
                                 TextSpan(
                                   text: data.orderId,
-                                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                           ),
                         ),
 
-                        const Divider(height: 1, thickness: 0.5, color: Colors.grey),
+                        const Divider(
+                            height: 1, thickness: 0.5, color: Colors.grey),
 
                         /// Date, Time and Trip Type
                         Padding(
@@ -129,13 +131,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             children: [
                               RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(fontSize: 13, fontFamily: 'Poppins', color: Colors.black),
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: 'Poppins',
+                                      color: Colors.black),
                                   children: [
                                     TextSpan(text: '${data.pickupDate} '),
-                                    const TextSpan(text: '@', style: TextStyle(color: Colors.black)),
+                                    const TextSpan(
+                                        text: '@',
+                                        style: TextStyle(color: Colors.black)),
                                     TextSpan(
                                       text: data.pickupTime,
-                                      style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                          color: Color(0xFFF45858),
+                                          fontWeight: FontWeight.w500),
                                     ),
                                   ],
                                 ),
@@ -154,19 +163,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
                         /// Route: Pickup & Drop
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Column(
                                 children: [
-                                  const Icon(Icons.circle, size: 14, color: Colors.orange),
+                                  const Icon(Icons.circle,
+                                      size: 14, color: Colors.orange),
                                   Container(
                                     width: 1,
                                     height: 30,
                                     color: Colors.grey.shade300,
                                   ),
-                                  const Icon(Icons.circle, size: 14, color: Color(0xFFC51C1C)),
+                                  const Icon(Icons.circle,
+                                      size: 14, color: Color(0xFFC51C1C)),
                                 ],
                               ),
                               const SizedBox(width: 12),
@@ -177,12 +189,16 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                     const SizedBox(height: 2),
                                     Text(
                                       data.pickupLocation,
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600),
                                     ),
                                     const SizedBox(height: 28),
                                     Text(
                                       data.dropLocation,
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600),
                                     ),
                                   ],
                                 ),
@@ -193,15 +209,19 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
                         /// Vehicle/Category Info
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           child: Row(
                             children: [
-                              Image.asset("assets/images/carMO.png", height: 30),
+                              Image.asset("assets/images/carMO.png",
+                                  height: 30),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   data.vehicleType,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600),
                                 ),
                               ),
                             ],
@@ -210,18 +230,26 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
                         /// Remark
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 4),
                           child: RichText(
                             text: TextSpan(
-                              style: const TextStyle(fontSize: 12, fontFamily: 'Poppins'),
+                              style: const TextStyle(
+                                  fontSize: 12, fontFamily: 'Poppins'),
                               children: [
                                 const TextSpan(
                                   text: 'Extra Requirement: ',
-                                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500),
                                 ),
                                 TextSpan(
-                                  text: data.remark.isNotEmpty ? data.remark : "No remarks provided",
-                                  style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
+                                  text: data.remark.isNotEmpty
+                                      ? data.remark
+                                      : "No remarks provided",
+                                  style: const TextStyle(
+                                      color: Color(0xFFF45858),
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),
@@ -235,9 +263,13 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                             children: [
                               _priceBox("₹${data.totalAmount}", "Total Amount"),
                               const SizedBox(width: 8),
-                              _priceBox("₹${data.totalAmount - data.driverCommission}", "Driver's Earning", isEarning: true),
+                              _priceBox(
+                                  "₹${data.totalAmount - data.driverCommission}",
+                                  "Driver's Earning",
+                                  isEarning: true),
                               const SizedBox(width: 8),
-                              _priceBox("₹${data.driverCommission}", "Commission"),
+                              _priceBox(
+                                  "₹${data.driverCommission}", "Commission"),
                             ],
                           ),
                         ),
@@ -249,8 +281,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   /// Driver Info (Safe Check)
                   // The current API response doesn't include driver info for this specific booking,
                   // so we show it only if available or a placeholder.
-                  DriverInfoCard(
-                    imagePath: 'https://img.freepik.com/premium-vector/blue-car-flat-style-illustration-isolated-white-background_108231-795.jpg?semt=ais_hybrid&w=740&q=80',
+                  const DriverInfoCard(
+                    imagePath:
+                        'https://img.freepik.com/premium-vector/blue-car-flat-style-illustration-isolated-white-background_108231-795.jpg?semt=ais_hybrid&w=740&q=80',
                     name: 'Assigned Driver',
                     subtitle: 'Verification in progress',
                     rating: 5,

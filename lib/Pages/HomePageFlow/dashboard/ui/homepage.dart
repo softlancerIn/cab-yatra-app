@@ -1,5 +1,3 @@
-
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,7 +27,6 @@ class _HomepageState extends State<Homepage>
   TimeOfDay? selectedTime;
   TextEditingController searchController = TextEditingController();
 
-
   String numericPart = '0.0';
 
   @override
@@ -43,18 +40,12 @@ class _HomepageState extends State<Homepage>
     selectedTime = TimeOfDay.now();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> _loadNumericPart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedNumericPart = prefs.getString('numericPart');
     if (storedNumericPart != null) {
       setState(() {
-        numericPart =
-            storedNumericPart;
+        numericPart = storedNumericPart;
       });
     }
   }
@@ -122,7 +113,8 @@ class _HomepageState extends State<Homepage>
               children: [
                 /// Alert Button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
@@ -131,7 +123,11 @@ class _HomepageState extends State<Homepage>
                     children: [
                       Text(
                         'Alert',
-                        style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                        style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins'),
                       ),
                       SizedBox(width: 8),
                       CustomToggleSwitch(),
@@ -149,7 +145,8 @@ class _HomepageState extends State<Homepage>
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(20),
@@ -158,7 +155,11 @@ class _HomepageState extends State<Homepage>
                       children: [
                         const Text(
                           'Help',
-                          style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins'),
                         ),
                         const SizedBox(width: 6),
                         Image.asset('assets/images/caall.png', height: 14),
@@ -175,7 +176,8 @@ class _HomepageState extends State<Homepage>
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
+              border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
             ),
             child: TabBar(
               controller: _tabController,
@@ -203,98 +205,94 @@ class _HomepageState extends State<Homepage>
           ),
         ),
       ),
-      body: BlocBuilder<DashboardBloc,DashboardState>(
-          builder: (context,state) {
-            if(state.isLoading){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: const Center(child: CircularProgressIndicator()));
+      body:
+          BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
+        if (state.isLoading) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
+        if (state.homeDataResponseModel == null) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
 
-            }
-            if(state.homeDataResponseModel==null){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: const Center(child: CircularProgressIndicator()));
-            }
+        final activeBookings = state.homeDataResponseModel!.activeBooking.data;
+        final newBooking = state.homeDataResponseModel!.newBooking.data;
 
-            final activeBookings=state.homeDataResponseModel!.activeBooking.data;
-            final newBooking=state.homeDataResponseModel!.newBooking.data;
+        // Watch for search query changes to keep controller in sync (e.g. on clear)
+        if (state.searchQuery != searchController.text &&
+            state.searchQuery.isEmpty) {
+          searchController.text = state.searchQuery;
+        }
 
-            // Watch for search query changes to keep controller in sync (e.g. on clear)
-            if (state.searchQuery != searchController.text && state.searchQuery.isEmpty) {
-              searchController.text = state.searchQuery;
-            }
-
-            return Column(
-              children: [
-                /// Search and Filter Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CustomSearchBar(
-                          controller: searchController,
-                          onSearch: () {
-                            context.read<DashboardBloc>().add(
-                                UpdateSearchQueryEvent(
-                                    searchQuery: searchController.text.trim()));
-                          },
-                          onChanged: (value) {
-                            context.read<DashboardBloc>().add(
-                                UpdateSearchQueryEvent(
-                                    searchQuery: value.trim()));
-                          },
+        return Column(
+          children: [
+            /// Search and Filter Section
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomSearchBar(
+                      controller: searchController,
+                      onSearch: () {
+                        context.read<DashboardBloc>().add(
+                            UpdateSearchQueryEvent(
+                                searchQuery: searchController.text.trim()));
+                      },
+                      onChanged: (value) {
+                        context.read<DashboardBloc>().add(
+                            UpdateSearchQueryEvent(searchQuery: value.trim()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Nav.push(context, Routes.applyFilter);
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade300, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          "assets/images/seetingFilter.png",
+                          height: 24,
+                          color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Nav.push(context, Routes.applyFilter);
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300, width: 1),
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,
-                          ),
-                          child: Center(
-                            child: Image.asset(
-                              "assets/images/seetingFilter.png",
-                              height: 24,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                // Content Section
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: const [
-                      NewBookingSection(),
-                      ActiveBookingSection(),
-                    ],
-                  ),
-                ),
-              ],
-            );
-        }
-      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            // Content Section
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const [
+                  NewBookingSection(),
+                  ActiveBookingSection(),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
       drawerEnableOpenDragGesture: true,
     );
   }
 }
-
-
-
 
 class DashedLinePainter extends CustomPainter {
   @override
@@ -316,10 +314,6 @@ class DashedLinePainter extends CustomPainter {
     return false;
   }
 }
-
-
-
-
 
 ///calculate
 class DistanceCalculator {

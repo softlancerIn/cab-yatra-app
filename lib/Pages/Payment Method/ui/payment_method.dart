@@ -15,7 +15,8 @@ class PaymentMethodScreen extends StatefulWidget {
   _PaymentMethodScreenState createState() => _PaymentMethodScreenState();
 }
 
-class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerProviderStateMixin {
+class _PaymentMethodScreenState extends State<PaymentMethodScreen>
+    with TickerProviderStateMixin {
   TabController? _tabController;
 
   final _bankFormKey = GlobalKey<FormState>();
@@ -52,7 +53,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const AppBAR(title: "Payment Method", showLeading: true, showAction: false),
+      appBar: const AppBAR(
+          title: "Payment Method", showLeading: true, showAction: false),
       body: BlocConsumer<PaymentBloc, PaymentState>(
         listener: (context, state) {
           if (state.success) {
@@ -66,21 +68,31 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
             return const Center(child: CircularProgressIndicator());
           }
 
-          final firstPayment = state.payment?.data?.isNotEmpty == true ? state.payment!.data!.first : null;
+          final firstPayment = state.payment?.data?.isNotEmpty == true
+              ? state.payment!.data!.first
+              : null;
           if (firstPayment != null) {
-            if (_bankNameController.text.isEmpty) _bankNameController.text = firstPayment.bankName ?? "";
-            if (_accountNumberController.text.isEmpty) _accountNumberController.text = firstPayment.accountNumber ?? "";
-            if (_ifscCodeController.text.isEmpty) _ifscCodeController.text = firstPayment.ifscCode ?? "";
-            if (_accountHolderController.text.isEmpty) _accountHolderController.text = firstPayment.accountHolderName ?? "";
-            if (_upiIdController.text.isEmpty) _upiIdController.text = firstPayment.upiId ?? "";
-            if (_paymentNumberController.text.isEmpty) _paymentNumberController.text = firstPayment.paymentNumber ?? "";
+            if (_bankNameController.text.isEmpty)
+              _bankNameController.text = firstPayment.bankName ?? "";
+            if (_accountNumberController.text.isEmpty)
+              _accountNumberController.text = firstPayment.accountNumber ?? "";
+            if (_ifscCodeController.text.isEmpty)
+              _ifscCodeController.text = firstPayment.ifscCode ?? "";
+            if (_accountHolderController.text.isEmpty)
+              _accountHolderController.text =
+                  firstPayment.accountHolderName ?? "";
+            if (_upiIdController.text.isEmpty)
+              _upiIdController.text = firstPayment.upiId ?? "";
+            if (_paymentNumberController.text.isEmpty)
+              _paymentNumberController.text = firstPayment.paymentNumber ?? "";
           }
 
           return Column(
             children: [
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -211,8 +223,9 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
                     child: Image.file(
                       state.qrImage!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Image.asset('assets/images/qr_code.png', fit: BoxFit.cover),
+                      errorBuilder: (context, error, stackTrace) => Image.asset(
+                          'assets/images/qr_code.png',
+                          fit: BoxFit.cover),
                     ),
                   )
                 : state.payment?.data?.isNotEmpty == true &&
@@ -224,7 +237,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
                           state.payment!.data!.first.qrImageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
-                              Image.asset('assets/images/qr_code.png', fit: BoxFit.cover),
+                              Image.asset('assets/images/qr_code.png',
+                                  fit: BoxFit.cover),
                         ),
                       )
                     : ClipRRect(
@@ -253,7 +267,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
                   fontFamily: 'Poppins',
                   color: Color(0xff444444))),
           const SizedBox(height: 18),
-          CommonTextFormField(hintText: 'Bank Name', controller: _bankNameController),
+          CommonTextFormField(
+              hintText: 'Bank Name', controller: _bankNameController),
           const SizedBox(height: 15),
           CommonTextFormField(
               hintText: 'Accoun Number',
@@ -265,16 +280,23 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
               controller: _reAccountNumberController,
               keyboardType: TextInputType.number),
           const SizedBox(height: 15),
-          CommonTextFormField(hintText: 'IFSC Code', controller: _ifscCodeController),
+          CommonTextFormField(
+              hintText: 'IFSC Code', controller: _ifscCodeController),
           const SizedBox(height: 15),
           CommonTextFormField(
-              hintText: 'Account Holder name', controller: _accountHolderController),
+              hintText: 'Account Holder name',
+              controller: _accountHolderController),
           const SizedBox(height: 22),
-          Row(
-            children: const [
-              Text("• ", style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.bold)),
+          const Row(
+            children: [
+              Text("• ",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)),
               Text("Please fill proper details",
-                  style: TextStyle(color: Colors.red, fontSize: 14, fontFamily: 'Poppins')),
+                  style: TextStyle(
+                      color: Colors.red, fontSize: 14, fontFamily: 'Poppins')),
             ],
           ),
         ],
@@ -310,4 +332,4 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> with TickerPr
       bloc.add(SubmitPayment(fields: fields, files: files));
     }
   }
-}
+}

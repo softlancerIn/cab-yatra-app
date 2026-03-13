@@ -15,26 +15,25 @@ class PrivacyPolicyPage extends StatefulWidget {
 }
 
 class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
-
   @override
   void initState() {
     super.initState();
 
     context.read<CmsBloc>().add(
-      LoadCms(context),
-    );
+          LoadCms(context),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBAR(title: "Privacy Policy",showLeading: true,showAction: true,),
-
-
+      appBar: const AppBAR(
+        title: "Privacy Policy",
+        showLeading: true,
+        showAction: true,
+      ),
       body: BlocBuilder<CmsBloc, CmsState>(
         builder: (context, state) {
-
           if (state.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -90,7 +89,7 @@ class _PrivacyPolicyPageState extends State<PrivacyPolicyPage> {
               style: {
                 "body": Style(
                   fontSize: FontSize(14),
-                  lineHeight: LineHeight(1.5),
+                  lineHeight: const LineHeight(1.5),
                   color: Colors.black87,
                   margin: Margins.zero,
                   padding: HtmlPaddings.zero,

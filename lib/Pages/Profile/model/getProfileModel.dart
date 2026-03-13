@@ -8,13 +8,13 @@ class GetProfileModel {
   GetProfileModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
@@ -41,20 +41,20 @@ class Data {
 
   Data(
       {this.id,
-        this.uniqId,
-        this.name,
-        this.email,
-        this.phone,
-        this.city,
-        this.type,
-        this.licenseNumber,
-        this.licenseNumber2,
-        this.cInfo,
-        this.status,
-        this.rating,
-        this.driverImageUrl,
-        this.createdAt,
-        this.updatedAt});
+      this.uniqId,
+      this.name,
+      this.email,
+      this.phone,
+      this.city,
+      this.type,
+      this.licenseNumber,
+      this.licenseNumber2,
+      this.cInfo,
+      this.status,
+      this.rating,
+      this.driverImageUrl,
+      this.createdAt,
+      this.updatedAt});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -75,22 +75,22 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['uniqId'] = this.uniqId;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['phone'] = this.phone;
-    data['city'] = this.city;
-    data['type'] = this.type;
-    data['license_number'] = this.licenseNumber;
-    data['license_number2'] = this.licenseNumber2;
-    data['c_info'] = this.cInfo;
-    data['status'] = this.status;
-    data['rating'] = this.rating;
-    data['driver_image'] = this.driverImageUrl;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['uniqId'] = uniqId;
+    data['name'] = name;
+    data['email'] = email;
+    data['phone'] = phone;
+    data['city'] = city;
+    data['type'] = type;
+    data['license_number'] = licenseNumber;
+    data['license_number2'] = licenseNumber2;
+    data['c_info'] = cInfo;
+    data['status'] = status;
+    data['rating'] = rating;
+    data['driver_image'] = driverImageUrl;
+    data['created_at'] = createdAt;
+    data['updated_at'] = updatedAt;
     return data;
   }
 }

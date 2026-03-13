@@ -1,21 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_state.dart';
-
 abstract class DashboardEvent extends Equatable {
   const DashboardEvent();
 
   @override
   List<Object?> get props => [];
 }
-
-
-
-
-
-
 
 class GetHomeDataEvent extends DashboardEvent {
   final BuildContext context;
@@ -35,7 +26,8 @@ class UpdateFilterEvent extends DashboardEvent {
   final String? vehicleType;
   final String? pickupLocation;
   final String? dropLocation;
-  const UpdateFilterEvent({this.vehicleType, this.pickupLocation, this.dropLocation});
+  const UpdateFilterEvent(
+      {this.vehicleType, this.pickupLocation, this.dropLocation});
   @override
   List<Object?> get props => [vehicleType, pickupLocation, dropLocation];
 }
@@ -47,9 +39,3 @@ class ClearFilterEvent extends DashboardEvent {
 class ResetDashboardEvent extends DashboardEvent {
   const ResetDashboardEvent();
 }
-
-
-
-
-
-

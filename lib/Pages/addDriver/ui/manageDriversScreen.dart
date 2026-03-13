@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../Custom_Widgets/custom_app_bar.dart';
 import '../bloc/driverBloc.dart';
 import '../bloc/driverState.dart';
 import '../bloc/submitDriver.dart';
@@ -21,6 +20,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     super.initState();
     context.read<DriverBloc>().add(LoadDrivers());
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +44,8 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+          child:
+              Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -80,11 +81,13 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                         CircleAvatar(
                           radius: 35,
                           backgroundColor: Colors.grey.shade200,
-                          backgroundImage: (driver.image != null && driver.image!.isNotEmpty)
-                              ? NetworkImage(driver.image!)
-                              : null,
+                          backgroundImage:
+                              (driver.image != null && driver.image!.isNotEmpty)
+                                  ? NetworkImage(driver.image!)
+                                  : null,
                           child: (driver.image == null || driver.image!.isEmpty)
-                              ? const Icon(Icons.person, size: 35, color: Colors.grey)
+                              ? const Icon(Icons.person,
+                                  size: 35, color: Colors.grey)
                               : null,
                         ),
                         const SizedBox(width: 15),
@@ -122,7 +125,8 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            _showDeleteConfirmation(context, driver.id, driver.name);
+                            _showDeleteConfirmation(
+                                context, driver.id, driver.name);
                           },
                           child: Container(
                             decoration: const BoxDecoration(
@@ -131,14 +135,16 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                             ),
                             child: const Padding(
                               padding: EdgeInsets.all(5),
-                              child: Icon(Icons.close, color: Colors.white, size: 14),
+                              child: Icon(Icons.close,
+                                  color: Colors.white, size: 14),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
+                  Divider(
+                      height: 1, thickness: 0.5, color: Colors.grey.shade200),
                 ],
               );
             },
@@ -152,19 +158,23 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Driver", style: TextStyle(fontFamily: 'Poppins')),
-        content: Text("Are you sure you want to remove $name?", style: const TextStyle(fontFamily: 'Poppins')),
+        title: const Text("Delete Driver",
+            style: TextStyle(fontFamily: 'Poppins')),
+        content: Text("Are you sure you want to remove $name?",
+            style: const TextStyle(fontFamily: 'Poppins')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Colors.grey, fontFamily: 'Poppins')),
+            child: const Text("Cancel",
+                style: TextStyle(color: Colors.grey, fontFamily: 'Poppins')),
           ),
           TextButton(
             onPressed: () {
               context.read<DriverBloc>().add(DeleteDriver(id));
               Navigator.pop(context);
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red, fontFamily: 'Poppins')),
+            child: const Text("Delete",
+                style: TextStyle(color: Colors.red, fontFamily: 'Poppins')),
           ),
         ],
       ),
@@ -176,7 +186,6 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-
       builder: (_) {
         return DraggableScrollableSheet(
             initialChildSize: 0.9, // 👈 70% se start
@@ -185,8 +194,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
             expand: false,
             builder: (context, scrollController) {
               return const AddDriverBottomSheet();
-          }
-        );
+            });
       },
     );
   }

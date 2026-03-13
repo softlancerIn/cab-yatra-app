@@ -5,7 +5,8 @@ class CustomShimmerContainer extends StatelessWidget {
   final double width;
   final double height;
 
-  CustomShimmerContainer({super.key,required this.height,required this.width});
+  const CustomShimmerContainer(
+      {super.key, required this.height, required this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class CustomShimmerContainer extends StatelessWidget {
       // Highlight shimmer color
       direction: ShimmerDirection.ltr,
       // Shimmer direction (left to right)
-      period: Duration(seconds: 1),
+      period: const Duration(seconds: 1),
       // Shimmer speed
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -30,6 +31,5 @@ class CustomShimmerContainer extends StatelessWidget {
         ),
       ),
     );
-    ;
   }
 }

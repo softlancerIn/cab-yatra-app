@@ -101,13 +101,15 @@ class _TransectionScreenState extends State<TransectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(
+      appBar: const AppBAR(
         title: "Transections",
         showLeading: true,
         showAction: false,
       ),
-      body: BlocBuilder<TransectionsBloc, TransectionsState>(builder: (context, state) {
-        if (state.getTransectionModel == null || state.getTransectionModel!.data == null) {
+      body: BlocBuilder<TransectionsBloc, TransectionsState>(
+          builder: (context, state) {
+        if (state.getTransectionModel == null ||
+            state.getTransectionModel!.data == null) {
           if (state.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -116,7 +118,8 @@ class _TransectionScreenState extends State<TransectionScreen> {
 
         if (state.getTransectionModel!.data!.isEmpty) {
           return const Center(
-              child: Text("No Data Found", style: TextStyle(fontFamily: 'Poppins')));
+              child: Text("No Data Found",
+                  style: TextStyle(fontFamily: 'Poppins')));
         }
 
         return ListView.builder(
@@ -209,7 +212,8 @@ class _TransectionScreenState extends State<TransectionScreen> {
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
                                 color: getStatusBg(status),
                                 borderRadius: BorderRadius.circular(20),
@@ -229,15 +233,19 @@ class _TransectionScreenState extends State<TransectionScreen> {
 
                         const SizedBox(height: 10),
 
-                        _rowText("Booking Amount:", "₹${transection.bookingAmount}"),
-                        _rowText("Commission Paid by Driver:", "₹${transection.commission}"),
-                        _rowText("Platform Charges:", "₹${transection.plateformCharge}"),
+                        _rowText(
+                            "Booking Amount:", "₹${transection.bookingAmount}"),
+                        _rowText("Commission Paid by Driver:",
+                            "₹${transection.commission}"),
+                        _rowText("Platform Charges:",
+                            "₹${transection.plateformCharge}"),
 
                         const SizedBox(height: 4),
                         const Divider(height: 1, thickness: 0.5),
                         const SizedBox(height: 6),
 
-                        _rowText("Your Earning:", "₹${transection.driverEarning}",
+                        _rowText(
+                            "Your Earning:", "₹${transection.driverEarning}",
                             isBold: true, valueColor: Colors.black),
                       ],
                     ),
@@ -251,7 +259,8 @@ class _TransectionScreenState extends State<TransectionScreen> {
     );
   }
 
-  Widget _rowText(String title, String value, {bool isBold = false, Color? valueColor}) {
+  Widget _rowText(String title, String value,
+      {bool isBold = false, Color? valueColor}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
@@ -279,4 +288,4 @@ class _TransectionScreenState extends State<TransectionScreen> {
       ),
     );
   }
-}
+}

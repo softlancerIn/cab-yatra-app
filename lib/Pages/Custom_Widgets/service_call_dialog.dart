@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../cores/utils/helperFunctions.dart';
 
 class ServiceCallDialog extends StatelessWidget {
+  const ServiceCallDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

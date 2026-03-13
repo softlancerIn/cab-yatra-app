@@ -17,11 +17,9 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   }
 
   Future<void> _onRegisterSubmitted(
-      RegisterSummitedEvent event,
+    RegisterSummitedEvent event,
     Emitter<RegisterState> emit,
   ) async {
-
-
     emit(state.copyWith(isLoading: true));
 
     try {
@@ -30,21 +28,18 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         name: event.name,
         city: event.city,
         otp: event.otp,
-
         context: event.context,
       );
-      if (response != null && response.status == true) {
+      if (response.status == true) {
         emit(
           state.copyWith(
-            errorMessage:response.message??  "Driver account created successfully!",
+            errorMessage:
+                response.message ?? "Driver account created successfully!",
             isLoading: false,
             isSuccess: true,
-
           ),
         );
-        Nav.go(event.context,Routes.login);
-
-
+        Nav.go(event.context, Routes.login);
       } else {
         emit(
           state.copyWith(

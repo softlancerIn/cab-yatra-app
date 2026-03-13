@@ -10,7 +10,7 @@ import '../Review/reviewSectionNew.dart';
 import 'dashboard/ui/homepage.dart';
 
 class MainHomeController extends StatefulWidget {
-  const MainHomeController({Key? key}) : super(key: key);
+  const MainHomeController({super.key});
 
   @override
   _MainHomeControllerState createState() => _MainHomeControllerState();
@@ -63,16 +63,24 @@ class _MainHomeControllerState extends State<MainHomeController> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Exit App', style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
-        content: const Text('Do you really want to exit the app?', style: TextStyle(fontFamily: 'Poppins')),
+        title: const Text('Exit App',
+            style:
+                TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
+        content: const Text('Do you really want to exit the app?',
+            style: TextStyle(fontFamily: 'Poppins')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('No', style: TextStyle(color: Colors.grey, fontFamily: 'Poppins')),
+            child: const Text('No',
+                style: TextStyle(color: Colors.grey, fontFamily: 'Poppins')),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Yes', style: TextStyle(color: Color(0xFFFFB300), fontWeight: FontWeight.bold, fontFamily: 'Poppins')),
+            child: const Text('Yes',
+                style: TextStyle(
+                    color: Color(0xFFFFB300),
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins')),
           ),
         ],
       ),
@@ -85,7 +93,7 @@ class _MainHomeControllerState extends State<MainHomeController> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        
+
         if (_currentIndex != 0) {
           // If not on Home tab, redirect to Home tab
           setState(() {
