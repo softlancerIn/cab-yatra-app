@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../Custom_Widgets/custom_app_bar.dart';
 import '../bloc/vehicle_bloc.dart';
 import '../bloc/vehicle_event.dart';
 import '../bloc/vehicle_state.dart';
@@ -23,27 +24,10 @@ class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Mange Vehicle",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 0.5, color: Colors.grey.shade200),
-        ),
+      appBar: const AppBAR(
+        title: "Manage Vehicle",
+        showLeading: true,
+        showAction: false,
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.orange,

@@ -11,6 +11,7 @@ import 'bloc/personal_info_bloc.dart';
 import 'bloc/personal_info_event.dart';
 import 'bloc/personal_info_state.dart';
 import '../../cores/services/secure_storage_service.dart';
+import '../Custom_Widgets/service_call_dialog.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
@@ -167,7 +168,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   LogOutButton(title: 'Logout',image: 'assets/images/logoutIcon.png',onTap: (){
                     showLogoutDialog(context);
                   }),
-                  LogOutButton(title: 'Help',image: 'assets/images/helpIcon.png',onTap: (){}),
+                  LogOutButton(title: 'Help',image: 'assets/images/helpIcon.png',onTap: (){
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => ServiceCallDialog(),
+                    );
+                  }),
                 ],
               ),
               SizedBox(height: 10,),
@@ -249,6 +255,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               onTap: (){
                                 Nav.push(context, Routes.reviewScreen);
                               },
+                              behavior: HitTestBehavior.opaque,
                               child: Row(
                                 children: [
                                   Text(
@@ -379,16 +386,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }){
     return GestureDetector(
       onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
             Image.asset(image,width: 20,height: 20,fit: BoxFit.cover,),
-            SizedBox(width: 8,),
-            Text(title,style: TextStyle(fontSize: 13,fontWeight: FontWeight.w500,color: Color(0xff787878)),),
-            Spacer(),
-            Icon(Icons.arrow_forward_ios,size: 18,color: Color(0xFFFCB117),),
-            SizedBox(width: 10,),
+            SizedBox(width: 12,),
+            Expanded(child: Text(title,style: TextStyle(fontSize: 14,fontWeight: FontWeight.w500,color: Color(0xff4B4B4B)),)),
+            Icon(Icons.arrow_forward_ios,size: 16,color: Color(0xFFFCB117),),
+            SizedBox(width: 5,),
           ],
         ),
       ),

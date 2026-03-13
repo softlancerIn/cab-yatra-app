@@ -81,8 +81,24 @@ class _MainHomeControllerState extends State<MainHomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        
+        if (_currentIndex != 0) {
+          // If not on Home tab, redirect to Home tab
+          setState(() {
+            _currentIndex = 0;
+          });
+        } else {
+          // If already on Home tab, show exit confirmation
+          final bool? exit = await _showExitDialog(context);
+          if (exit == true) {
+            SystemNavigator.pop();
+          }
+        }
+      },
       child: Scaffold(
         body: IndexedStack(
           index: _currentIndex,

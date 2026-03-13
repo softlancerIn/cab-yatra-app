@@ -90,14 +90,21 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Column(
-      children: [
-        SizedBox(height: screenHeight * 0.02),
-        Container(
-          height: screenHeight * 0.08,
-          color: Colors.white,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 4,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Container(
+          height: 60,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
@@ -139,7 +146,7 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

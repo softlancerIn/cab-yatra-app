@@ -49,9 +49,16 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
         ),
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            // color: Color.fromRGBO(0, 0, 0, 1),
-              color: Colors.white),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
         ),
         centerTitle: true,
         title: const Text(

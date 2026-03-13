@@ -274,6 +274,20 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Private Chat (Pusher)'),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
