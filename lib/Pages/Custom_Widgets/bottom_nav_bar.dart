@@ -13,42 +13,37 @@ class CustomBottomNavBar extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
       onTap: onTap,
+      selectedItemColor: const Color(0xFFFFB900),
+      unselectedItemColor: const Color(0xFF5A6980),
+      showUnselectedLabels: true,
+      selectedFontSize: 12,
+      unselectedFontSize: 12,
       items: [
         const BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home, size: 28),
           label: 'Home',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.car_rental),
+          icon: Icon(Icons.car_rental, size: 28),
           label: 'Posted Booking',
         ),
         BottomNavigationBarItem(
-          icon: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF5A6980), width: 4),
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.add_circle,
-                size: 40,
-              ),
-            ),
+          icon: const Icon(
+            Icons.add_circle,
+            size: 48,
+            color: Color(0xFFFFB900),
           ),
           label: '',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.chat),
+          icon: Icon(Icons.chat, size: 28),
           label: 'Chat',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.person, size: 28),
           label: 'Profile',
         ),
       ],
-      selectedItemColor: const Color(0xFFFFB900),
-      unselectedItemColor: const Color(0xFF5A6980),
-      showUnselectedLabels: true,
     );
   }
 }

@@ -2,6 +2,7 @@
 import 'package:cab_taxi_app/widget/customTextField.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -137,10 +138,9 @@ class _AddBookingOneWayScreenViewState
                   //  const SizedBox(height: 16),
 
                   // ── Pickup & Drop (single field for now) ────────────────────
-                  CommonTextFormField(
+                  LocationAutocompleteField(
                     controller: _pickupCtrl,
-                    hintText:  "Pickup Location",
-
+                    hint: "Pickup Location",
                   ),
                   // containerShadow(
                   //   child: _buildTextField(
@@ -150,10 +150,9 @@ class _AddBookingOneWayScreenViewState
                   //   ),
                   // ),
                   const SizedBox(height: 16),
-                  CommonTextFormField(
+                  LocationAutocompleteField(
                     controller: _dropCtrl,
-                    hintText:  "Drop Location",
-
+                    hint: "Drop Location",
                   ),
                   // containerShadow(
                   //   child: _buildTextField(

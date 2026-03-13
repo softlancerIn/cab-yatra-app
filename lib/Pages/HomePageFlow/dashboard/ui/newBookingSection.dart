@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
 import '../../custom/customSearchBar.dart';
-import '../bloc/dashboard_bloc.dart';
-import '../bloc/dashboard_state.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 import 'sliderWidget.dart';
+
 class NewBookingSection extends StatefulWidget {
   const NewBookingSection({super.key});
 
@@ -18,7 +15,6 @@ class NewBookingSection extends StatefulWidget {
 }
 
 class _NewBookingSectionState extends State<NewBookingSection> {
-  TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -43,7 +39,40 @@ class _NewBookingSectionState extends State<NewBookingSection> {
 
             }
 
-            final newBooking=state.homeDataResponseModel!.newBooking.data;
+            final allBookings = state.homeDataResponseModel!.newBooking.data;
+
+            final newBooking = allBookings.where((booking) {
+              final query = state.searchQuery.trim().toLowerCase();
+              final queryWords = query.split(' ').where((word) => word.isNotEmpty).toList();
+
+              bool matchesSearch = true;
+              if (queryWords.isNotEmpty) {
+                matchesSearch = queryWords.every((word) {
+                  return booking.bookingId.toLowerCase().contains(word) ||
+                      booking.pickupLocation.toLowerCase().contains(word) ||
+                      booking.destinationLocation.toLowerCase().contains(word);
+                });
+              }
+
+              final matchesVehicle = state.selectedVehicleType == null ||
+                  booking.carCategoryName.toLowerCase() ==
+                      state.selectedVehicleType!.toLowerCase();
+
+              final matchesPickup = state.pickupLocationFilter == null ||
+                  booking.pickupLocation
+                      .toLowerCase()
+                      .contains(state.pickupLocationFilter!.toLowerCase());
+
+              final matchesDrop = state.dropLocationFilter == null ||
+                  booking.destinationLocation
+                      .toLowerCase()
+                      .contains(state.dropLocationFilter!.toLowerCase());
+
+              return matchesSearch &&
+                  matchesVehicle &&
+                  matchesPickup &&
+                  matchesDrop;
+            }).toList();
 
 
             return SingleChildScrollView(
@@ -53,49 +82,25 @@ class _NewBookingSectionState extends State<NewBookingSection> {
             //     : Column(
             child: Column(
               children: [
-                SizedBox(
-                  height: 5,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: CustomSearchBar(
-                            controller: searchController,
-                            onSearch: () {},
-                          )),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      GestureDetector(
-                        onTap: (){
-                          Nav.push(context,Routes.applyFilter);
-                        },
-                        child: Container(
-                            height: 50,
-                            padding: const EdgeInsets.all(12),
-                            clipBehavior: Clip.antiAlias,
-                            //     clipBehavior: Clip.antiAlias,
-                            decoration: ShapeDecoration(
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(width: 0.50),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: Image.asset(
-                              "assets/images/seetingFilter.png",
-                              scale: 3,
-                            )),
-                      )
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12.0),
                   child: SliderWidget(),
                 ),
+                if (newBooking.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 40.0),
+                    child: Center(
+                      child: Text(
+                        "No bookings found",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                else
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -105,364 +110,193 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                       // var newBookingData = controller
                       //     .homeData.value.newBooking!.data![index];
                       return GestureDetector(
-                        onTap: () async {
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
-
-
-                          //Fluttertoast.showToast(
-                          //   msg: 'Please add the Account Details!',
-                          //   gravity: ToastGravity.CENTER,
-                          //   backgroundColor: Colors.red,
-                          //   textColor: Colors.white,
-                          // );
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookingDetailScreen(
+                                bookingID: newBooking[index].id,
+                              ),
+                            ),
+                          );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                clipBehavior: Clip.antiAlias,
-                                decoration: ShapeDecoration(
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                  shadows: [
-                                    BoxShadow(
-                                      color: Color(0x3F000000),
-                                      blurRadius: 2,
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
-                                    )
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 7, left: 7, right: 7),
-                                      child: Row(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          child: Container(
+                            clipBehavior: Clip.antiAlias,
+                            decoration: ShapeDecoration(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(color: Colors.grey.shade300, width: 0.5),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              shadows: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /// HEADER: ID, Date, Trip Type
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text('ID : ${newBooking[index].bookingId}',
-                                              style: const TextStyle(
-                                                  fontSize: 12, fontWeight: FontWeight.w500)),
-                                          // Text('654',
-                                          //     style: const TextStyle(
-                                          //         fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffFCB117))),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: size.height * 0.005),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 7, right: 7),
-                                      child: Row(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              InkWell(
-                                                child: Text(
-                                                  newBooking[index].pickupDate,
-                                                  style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500),
+                                          RichText(
+                                            text: TextSpan(
+                                              style: const TextStyle(fontSize: 12, fontFamily: 'Poppins'),
+                                              children: [
+                                                const TextSpan(
+                                                  text: 'ID : ',
+                                                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.normal),
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "@ ",
-                                                style: const TextStyle(
-                                                    fontSize: 12, fontWeight: FontWeight.w500),
-                                              ),
-                                              InkWell(
-                                                // onTap: () => _selectTime(context), // Pick the time
-                                                child: Text(
-                                                  newBooking[index].pickupTime,
-                                                  //data.pickUpTime.toString(),
-                                                  // selectedTime != null
-                                                  //     ? selectedTime!.format(context)
-                                                  //     : TimeOfDay.now().format(context),
-                                                  style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffF45858)),
+                                                TextSpan(
+                                                  text: newBooking[index].bookingId,
+                                                  style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                              newBooking[index].bookingType,
-                                              //'One Way Trip',
-                                              style: const TextStyle(
-                                                  fontSize: 14, fontWeight: FontWeight.bold)),
-                                        ],
-                                      ),
-                                    ),
-                                    const Divider(
-                                        thickness: 1, color: Color.fromRGBO(0, 0, 0, 0.2)),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 7, right: 7),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              SizedBox(
-                                                width: size.width * 0.87,
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-
-                                                    Row(
-                                                      mainAxisSize: MainAxisSize.min,
-                                                      children: [
-                                                        Container(
-                                                          width: size.width * 0.035,
-                                                          height: size.height * 0.017,
-                                                          decoration: BoxDecoration(
-                                                            color: const Color.fromRGBO(
-                                                                212, 119, 22, 1),
-                                                            borderRadius:
-                                                            BorderRadius.circular(30),
-                                                          ),
-                                                        ),
-                                                        SizedBox(width: size.width * 0.02),
-                                                        SizedBox(
-                                                          width: size.width * 0.6,
-                                                          child: Text(
-                                                            newBooking[index].pickupLocation,
-                                                            maxLines: 1,
-                                                            style: TextStyle(
-                                                              fontSize: size.width * 0.035,
-                                                              fontFamily: 'Poppins',
-                                                              fontWeight: FontWeight.w600,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-
-                                                    const Spacer(),
-                                                    Icon(Icons.arrow_forward_ios_sharp)
-
-
-                                                  ],
-                                                ),
-                                              ),
-
-                                              //  if (data.typeLabel != 'Local')
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  //  if (dropCities.length == 1)
-                                                  Row(
-                                                    mainAxisSize: MainAxisSize.min,
-                                                    children: [
-                                                      Container(
-                                                        width: size.width * 0.035,
-                                                        height: size.height * 0.017,
-                                                        decoration: BoxDecoration(
-                                                          color: Color(0xFFC51C1C),
-                                                          borderRadius:
-                                                          BorderRadius.circular(30),
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: size.width * 0.02),
-                                                      SizedBox(
-                                                        width: size.width * 0.6,
-                                                        child: Text(
-                                                          newBooking[index].destinationLocation,
-                                                          maxLines: 1,
-                                                          style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontFamily: 'Poppins',
-                                                            fontWeight: FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-
-
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    //  if (data.destination_date!.isNotEmpty)
-
-                                   // SizedBox(height: 10,),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
-                                      child: Row(
-                                        children: [
-                                          Image.network(newBooking[index].carImage,scale: 4,errorBuilder: (context, error, stackTrace) {
-                                            return Image.asset("assets/images/carMO.png",scale: 4,);
-                                          },),
-                                        //  Image.asset("assets/images/carMO.png",scale: 4,),
-                                          SizedBox(width: 5,),
-                                          Text(
-                                            newBooking[index].carCategoryName,
-                                            style: TextStyle(
-                                              color: Colors.black.withValues(alpha: 0.50),
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'Extra Requirement : ',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
+                                              ],
                                             ),
                                           ),
-                                          SizedBox(
-                                            width: 200,
-                                            child: Text(
-                                              newBooking[index].remark??"N/A",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: const Color(0xFFF45858),
-                                                fontSize: 11,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          Text(
+                                            newBooking[index].bookingType,
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xFF3E4959),
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    SizedBox(height: 3,),
-                                    Padding(
-                                      padding: const EdgeInsets.all(7),
-                                      child: Container(
-                                        width: size.width *
-                                            0.9, // Adjust the container width as needed
-                                        height: size.height *
-                                            0.08, // Adjust the container height as needed
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                              color: Colors.white,
-                                              width: 2), // Outer border for entire container
-                                        ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.stretch, // Ensure equal height
+                                      const SizedBox(height: 4),
+                                      RichText(
+                                        text: TextSpan(
+                                          style: const TextStyle(fontSize: 12, fontFamily: 'Poppins', color: Colors.black),
                                           children: [
-                                            // First part
-                                            Expanded(
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: ShapeDecoration(
-                                                  color: const Color(0xADEFEFEF),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                ),
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      "₹${newBooking[index].totalFare}",
-                                                      style: TextStyle(
-                                                          fontSize: size.width * 0.035,
-                                                          fontWeight: FontWeight.w500),
-                                                    ),
-                                                    SizedBox(height: size.height * 0.01),
-                                                    Text(
-                                                      // data.carCategory?.parking ?? "",
-                                                     "Total Amount",
-                                                      style: const TextStyle(
-                                                          fontSize: 10,
-                                                          fontWeight: FontWeight.w400),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-
-                                            // Second part
-                                            Expanded(
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: ShapeDecoration(
-                                                  color: const Color(0xADEFEFEF),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                ),
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      "₹${newBooking[index].driverCommission}",
-                                                      style: TextStyle(
-                                                          fontSize: size.width * 0.035,
-                                                          fontWeight: FontWeight.w500),
-                                                    ),
-                                                    SizedBox(height: size.height * 0.01),
-                                                    Text(
-                                                      "Driver’s Earning",
-                                                      //data.toll ?? "",
-                                                      style: const TextStyle(
-                                                          fontSize: 10,
-                                                          fontWeight: FontWeight.w400),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 5,),
-
-                                            // Third part
-                                            Expanded(
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: ShapeDecoration(
-                                                  color: const Color(0xADEFEFEF),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                ),
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      "₹${newBooking[index].driverCommission}",
-                                                      style: TextStyle(
-                                                          fontSize: size.width * 0.035,
-                                                          fontWeight: FontWeight.w500),
-                                                    ),
-                                                    SizedBox(height: size.height * 0.01),
-                                                    Text(
-                                                      "Commission",
-                                                      //data.tax ?? "",
-                                                      style: const TextStyle(
-                                                          fontSize: 10,
-                                                          fontWeight: FontWeight.w400),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                            TextSpan(text: '${newBooking[index].pickupDate} '),
+                                            const TextSpan(text: '@', style: TextStyle(color: Colors.black)),
+                                            TextSpan(
+                                              text: newBooking[index].pickupTime,
+                                              style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
-
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                const Divider(height: 1, thickness: 0.5, color: Colors.grey),
+
+                                /// ROUTE: Pickup & Drop with Dotted Line
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          const Icon(Icons.circle, size: 14, color: Colors.orange),
+                                          Container(
+                                            width: 1,
+                                            height: 30,
+                                            child: CustomPaint(painter: DashLinePainter()),
+                                          ),
+                                          const Icon(Icons.circle, size: 14, color: Color(0xFFC51C1C)),
+                                        ],
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              newBooking[index].pickupLocation,
+                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                            ),
+                                            const SizedBox(height: 28),
+                                            Text(
+                                              newBooking[index].destinationLocation,
+                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 20),
+                                          child: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                /// VEHICLE INFO
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      Image.network(
+                                        newBooking[index].carImage,
+                                        height: 30,
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            Image.asset("assets/images/carMO.png", height: 30),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          newBooking[index].carCategoryName,
+                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                /// EXTRA REQUIREMENTS / NOTES
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(fontSize: 11, fontFamily: 'Poppins'),
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Extra Requirement: ',
+                                          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: newBooking[index].remark ?? "N/A",
+                                          style: const TextStyle(color: Color(0xFFF45858), fontWeight: FontWeight.w500),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                /// PRICE BOXES
+                                Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      _priceBox("₹${newBooking[index].totalFare}", "Total Amount"),
+                                      const SizedBox(width: 8),
+                                      _priceBox("₹${newBooking[index].driverCommission}", "Driver's Earning", isEarning: true),
+                                      const SizedBox(width: 8),
+                                      _priceBox("₹${newBooking[index].driverCommission}", "Commission"),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -470,10 +304,54 @@ class _NewBookingSectionState extends State<NewBookingSection> {
               ],
             ),
           );
-        }
-      ),
+        }),
     );
   }
 
+  Widget _priceBox(String amount, String label, {bool isEarning = false}) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          children: [
+            Text(
+              amount,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: isEarning ? const Color(0xFFF45858) : Colors.black,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 9, color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
+class DashLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashHeight = 3, dashSpace = 3, startY = 0;
+    final paint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 1;
+    while (startY < size.height) {
+      canvas.drawLine(Offset(0, startY), Offset(0, startY + dashHeight), paint);
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

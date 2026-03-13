@@ -1,19 +1,15 @@
 
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../app/router/navigation/routes.dart';
-
 import '../HomePageFlow/custom/customSearchBar.dart';
-
 import '../bookingDetails/ui/bookingDetailScreen.dart';
 import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
+import '../HomePageFlow/custom/apply_filter_dialog.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -24,694 +20,443 @@ class BookingPage extends StatefulWidget {
 
 class _BookingPageState extends State<BookingPage> {
   TextEditingController searchController = TextEditingController();
-  // final MyBookingController controller = Get.put(MyBookingController());
-  // final HomeController homeController = Get.put(HomeController());
-
 
   @override
   void initState() {
     super.initState();
     context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
-
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    //controller.getMyBookingData();
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBAR(title: "Posted Booking",showLeading: false,showAction: false,),
-      body: RefreshIndicator(
-        onRefresh: ()async {
-          //await controller.getMyBookingData();
-        },
-        child: BlocBuilder<BookingBloc,BookingState>(
-            builder: (context,state) {
-              if(state.isLoading){
-                return SizedBox(
-                    height: size.height,
-                    width: size.width,
-                    child: Center(child: const CircularProgressIndicator()));
+      appBar: AppBAR(title: "Posted Booking", showLeading: false, showAction: false,),
+      body: BlocBuilder<BookingBloc, BookingState>(
+        builder: (context, state) {
+          if (state.isLoading) {
+            return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
+          if (state.postedBookingModel == null) {
+            return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
 
-              }
-              if(state.postedBookingModel==null){
-                return SizedBox(
-                    height: size.height,
-                    width: size.width,
-                    child: Center(child: const CircularProgressIndicator()));
+          final allBookings = state.postedBookingModel!.data ?? [];
+          final newBooking = allBookings.where((booking) {
+            final query = state.searchQuery.toLowerCase().trim();
+            return query.isEmpty ||
+                (booking.orderId?.toLowerCase().contains(query) ?? false) ||
+                (booking.pickUpLoc?.toLowerCase().contains(query) ?? false) ||
+                (booking.destinationLoc?.toLowerCase().contains(query) ?? false);
+          }).toList();
 
-              }
-
-              final newBooking=state.postedBookingModel!.data;
-
-
-              return SingleChildScrollView(
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: CustomSearchBar(
-                            controller: searchController,
-                            onSearch: () {},
-                          )),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      GestureDetector(
-                        onTap: (){
-                          //Nav.push(context,Routes.applyFilter);
-                        },
-                        child: Container(
-                            height: 50,
-                            padding: const EdgeInsets.all(12),
-                            clipBehavior: Clip.antiAlias,
-                            //     clipBehavior: Clip.antiAlias,
-                            decoration: ShapeDecoration(
-                              color: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(width: 0.50),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: CustomSearchBar(
+                        controller: searchController,
+                        onSearch: () {
+                          context.read<BookingBloc>().add(
+                            UpdatePostedBookingSearchQueryEvent(
+                              searchQuery: searchController.text,
                             ),
-                            child: Image.asset(
-                              "assets/images/seetingFilter.png",
-                              scale: 3,
-                            )),
-                      )
-                    ],
-                  ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const ApplyFilterDialog(),
+                        );
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 50,
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.withOpacity(0.3), style: BorderStyle.solid),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.tune,
+                          color: Color(0xffF45858),
+                          size: 28,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                SizedBox(height: 10,),
-
-
-                ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount:newBooking!.length,
+              ),
+              const SizedBox(height: 5),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    itemCount: newBooking.length,
                     itemBuilder: (context, index) {
                       var newBookingData = newBooking[index];
                       return GestureDetector(
-                        onTap: () async {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBookingData.id.toString(),),));
-
-                         // Navigator.push(context, MaterialPageRoute(builder: (context) => BookingDetailScreen(bookingID: newBooking[index].id,),));
-
-
-                          //Fluttertoast.showToast(
-                          //   msg: 'Please add the Account Details!',
-                          //   gravity: ToastGravity.CENTER,
-                          //   backgroundColor: Colors.red,
-                          //   textColor: Colors.white,
-                          // );
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookingDetailScreen(
+                                bookingID: newBookingData.id.toString(),
+                              ),
+                            ),
+                          );
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14,vertical: 8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                clipBehavior: Clip.antiAlias,
-                                decoration: ShapeDecoration(
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                  shadows: [
-                                    BoxShadow(
-                                      color: Color(0x3F000000),
-                                      blurRadius: 2,
-                                      offset: Offset(0, 0),
-                                      spreadRadius: 0,
-                                    )
-                                  ],
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade200),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                )
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /// Header: ID and Status
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'ID : ${newBookingData.orderId} ',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'Poppins',
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                        const TextSpan(
+                                          text: '(Open)',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'Poppins',
+                                            color: Color(0xff45B129),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 7, left: 7, right: 7),
-                                      child: Row(
-                                        children: [
-                                          RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                 TextSpan(
-                                                  text: 'ID : ${newBookingData.orderId}',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                                const TextSpan(
-                                                  text: ' (Open)',
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Color(0xff45B129),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
 
-                                          // Text('654',
-                                          //     style: const TextStyle(
-                                          //         fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffFCB117))),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: size.height * 0.005),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 7, right: 7),
-                                      child: Row(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              InkWell(
-                                                child: Text(
-                                                  newBookingData.pickUpDate.toString(),
-                                                  style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500),
-                                                ),
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "@ ",
-                                                style: const TextStyle(
-                                                    fontSize: 12, fontWeight: FontWeight.w500),
-                                              ),
-                                              InkWell(
-                                                // onTap: () => _selectTime(context), // Pick the time
-                                                child: Text( newBookingData.pickUpTime.toString(),
-                                                  // newBooking[index].pickupTime,
-                                                  //data.pickUpTime.toString(),
-                                                  // selectedTime != null
-                                                  //     ? selectedTime!.format(context)
-                                                  //     : TimeOfDay.now().format(context),
-                                                  style: const TextStyle(
-                                                      fontSize: 12, fontWeight: FontWeight.w500,color: Color(0xffF45858)),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const Spacer(),
-                                          Text(
-                                            //data.subTypeLabel.toString(),
-                                              ' ${newBookingData.subTypeLabel}',
-                                              style: const TextStyle(
-                                                  fontSize: 12, fontWeight: FontWeight.w600)),
-                                        ],
-                                      ),
-                                    ),
-                                    const Divider(
-                                        thickness: 1, color: Color.fromRGBO(0, 0, 0, 0.2)),
-                                    SizedBox(
-                                      width: size.width ,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Container(
-                                                    width: size.width * 0.035,
-                                                    height: size.height * 0.017,
-                                                    decoration: BoxDecoration(
-                                                      color: const Color.fromRGBO(
-                                                          212, 119, 22, 1),
-                                                      borderRadius:
-                                                      BorderRadius.circular(30),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: size.width * 0.02),
-                                                  SizedBox(
-                                                    width: size.width * 0.4,
-                                                    child: Text(
-                                                      newBookingData.pickUpLoc.toString(),
-                                                 //     newBooking[index].pickupLocation,
-                                                      maxLines: 1,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontFamily: 'Poppins',
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                                                                Spacer(),
-
-                                              Container(
-                                                width: 168,
-                                                height: 30,
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: BoxDecoration(),
-                                                child: Stack(
-                                                  children: [
-                                                    Positioned(
-                                                      left: 84,
-                                                      top: 1,
-                                                      child: Container(
-                                                        width: 82,
-                                                        height: 27,
-                                                        clipBehavior: Clip.antiAlias,
-                                                        decoration: ShapeDecoration(
-                                                          color: const Color(0xFFFCB117),
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.only(
-                                                              topRight: Radius.circular(2000),
-                                                              bottomRight: Radius.circular(2000),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Stack(
-                                                          children: [
-                                                            Positioned(
-                                                              left: 22,
-                                                              top: 3,
-                                                              child: Text(
-                                                                '₹ ${newBookingData.driverCommission}',
-                                                                style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 12,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Positioned(
-                                                              left: 23,
-                                                              top: 16,
-                                                              child: Text(
-                                                                'Commission',
-                                                                style: TextStyle(
-                                                                  color: Colors.white,
-                                                                  fontSize: 5.50,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    Positioned(
-                                                      left: 1,
-                                                      top: 1,
-                                                      child: Container(
-                                                        width: 82,
-                                                        height: 27,
-                                                        clipBehavior: Clip.antiAlias,
-                                                        decoration: ShapeDecoration(
-                                                          color: const Color(0xFFEFEFEF),
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.only(
-                                                              topLeft: Radius.circular(2000),
-                                                              bottomLeft: Radius.circular(2000),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Stack(
-                                                          children: [
-                                                            Positioned(
-                                                              left: 18,
-                                                              top: 3,
-                                                              child: Text(
-                                                                '₹ ${newBookingData.totalFaire}',
-                                                                style: TextStyle(
-                                                                  color: Colors.black,
-                                                                  fontSize: 12,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            Positioned(
-                                                              left: 22,
-                                                              top: 16,
-                                                              child: Text(
-                                                                'Total Amount',
-                                                                style: TextStyle(
-                                                                  color: Colors.black,
-                                                                  fontSize: 5.50,
-                                                                  fontFamily: 'Poppins',
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-
-
-
-                                                                                       // Icon(Icons.arrow_forward_ios_sharp)
-
-
-                                            ],
-                                          ),
-
-                                          //  if (data.typeLabel != 'Local')
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            children: [
-                                              //  if (dropCities.length == 1)
-                                              Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Container(
-                                                    width: size.width * 0.035,
-                                                    height: size.height * 0.017,
-                                                    decoration: BoxDecoration(
-                                                      color: Color(0xFFC51C1C),
-                                                      borderRadius:
-                                                      BorderRadius.circular(30),
-                                                    ),
-                                                  ),
-                                                  SizedBox(width: size.width * 0.02),
-                                                  SizedBox(
-                                                    width: size.width * 0.6,
-                                                    child: Text( newBookingData.destinationLoc.toString(),
-                                                //      newBooking[index].destinationLocation,
-                                                      maxLines: 1,
-                                                      style: TextStyle(
-                                                        fontSize:12,
-                                                        fontFamily: 'Poppins',
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-
-
-                                            ],
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    //  if (data.destination_date!.isNotEmpty)
-
-                                    // SizedBox(height: 10,),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
-                                      child: Row(
-                                        children: [
-                                          Image.network("car image",scale: 4,errorBuilder: (context, error, stackTrace) {
-                                            return Image.asset("assets/images/carMO.png",scale: 4,);
-                                          },),
-                                          //  Image.asset("assets/images/carMO.png",scale: 4,),
-                                          SizedBox(width: 5,),
-                                          Text(
-                                              newBookingData.carCategory!.name.toString(),
-                                            //newBooking[index].carCategoryName,
-                                            style: TextStyle(
-                                              color: Colors.black.withValues(alpha: 0.50),
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
-                                            ),
-
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 7.0),
-                                      child: Row(
+                                /// Date, Time and Trip Type
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
                                         children: [
                                           Text(
-                                            'Extra Requirement : ',
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 11,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                            '${newBookingData.pickUpDate} ',
+                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
                                           ),
+                                          const Text("@ ", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontFamily: 'Poppins')),
+                                          Text(
+                                            newBookingData.pickUpTime.toString(),
+                                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xffF45858), fontFamily: 'Poppins'),
+                                          ),
+                                        ],
+                                      ),
+                                      Text(
+                                        newBookingData.subTypeLabel ?? "",
+                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Divider(height: 1, thickness: 1, color: Color(0xffF1F1F1)),
+                                ),
+
+                                /// Pickup and Destination with Fares
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          const SizedBox(height: 2),
+                                          const Icon(Icons.circle, size: 14, color: Color(0xffD47716)),
                                           SizedBox(
-                                            width: 200,
-                                            child: Text( newBookingData.remark.toString(),
-                                              //newBooking[index].remark??"N/A",
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                color: const Color(0xFFF45858),
-                                                fontSize: 11,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
+                                            width: 1,
+                                            height: 20,
+                                            child: CustomPaint(painter: DashLinePainter()),
                                           ),
+                                          const Icon(Icons.circle, size: 14, color: Color(0xffC51C1C)),
                                         ],
                                       ),
-                                    ),
-                                    SizedBox(height: 3,),
-                                    Padding(
-                                      padding: const EdgeInsets.all(7),
-                                      child: Container(
-                                        width: size.width *
-                                            0.9, // Adjust the container width as needed
-                                        height: 45, // Adjust the container height as needed
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              newBookingData.pickUpLoc ?? "",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+                                            ),
+                                            const SizedBox(height: 18),
+                                            Text(
+                                              newBookingData.destinationLoc ?? "",
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 10),
+
+                                      /// Commission Box
+                                      Container(
+                                        height: 38,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(
-                                              color: Colors.white,
-                                              width: 2), // Outer border for entire container
+                                          color: const Color(0xffEFEFEF),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
                                         child: Row(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.stretch, // Ensure equal height
                                           children: [
-                                            // First part
-                                            Expanded(
-                                              child: Container(
-                                                clipBehavior: Clip.antiAlias,
-                                                decoration: ShapeDecoration(
-                                                  color: const Color(0xADEFEFEF),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Image.asset("assets/images/chatNew.png",scale: 3,),
-                                                    SizedBox(width: 10),   Text(
-                                                      "Chat",
-                                                      //"₹${newBooking[index].totalFare}",
-                                                      style: TextStyle(
-                                                          fontSize: size.width * 0.035,
-                                                          fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
-                                                    ),
-
-
-                                                  ],
-                                                ),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text('₹ ${newBookingData.totalFaire}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'Poppins')),
+                                                  const Text('Total Faire', style: TextStyle(fontSize: 7, fontFamily: 'Poppins')),
+                                                ],
                                               ),
                                             ),
-                                            SizedBox(width: 5,),
-
-                                            // Second part
-                                            GestureDetector(
-                                              onTap: () {
-                                                Nav.push(
-                                                  context,
-                                                  Routes.editBooking,
-                                                  extra: newBookingData, // 👈 FULL OBJECT PASS
-                                                );
-
-                                                print("Booking Type 🙌 ${newBookingData.subTypeLabel}");
-                                              },
-                                              child: Expanded(
-                                                child: Container(
-                                                  width: 100,
-                                                  clipBehavior: Clip.antiAlias,
-                                                  decoration: ShapeDecoration(
-                                                    color: const Color(0xADEFEFEF),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      Image.asset("assets/images/pencil 1.png",scale: 3,),
-                                                      SizedBox(width: 10,),
-                                                      Text("Edit",
-                                                    //    "₹${newBooking[index].driverCommission}",
-                                                        style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontWeight: FontWeight.w500),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xffFCB117),
+                                                borderRadius: BorderRadius.circular(20),
                                               ),
-                                            ),
-                                            SizedBox(width: 5,),
-
-                                            // Third part
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: (){
-                                                  print("delete CCOUNT");
-                                                  showDialog(context: context, builder: (context) {
-                                                    return    DeleteBookingDialog(bookingId: newBookingData.id.toString(),);
-                                                  },);
-
-                                                },
-                                                child: Container(
-                                                  clipBehavior: Clip.antiAlias,
-                                                  decoration: ShapeDecoration(
-                                                    color: const Color(0xADEFEFEF),
-                                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                                  ),
-                                                  child: Column(
-                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                    children: [
-                                                      Text("Delete",
-                                                       // "₹${newBooking[index].driverCommission}",
-                                                        style: TextStyle(
-                                                            fontSize: size.width * 0.035,
-                                                            fontWeight: FontWeight.w500,color: Color(0xffF45858)),
-                                                      ),
-
-                                                    ],
-                                                  ),
-                                                ),
+                                              alignment: Alignment.center,
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text('₹ ${newBookingData.driverCommission}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'Poppins')),
+                                                  const Text('Commission', style: TextStyle(fontSize: 7, color: Colors.white, fontFamily: 'Poppins')),
+                                                ],
                                               ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
-                                  ///Chat wala section with Icons
-                                    Container(
-                                      clipBehavior: Clip.antiAlias,
-                                      height: 45,
-                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                      decoration: ShapeDecoration(
-                                        color: const Color(0xADEFEFEF),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset("assets/images/chatNew.png",scale: 3,),
-                                          SizedBox(width: 10),   Text(
-                                            "Chat",
-                                            //"₹${newBooking[index].totalFare}",
-                                            style: TextStyle(
-                                                fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500,color: Color(0xffFCB117)),
-                                          ),
-
-
-                                        ],
-                                      ),
-                                    ),
-                                    ///Share with section with Icons
-                                    Container(
-                                      clipBehavior: Clip.antiAlias,
-                                      height: 45,
-                                      margin: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
-                                      decoration: ShapeDecoration(
-                                        color: const Color(0xffFCB117),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-
-                                        Text(
-                                            "Chat",
-                                            //"₹${newBooking[index].totalFare}",
-                                            style: TextStyle(
-                                                fontSize: size.width * 0.035,
-                                                fontWeight: FontWeight.w500,color: Colors.white),
-                                          ),   SizedBox(width: 10),  Image.asset("assets/images/paper-plane 1.png",scale: 3,),
-
-
-                                        ],
-                                      ),
-                                    ),
-
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+
+                                /// Car Detail
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 15, 12, 0),
+                                  child: Row(
+                                    children: [
+                                      Image.network(
+                                        newBookingData.carImage ?? "",
+                                        height: 40,
+                                        width: 65,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) => Image.asset("assets/images/carMO.png", width: 65,),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          (newBookingData.carCategory?.name ?? "SWIFT CELERIO WAGONR ALTO OR SIMILAR").toUpperCase(),
+                                          style: const TextStyle(
+                                            color: Color(0xFF1D1E20),
+                                            fontSize: 12,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+
+                                /// Extra Requirements
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 15),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: 'Extra Requirement : ',
+                                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black, fontFamily: 'Poppins'),
+                                        ),
+                                        TextSpan(
+                                          text: newBookingData.remark ?? "N/A",
+                                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xffF45858), fontFamily: 'Poppins'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                /// Footer Buttons (Chat, Edit, Delete)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: _actionButton(
+                                          icon: "assets/images/chatNew.png",
+                                          label: "Chat",
+                                          color: const Color(0xffFCB117),
+                                          onTap: () {},
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: _actionButton(
+                                          icon: "assets/images/pencil 1.png",
+                                          label: "Edit",
+                                          color: Colors.black,
+                                          onTap: () {
+                                            Nav.push(context, Routes.editBooking, extra: newBookingData);
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: _actionButton(
+                                          label: "Delete",
+                                          color: const Color(0xffF45858),
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => DeleteBookingDialog(bookingId: newBookingData.id.toString()),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                /// Share Button
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 15),
+                                  child: GestureDetector(
+                                    onTap: () {},
+                                    child: Container(
+                                      height: 44,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xffFCB117),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Text("Share", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white, fontFamily: 'Poppins')),
+                                          const SizedBox(width: 10),
+                                          Image.asset("assets/images/paper-plane 1.png", height: 18, color: Colors.white),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
-                    }),
-              ],
-            ),
-                    );
-          }
-        ),
+                    },
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-
-
-  Future<bool?> _showConfirmationDialog(BuildContext context) {
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text('Are you sure?'),
-          content: Text('Do you want to complete the booking?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text('Cancel'),
+  Widget _actionButton({String? icon, required String label, required Color color, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Image.asset(icon, height: 16, color: label == "Chat" ? const Color(0xffFCB117) : null,),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              label,
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color, fontFamily: 'Poppins'),
             ),
-            TextButton(
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color(0xFFFFB900),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: Text('Confirm'),
-            )
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
-//////
+
 class DeleteBookingDialog extends StatelessWidget {
-  var bookingId;
+  final String bookingId;
 
-
-
-
-  DeleteBookingDialog({super.key, required this.bookingId});
-
- // final controller = Get.put(MyBookingController());
+  const DeleteBookingDialog({super.key, required this.bookingId});
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       backgroundColor: Colors.white,
@@ -720,199 +465,70 @@ class DeleteBookingDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Delete Booking ',
+            const Text(
+              'Delete Booking',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: const Color(0xFF3E4959),
-                fontSize: 18,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Color(0xFF3E4959), fontSize: 18, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
             ),
-            Text(
-              'Are you sure you want to delete this booking? ',
-              style: TextStyle(
-                color: const Color(0xFF3E4959),
-                fontSize: 15,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w400,
-              ),
+            const SizedBox(height: 8),
+            const Text(
+              'Are you sure you want to delete this booking?',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF3E4959), fontSize: 14, fontFamily: 'Roboto', fontWeight: FontWeight.w400),
             ),
-            SizedBox(
-              height: screenHeight * 0.02,
-            ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
+                  onTap: () => Navigator.of(context).pop(),
                   child: Container(
-                    width: screenWidth * 0.27,
-                    height: screenHeight * 0.045,
-                    decoration: ShapeDecoration(
-                      color: Color(0xff3E4959),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 2,
-                          color: Color(0xff3E4959),
-                        ),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
+                    width: 100,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: const Color(0xff3E4959)),
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                    child: Center(
-                      child: Text(
-                        'Go back',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    child: const Center(child: Text('Go back', style: TextStyle(color: Color(0xff3E4959)))),
                   ),
                 ),
                 GestureDetector(
                   onTap: () {
-
-                    context.read<BookingBloc>().add(
-                      DeleteBooingEvent(
-                        context: context,
-                        bookingId: bookingId,
-
-                      ),
-                    );
+                    context.read<BookingBloc>().add(DeleteBooingEvent(context: context, bookingId: bookingId));
                     Navigator.of(context).pop();
-                    // controller.deleteBooking(
-                    //     bookingId: bookingId);
                   },
                   child: Container(
-                    width: screenWidth * 0.27,
-                    height: screenHeight * 0.045,
-                    decoration: ShapeDecoration(
+                    width: 100,
+                    height: 40,
+                    decoration: BoxDecoration(
                       color: const Color(0xFFFF0000),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5)),
+                      borderRadius: BorderRadius.circular(5),
                     ),
-                    child: const Center(
-                      child: Text(
-                        'Yes',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
+                    child: const Center(child: Text('Yes', style: TextStyle(color: Colors.white))),
                   ),
                 ),
-
               ],
             ),
           ],
         ),
       ),
-      // child: Obx(() {
-      //   return controller.myBookingLoading.value
-      //       ?  Center(
-      //       child: CustomShimmerContainer(
-      //         width: screenWidth * 0.8,
-      //         height: screenHeight * 0.05,
-      //       ),
-      //   )
-      //       : Padding(
-      //     padding: const EdgeInsets.all(16.0),
-      //     child: Column(
-      //       mainAxisSize: MainAxisSize.min,
-      //       children: [
-      //         const Text(
-      //           'Are you sure you want to Delete Booking',
-      //           textAlign: TextAlign.center,
-      //           style: TextStyle(
-      //             color: Color(0xFFFF0000),
-      //             fontSize: 22,
-      //             fontFamily: 'Poppins',
-      //             fontWeight: FontWeight.w500,
-      //           ),
-      //           softWrap: true,
-      //         ),
-      //         SizedBox(
-      //           height: screenHeight * 0.02,
-      //         ),
-      //         Row(
-      //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      //           children: [
-      //             GestureDetector(
-      //               onTap: () {
-      //                 controller.deleteBooking(
-      //                     bookingId: bookingId);
-      //               },
-      //               child: Container(
-      //                 width: screenWidth * 0.27,
-      //                 height: screenHeight * 0.05,
-      //                 decoration: ShapeDecoration(
-      //                   color: const Color(0xFFFF0000),
-      //                   shape: RoundedRectangleBorder(
-      //                       borderRadius: BorderRadius.circular(5)),
-      //                 ),
-      //                 child: const Center(
-      //                   child: Text(
-      //                     'Yes',
-      //                     style: TextStyle(
-      //                       color: Colors.white,
-      //                       fontSize: 16,
-      //                       fontFamily: 'Poppins',
-      //                       fontWeight: FontWeight.w500,
-      //                     ),
-      //                   ),
-      //                 ),
-      //               ),
-      //             ),
-      //             GestureDetector(
-      //               onTap: () {
-      //                 Navigator.of(context).pop();
-      //               },
-      //               child: Container(
-      //                 width: screenWidth * 0.27,
-      //                 height: screenHeight * 0.05,
-      //                 decoration: ShapeDecoration(
-      //                   shape: RoundedRectangleBorder(
-      //                     side: BorderSide(
-      //                       width: 2,
-      //                       color: Colors.black.withOpacity(0.5),
-      //                     ),
-      //                     borderRadius: BorderRadius.circular(5),
-      //                   ),
-      //                 ),
-      //                 child: Center(
-      //                   child: Text(
-      //                     'No',
-      //                     style: TextStyle(
-      //                       color: Colors.black.withOpacity(0.5),
-      //                       fontSize: 16,
-      //                       fontFamily: 'Poppins',
-      //                       fontWeight: FontWeight.w600,
-      //                     ),
-      //                   ),
-      //                 ),
-      //               ),
-      //             ),
-      //           ],
-      //         ),
-      //       ],
-      //     ),
-      //   );
-      // }),
     );
   }
 }
 
+class DashLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashHeight = 3, dashSpace = 3, startY = 0;
+    final paint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 1;
+    while (startY < size.height) {
+      canvas.drawLine(Offset(0, startY), Offset(0, startY + dashHeight), paint);
+      startY += dashHeight + dashSpace;
+    }
+  }
 
-
-
-
-
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}

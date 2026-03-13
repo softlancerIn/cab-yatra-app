@@ -112,14 +112,6 @@ class CommonTextFormField extends StatelessWidget {
         color: backgroundColor,
         border: Border.all(color: borderColor??Color(0xffDBDBDB)),
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow:   [
-          BoxShadow(
-          color: Color(0x3F000000),
-      blurRadius: 4,
-      offset: Offset(0, 0),
-      spreadRadius: 0,
-    )
-    ],
       ),
       child: TextFormField(
         controller: controller,

@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'ui/addBookingOneWayScreen.dart';
 
 class AddBookingScreen extends StatefulWidget {
-  const AddBookingScreen({super.key});
+  final VoidCallback? onBack;
+  const AddBookingScreen({super.key, this.onBack});
 
   @override
   State<AddBookingScreen> createState() => _AddBookingScreenState();
@@ -36,21 +37,31 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
 
 
         toolbarHeight: 50,
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             // color: Color.fromRGBO(0, 0, 0, 1),
               color: Colors.white),
         ),
-        centerTitle: false,
-        title: Text(
+        centerTitle: true,
+        title: const Text(
           'Add New Booking',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.black,
             fontSize: 16,
             fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
 

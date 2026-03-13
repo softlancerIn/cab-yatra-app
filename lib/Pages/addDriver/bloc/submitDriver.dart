@@ -16,3 +16,8 @@ class PickDLFront extends DriverEvent {}
 class PickDLBack extends DriverEvent {}
 class PickAadharFront extends DriverEvent {}
 class PickAadharBack extends DriverEvent {}
+
+class DeleteDriver extends DriverEvent {
+  final int id;
+  DeleteDriver(this.id);
+}

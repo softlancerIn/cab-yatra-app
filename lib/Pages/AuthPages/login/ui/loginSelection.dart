@@ -20,42 +20,41 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           image: DecorationImage(image: AssetImage("assets/images/loginSelection.png"),fit: BoxFit.fill)
         ),
         child:SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12,vertical: 12),
           child: Column(
             children: [
               SizedBox(height: MediaQuery.of(context).size.height*0.62,),
-              Text(
+              const Text(
                 'Welcome to Cabyatra',
                 style: TextStyle(
-                  color: const Color(0xFF3E4959),
+                  color: Color(0xFF3E4959),
                   fontSize: 20,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.40,
                 ),
               ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   GestureDetector(
                     onTap: (){
                       Nav.push(context,Routes.loginMobile);
-                  //    Get.to(const OtpPage(phone: "324472734734",));
                     },
                     child: Container(
                       width: 150,
-                      height: 38,
+                      height: 35,
                       clipBehavior: Clip.antiAlias,
                       decoration: ShapeDecoration(
                         color: const Color(0xFF3E4959),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Stack(
+                      child: const Stack(
                         children: [
                           Positioned(
                             left: 53,
@@ -77,7 +76,6 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                   GestureDetector(
                     onTap: (){
                       Nav.push(context,Routes.loginRegister);
-                     // Get.to(const NewRegisterScreen());
                     },
                     child: Container(
                       width: 150,
@@ -87,7 +85,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                         color: const Color(0xFFFCB117),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: Stack(
+                      child: const Stack(
                         children: [
                           Positioned(
                             left: 41,
@@ -124,10 +122,10 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: 'Terms of Use',
                         style: TextStyle(
-                          color: const Color(0xFF3E4959),
+                          color: Color(0xFF3E4959),
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
@@ -145,10 +143,10 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: 'Privacy Policy',
                         style: TextStyle(
-                          color: const Color(0xFF3E4959),
+                          color: Color(0xFF3E4959),
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,

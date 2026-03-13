@@ -23,6 +23,7 @@ import '../../Pages/cms/ui/aboutPage.dart';
 import '../../Pages/cms/ui/privacy_policy.dart';
 import '../../Pages/cms/ui/term_condition.dart';
 import '../../Pages/editBooking/edit_new_booking.dart';
+import '../../Pages/manage_vehicles/ui/manage_vehicles_screen.dart';
 import '../../Pages/transection/ui/transectionScreen.dart';
 import 'navigation/routes.dart';
 
@@ -149,14 +150,27 @@ class AppRouter {
       ),
       GoRoute(
         path: Routes.manageDrivers,
-        builder: (_, __) =>  ManageDriversScreen(),
+        builder: (_, __) => const ManageDriversScreen(),
+      ),
+      GoRoute(
+        path: Routes.manageVehicles,
+        builder: (_, __) => const ManageVehiclesScreen(),
       ),GoRoute(
         path: Routes.transection,
         builder: (_, __) =>  TransectionScreen(),
       ),
       GoRoute(
         path: Routes.applyFilter,
-        builder: (_, __) =>  ApplyFilterDialog(),
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ApplyFilterDialog(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          opaque: false,
+          barrierColor: Colors.black.withOpacity(0.5),
+          barrierDismissible: true,
+        ),
       ),
       GoRoute(
       path: Routes.aboutus,

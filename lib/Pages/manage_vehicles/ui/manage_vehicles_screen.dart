@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/vehicle_bloc.dart';
+import '../bloc/vehicle_event.dart';
+import '../bloc/vehicle_state.dart';
+import 'add_vehicle_bottom_sheet.dart';
 
-import '../../Custom_Widgets/custom_app_bar.dart';
-import '../bloc/driverBloc.dart';
-import '../bloc/driverState.dart';
-import '../bloc/submitDriver.dart';
-import 'addDriverScreen.dart';
-
-class ManageDriversScreen extends StatefulWidget {
-  const ManageDriversScreen({super.key});
+class ManageVehiclesScreen extends StatefulWidget {
+  const ManageVehiclesScreen({super.key});
 
   @override
-  State<ManageDriversScreen> createState() => _ManageDriversScreenState();
+  State<ManageVehiclesScreen> createState() => _ManageVehiclesScreenState();
 }
 
-class _ManageDriversScreenState extends State<ManageDriversScreen> {
+class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    context.read<DriverBloc>().add(LoadDrivers());
+    context.read<VehicleBloc>().add(LoadVehicles());
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +32,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          "Mange Drivers",
+          "Mange Vehicle",
           style: TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -51,25 +49,25 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         backgroundColor: Colors.orange,
         shape: const CircleBorder(),
         onPressed: () {
-          _openAddDriverBottomSheet(context);
+          _openAddVehicleBottomSheet(context);
         },
         child: const Icon(Icons.add, color: Colors.white, size: 35),
       ),
-      body: BlocBuilder<DriverBloc, DriverState>(
+      body: BlocBuilder<VehicleBloc, VehicleState>(
         builder: (context, state) {
-          if (state.loading) {
+          if (state.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (state.drivers.isEmpty) {
-            return const Center(child: Text("No drivers added yet."));
+          if (state.vehicles.isEmpty) {
+            return const Center(child: Text("No vehicles added yet."));
           }
 
           return ListView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: state.drivers.length,
+            itemCount: state.vehicles.length,
             itemBuilder: (context, index) {
-              final driver = state.drivers[index];
+              final vehicle = state.vehicles[index];
 
               return Column(
                 children: [
@@ -77,15 +75,23 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 35,
-                          backgroundColor: Colors.grey.shade200,
-                          backgroundImage: (driver.image != null && driver.image!.isNotEmpty)
-                              ? NetworkImage(driver.image!)
-                              : null,
-                          child: (driver.image == null || driver.image!.isEmpty)
-                              ? const Icon(Icons.person, size: 35, color: Colors.grey)
-                              : null,
+                        Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.black, width: 1),
+                          ),
+                          child: Center(
+                            child: (vehicle.image != null && vehicle.image!.isNotEmpty)
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(35),
+                                    child: Image.network(vehicle.image!,
+                                        fit: BoxFit.contain, width: 50, height: 50),
+                                  )
+                                : Image.asset('assets/images/manageVahical.png', width: 40),
+                          ),
                         ),
                         const SizedBox(width: 15),
                         Expanded(
@@ -93,16 +99,16 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                driver.name,
+                                vehicle.vehicleType,
                                 style: const TextStyle(
                                   fontSize: 17,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                   fontFamily: 'Poppins',
                                   color: Color(0xFF333333),
                                 ),
                               ),
                               Text(
-                                driver.city,
+                                vehicle.vehicleNumber,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade500,
@@ -110,7 +116,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                                 ),
                               ),
                               Text(
-                                driver.phone,
+                                vehicle.vehicleYear,
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade500,
@@ -122,7 +128,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            _showDeleteConfirmation(context, driver.id, driver.name);
+                            _showDeleteConfirmation(context, vehicle.id, vehicle.vehicleType);
                           },
                           child: Container(
                             decoration: const BoxDecoration(
@@ -148,12 +154,13 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, int id, String name) {
+  void _showDeleteConfirmation(BuildContext context, int id, String type) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Driver", style: TextStyle(fontFamily: 'Poppins')),
-        content: Text("Are you sure you want to remove $name?", style: const TextStyle(fontFamily: 'Poppins')),
+        title: const Text("Delete Vehicle", style: TextStyle(fontFamily: 'Poppins')),
+        content: Text("Are you sure you want to remove this $type?",
+            style: const TextStyle(fontFamily: 'Poppins')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -161,7 +168,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
           ),
           TextButton(
             onPressed: () {
-              context.read<DriverBloc>().add(DeleteDriver(id));
+              context.read<VehicleBloc>().add(DeleteVehicle(id));
               Navigator.pop(context);
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red, fontFamily: 'Poppins')),
@@ -171,22 +178,20 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     );
   }
 
-  void _openAddDriverBottomSheet(BuildContext context) {
+  void _openAddVehicleBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-
       builder: (_) {
         return DraggableScrollableSheet(
-            initialChildSize: 0.9, // 👈 70% se start
+            initialChildSize: 0.8,
             minChildSize: 0.4,
             maxChildSize: 0.95,
             expand: false,
             builder: (context, scrollController) {
-              return const AddDriverBottomSheet();
-          }
-        );
+              return const AddVehicleBottomSheet();
+            });
       },
     );
   }

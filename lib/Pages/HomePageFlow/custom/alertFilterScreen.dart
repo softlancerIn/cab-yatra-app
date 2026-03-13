@@ -8,9 +8,16 @@ class AlertFilterScreen extends StatefulWidget {
 }
 
 class _AlertFilterScreenState extends State<AlertFilterScreen> {
-  List<String> selectedVehicles = ['Sedan', 'SUV'];
+  List<String> selectedVehicles = [];
   bool manualPickup = true;
-  String pickupCity = 'Vrindavan';
+  List<String> pickupCities = [];
+  final TextEditingController cityController = TextEditingController();
+
+  @override
+  void dispose() {
+    cityController.dispose();
+    super.dispose();
+  }
 
   void toggleVehicle(String type) {
     setState(() {
@@ -128,26 +135,34 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
             /// CONDITIONAL UI (SECOND IMAGE LOGIC)
             if (manualPickup) ...[
               Wrap(
-                children: [
-                  Chip(
+                spacing: 8,
+                children: pickupCities.map((city) {
+                  return Chip(
                     backgroundColor: Colors.orange,
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          pickupCity,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(Icons.close,
-                            size: 16, color: Colors.white)
-                      ],
+                    label: Text(
+                      city,
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  )
-                ],
+                    onDeleted: () {
+                      setState(() {
+                        pickupCities.remove(city);
+                      });
+                    },
+                    deleteIcon: const Icon(Icons.close, size: 18, color: Colors.white),
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 14),
               TextField(
+                controller: cityController,
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    setState(() {
+                      pickupCities.add(value.trim());
+                      cityController.clear();
+                    });
+                  }
+                },
                 decoration: InputDecoration(
                   hintText: 'Select Your Pickup City',
                   filled: true,
@@ -173,9 +188,9 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
         child: Row(
           children: [
             Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xff3E4959),
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xff3E4959)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -183,10 +198,11 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                 onPressed: () {
                   setState(() {
                     selectedVehicles.clear();
+                    pickupCities.clear();
                     manualPickup = false;
                   });
                 },
-                child: const Text('Clear Filter',style: TextStyle(color: Colors.white),),
+                child: const Text('Clear Filter',style: TextStyle(color: Color(0xff3E4959)),),
               ),
             ),
             const SizedBox(width: 12),
@@ -198,7 +214,9 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context);
+                },
                 child: const Text('Done',style: TextStyle(color: Colors.white),),
               ),
             ),

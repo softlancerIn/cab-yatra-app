@@ -2,8 +2,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../repo/dashboardRepo.dart';
 
-import 'dashboard_event.dart';
-import 'dashboard_state.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_event.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_state.dart';
+
+export 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_event.dart';
+export 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_state.dart';
 
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardRepo repo = DashboardRepo();
@@ -27,6 +30,26 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
     on<GetHomeDataEvent>(getHomeDataEvent);
 
+    on<UpdateSearchQueryEvent>((event, emit) {
+      emit(state.copyWith(searchQuery: event.searchQuery));
+    });
+
+    on<UpdateFilterEvent>((event, emit) {
+      emit(state.copyWith(
+        selectedVehicleType: event.vehicleType,
+        pickupLocationFilter: event.pickupLocation,
+        dropLocationFilter: event.dropLocation,
+      ));
+    });
+
+    on<ClearFilterEvent>((event, emit) {
+      emit(state.copyWith(
+        searchQuery: '',
+        selectedVehicleType: null,
+        pickupLocationFilter: null,
+        dropLocationFilter: null,
+      ));
+    });
 
     on<ResetDashboardEvent>((event, emit) {
       emit(const DashboardState()); // pura state reset

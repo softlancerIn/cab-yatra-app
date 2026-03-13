@@ -40,8 +40,17 @@ class GetPostedBooingEvent extends BookingEvent {
 
 
 
-class ResetBookingEvent extends BookingEvent {
-  const ResetBookingEvent();
+class RESETBookingEvent extends BookingEvent {
+  const RESETBookingEvent();
+}
+
+class UpdatePostedBookingSearchQueryEvent extends BookingEvent {
+  final String searchQuery;
+
+  const UpdatePostedBookingSearchQueryEvent({required this.searchQuery});
+
+  @override
+  List<Object?> get props => [searchQuery];
 }
 
 

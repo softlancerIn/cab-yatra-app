@@ -10,6 +10,7 @@ class BookingState extends Equatable {
 
   final bool isLoading;
   final String? errorMessage;
+  final String searchQuery;
 
   final PostedBookingModel? postedBookingModel;
   final DeletePostedBookingModel? deletePostedBookingModel;
@@ -19,6 +20,7 @@ class BookingState extends Equatable {
 
     this.errorMessage,
     this.isLoading = false,
+    this.searchQuery = '',
 
     this.postedBookingModel,
     this.deletePostedBookingModel,
@@ -30,6 +32,7 @@ class BookingState extends Equatable {
 
     bool? isLoading,
     String? errorMessage,
+    String? searchQuery,
 
     PostedBookingModel? postedBookingModel,
     DeletePostedBookingModel? deletePostedBookingModel,
@@ -39,6 +42,7 @@ class BookingState extends Equatable {
 
       isLoading: isLoading??this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
+      searchQuery: searchQuery ?? this.searchQuery,
 
       postedBookingModel: postedBookingModel ?? this.postedBookingModel,
       deletePostedBookingModel: deletePostedBookingModel ?? this.deletePostedBookingModel,
@@ -53,6 +57,7 @@ class BookingState extends Equatable {
 
     isLoading,
     errorMessage,
+    searchQuery,
 
     postedBookingModel,deletePostedBookingModel
 

@@ -1,4 +1,5 @@
 import 'package:cab_taxi_app/Pages/Add%20New%20Booking/repo/addCreateRepo.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -145,7 +146,10 @@ class _AddBookingRoundTripScreenViewState
                   //     hint: "e.g. Ghaziabad",
                   //   ),
                   // ),
-                  CommonTextFormField(controller: _pickupCtrl,hintText: "Pickup Location",),
+                  LocationAutocompleteField(
+                    controller: _pickupCtrl,
+                    hint: "Pickup Location",
+                  ),
                   const SizedBox(height: 16),
                   CommonTextFormField(controller: noOfDays,hintText: "No Of Days",),
                   const SizedBox(height: 16),

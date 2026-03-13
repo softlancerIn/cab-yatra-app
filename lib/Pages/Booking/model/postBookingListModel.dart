@@ -47,6 +47,7 @@ class SeeBookingData {
   String? typeLabel;
   String? subTypeLabel;
   String? isAirportLabel;
+  String? carImage;
   CarCategory? carCategory;
 
   SeeBookingData(
@@ -69,6 +70,7 @@ class SeeBookingData {
         this.typeLabel,
         this.subTypeLabel,
         this.isAirportLabel,
+        this.carImage,
         this.carCategory});
 
   SeeBookingData.fromJson(Map<String, dynamic> json) {
@@ -91,6 +93,7 @@ class SeeBookingData {
     typeLabel = json['type_label'];
     subTypeLabel = json['sub_type_label'];
     isAirportLabel = json['is_airport_label'];
+    carImage = json['car_image'];
     carCategory = json['car_category'] != null
         ? new CarCategory.fromJson(json['car_category'])
         : null;
@@ -117,6 +120,7 @@ class SeeBookingData {
     data['type_label'] = this.typeLabel;
     data['sub_type_label'] = this.subTypeLabel;
     data['is_airport_label'] = this.isAirportLabel;
+    data['car_image'] = this.carImage;
     if (this.carCategory != null) {
       data['car_category'] = this.carCategory!.toJson();
     }
