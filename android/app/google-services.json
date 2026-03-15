@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "87185553071",
+    "project_id": "cab-yatra-15b08",
+    "storage_bucket": "cab-yatra-15b08.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:87185553071:android:06395a899f2c06f4e0865a",
+        "android_client_info": {
+          "package_name": "cabyatra.com.users"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKp_ZduHx-0XF_SqCRx7-9DHndwGCdnrM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
