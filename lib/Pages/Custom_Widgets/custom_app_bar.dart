@@ -105,7 +105,9 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
               /// 🔙 Leading Icon
               showLeading
                   ? GestureDetector(
-                onTap: () => Nav.pop(context),
+                onTap: () {
+                  Nav.pop(context);
+                },
                 child: const Icon(Icons.arrow_back_ios),
               )
                   : const SizedBox(width: 24),

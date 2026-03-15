@@ -1,25 +1,10 @@
 
 import 'package:cab_taxi_app/Pages/Add%20New%20Booking/ui/addBookingRoundTripScreen.dart';
-import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
-import '../../Controllers/home_controller.dart';
-import '../../Controllers/my_booking_controller.dart';
-import '../../core/network_service.dart';
-import '../../models/dropdown_models.dart';
-import '../../models/post_booking_model.dart';
-import '../../services/location_search.dart';
-import '../Custom_Widgets/CustomShimmer_widget.dart';
-import '../HomePageFlow/home_controller.dart';
+import 'package:flutter/material.dart';
+
 import 'ui/addBookingOneWayScreen.dart';
 
-//todo special req: text size bigger
-//todo: list of vehical based on length
-//todo: list of location spacing reduce
-//todo: bold
 class AddBookingScreen extends StatefulWidget {
   const AddBookingScreen({super.key});
 
@@ -51,7 +36,7 @@ class _AddBookingScreenState extends State<AddBookingScreen> with SingleTickerPr
 
 
         toolbarHeight: 50,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             // color: Color.fromRGBO(0, 0, 0, 1),

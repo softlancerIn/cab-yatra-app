@@ -19,6 +19,12 @@ class SelectCarCategory extends AddBookingEvent {
   const SelectCarCategory(this.carCategoryId);
   @override
   List<Object?> get props => [carCategoryId];
+}class UpdateAssignMethodEvent extends AddBookingEvent {
+  final String assignType;
+  final BuildContext context;
+  const UpdateAssignMethodEvent({required this.assignType,required this.context});
+  @override
+  List<Object?> get props => [assignType,context];
 }
 
 class SubmitBooking extends AddBookingEvent {
@@ -32,11 +38,15 @@ class SubmitBooking extends AddBookingEvent {
   final double driverCommission;
   final bool showPhoneNumber;
   final String remarks;
+  final String noOfDay;
+  final String tripNotes;
   final BuildContext context;
 
   const SubmitBooking({
     required this.subType,
     required this.carCategoryId,
+    required this.tripNotes,
+    required this.noOfDay,
     required this.pickUpDate,
     required this.pickUpTime,
     required this.pickUpLocations,
@@ -60,6 +70,7 @@ class SubmitBooking extends AddBookingEvent {
     driverCommission,
     showPhoneNumber,
     remarks,
+    noOfDay,tripNotes
   ];
 }
 

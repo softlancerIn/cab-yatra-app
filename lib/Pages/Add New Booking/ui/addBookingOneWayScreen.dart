@@ -1,17 +1,13 @@
-import 'package:cab_taxi_app/Pages/Add%20New%20Booking/repo/addCreateRepo.dart';
+
 import 'package:cab_taxi_app/widget/customTextField.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
+
 import 'package:intl/intl.dart';
 
-import '../../../core/network_service.dart';
-import '../../../models/dropdown_models.dart';
-import '../../../models/post_booking_model.dart';
-import '../../../services/location_search.dart';
-import '../../Custom_Widgets/custom_app_bar.dart';
+
 
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';
@@ -24,7 +20,7 @@ class AddBookingOneWayScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          AddBookingBloc(AddBookingRepo())..add(LoadCarCategories(context)),
+          AddBookingBloc()..add(LoadCarCategories(context)),
       child: const _AddBookingOneWayScreenView(),
     );
   }
@@ -58,22 +54,23 @@ class _AddBookingOneWayScreenViewState
 
     return Scaffold(
       backgroundColor: Colors.white,
-      //  appBar: AppBAR(title: "Add New Booking"),
+        // appBar: AppBAR(title: "Add New Booking"),
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            Fluttertoast.showToast(
-              msg: "Booking created successfully!",
-              backgroundColor: Colors.green,
-            );
-            Get.back();
+            // Fluttertoast.showToast(
+            //   msg: "Booking created successfully!",
+            //   backgroundColor: Colors.green,
+            // );
+            showAssignDriverBottomSheet(context);
+         //   Get.back();
           }
-          if (state.hasError && state.errorMessage != null) {
-            Fluttertoast.showToast(
-              msg: state.errorMessage!,
-              backgroundColor: Colors.red,
-            );
-          }
+          // if (state.hasError && state.errorMessage != null) {
+          //   Fluttertoast.showToast(
+          //     msg: state.errorMessage!,
+          //     backgroundColor: Colors.red,
+          //   );
+          // }
         },
         builder: (context, state) {
           return RefreshIndicator(
@@ -91,7 +88,7 @@ class _AddBookingOneWayScreenViewState
                   const SizedBox(height: 8),
 
                   state.isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(child: SizedBox())
                       : state.carCategories == null ||
                               state.carCategories!.data!.isEmpty
                           ? const Text("No categories available",
@@ -200,6 +197,7 @@ class _AddBookingOneWayScreenViewState
                         child: CommonTextFormField(
                           hintText:  "Total Fare",
                           controller: _totalFareCtrl,
+                          keyboardType: TextInputType.number,
                         ),),
 
                       const SizedBox(width: 12),
@@ -207,6 +205,7 @@ class _AddBookingOneWayScreenViewState
                         child: CommonTextFormField(
                           hintText: "Driver Commission",
                           controller: _driverCommCtrl,
+                          keyboardType: TextInputType.number,
                         ),
                         // child: containerShadow(
                         //   child: _buildNumberField(
@@ -320,6 +319,8 @@ class _AddBookingOneWayScreenViewState
 
                     final booking = SubmitBooking(
                       subType: "0",
+                      noOfDay: "",
+                      tripNotes: "",
                       // hardcoded as per requirement
                       carCategoryId: state.selectedCarCategoryId!,
                       pickUpDate: _startDateCtrl.text,
@@ -337,80 +338,11 @@ class _AddBookingOneWayScreenViewState
                     );
 
                     context.read<AddBookingBloc>().add(booking);
+                    showAssignDriverBottomSheet(context);
+
                   },),
 
-                  // ── Submit Button ───────────────────────────────────────────
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   height: 54,
-                  //   child: ElevatedButton(
-                  //     style: ElevatedButton.styleFrom(
-                  //       backgroundColor: const Color(0xFFFFB900),
-                  //       foregroundColor: Colors.black87,
-                  //     ),
-                  //     onPressed: state.isSubmitting
-                  //         ? null
-                  //         : () {
-                  //             if (state.selectedCarCategoryId == null) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Please select vehicle category");
-                  //               return;
-                  //             }
-                  //             if (_pickupCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Pickup location is required");
-                  //               return;
-                  //             }
-                  //             if (_dropCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Drop location is required");
-                  //               return;
-                  //             }
-                  //             if (_startDateCtrl.text.isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Pickup date is required");
-                  //               return;
-                  //             }
-                  //             if (_totalFareCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Total fare is required");
-                  //               return;
-                  //             }
-                  //
-                  //             final booking = SubmitBooking(
-                  //               subType: "0",
-                  //               // hardcoded as per requirement
-                  //               carCategoryId: state.selectedCarCategoryId!,
-                  //               pickUpDate: _startDateCtrl.text,
-                  //               pickUpTime: _startTimeCtrl.text,
-                  //               pickUpLocations: [_pickupCtrl.text.trim()],
-                  //               destinationLocations: [_dropCtrl.text.trim()],
-                  //               totalFare:
-                  //                   double.tryParse(_totalFareCtrl.text) ?? 0.0,
-                  //               driverCommission:
-                  //                   double.tryParse(_driverCommCtrl.text) ??
-                  //                       0.0,
-                  //               showPhoneNumber: _showPhoneNumber,
-                  //               remarks: _remarksCtrl.text.trim(),
-                  //               context: context,
-                  //             );
-                  //
-                  //             context.read<AddBookingBloc>().add(booking);
-                  //           },
-                  //     child: state.isSubmitting
-                  //         ? const SizedBox(
-                  //             height: 24,
-                  //             width: 24,
-                  //             child:
-                  //                 CircularProgressIndicator(strokeWidth: 2.5),
-                  //           )
-                  //         : const Text(
-                  //             "SUBMIT BOOKING",
-                  //             style: TextStyle(
-                  //                 fontSize: 16, fontWeight: FontWeight.w600),
-                  //           ),
-                  //   ),
-                  // ),
+
 
                   const SizedBox(height: 60),
                 ],
@@ -424,42 +356,9 @@ class _AddBookingOneWayScreenViewState
 
   // ── Helper Widgets ──────────────────────────────────────────────────────────────
 
-  Widget _buildTextField({
-    required String label,
-    required TextEditingController controller,
-    String? hint,
-  }) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        hintStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-        labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-        border: InputBorder.none,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      ),
-    );
-  }
 
-  Widget _buildNumberField({
-    required String label,
-    required TextEditingController controller,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        border: InputBorder.none,
-        hintStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-        labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      ),
-    );
-  }
+
+
 
   Widget _buildDateField({
     required String label,
@@ -550,32 +449,7 @@ class _AddBookingOneWayScreenViewState
     );
   }
 
-  Widget _buildDropdownField({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-        const SizedBox(height: 6),
-        DropdownButtonFormField<String>(
-          value: value,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-          ),
-          items: items
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ],
-    );
-  }
+
 
   @override
   void dispose() {
@@ -587,5 +461,119 @@ class _AddBookingOneWayScreenViewState
     _driverCommCtrl.dispose();
     _remarksCtrl.dispose();
     super.dispose();
+  }
+  void showAssignDriverBottomSheet(BuildContext context) {
+    int selectedValue = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+
+                  const Icon(Icons.check_circle,
+                      size: 70, color: Colors.red),
+
+                  const SizedBox(height: 10),
+
+                  const Text(
+                    "Booking posted Successfully",
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+
+                        RadioListTile<int>(
+                          value: 0,
+                          groupValue: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedValue = value!;
+                            });
+                          },
+                          title: const Text(
+                            "Auto Assign Driver – The first driver who pays the commission will get the booking",
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+
+                        RadioListTile<int>(
+                          value: 1,
+                          groupValue: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedValue = value!;
+                            });
+                          },
+                          title: const Text(
+                            "Manual Selection – You will choose the driver yourself",
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+
+                        context.read<AddBookingBloc>().add(
+                          UpdateAssignMethodEvent(
+
+                            context: context,
+                            assignType: selectedValue.toString(),
+                          ),
+                        );
+
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        "Done",
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10)
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

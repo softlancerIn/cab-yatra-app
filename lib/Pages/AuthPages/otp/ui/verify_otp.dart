@@ -1,18 +1,13 @@
 import 'dart:async';
 
-import 'package:cab_taxi_app/Pages/Add%20Profile/add_profile.dart';
-import 'package:cab_taxi_app/Pages/Booking/my_booking.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
+
 import 'package:pinput/pinput.dart';
 
-import '../../../../Controllers/auth_controller.dart';
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-import '../../../../core/network_service.dart';
+
 import '../../../../widget/primary_button.dart';
 import '../bloc/otpBloc.dart';
 import '../bloc/otpEvent.dart';
@@ -31,7 +26,7 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
   final FocusNode focusNode2 = FocusNode();
   final FocusNode focusNode3 = FocusNode();
   final FocusNode focusNode4 = FocusNode();
-  NetworkService service = NetworkService();
+
 
 
 

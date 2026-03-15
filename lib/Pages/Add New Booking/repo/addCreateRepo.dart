@@ -9,6 +9,7 @@ import '../../../../cores/network/network_utils.dart';
 import '../../../../cores/services/secure_storage_service.dart';
 import '../model/booking_create_model.dart';
 import '../model/car_category_model.dart';
+import '../model/updateAssignMethodModel.dart';
 
 
 class AddBookingRepo {
@@ -25,24 +26,28 @@ class AddBookingRepo {
     required List destinationLoc,
     required double total_faire,
     required double driverCommission,
-    required double is_show_phoneNumber,
+    required bool is_show_phoneNumber,
     required String remarks,
+    required String noOfDay,
+    required String tripNotes,
     required BuildContext context,
   }) async {
     try {
       final response = await _api.post(
         ApiConstants.addBooking,
         data: {
-          "subType": "0", //hardcoded rahega ok
-          "carCategoryId": 2,// car category wala api se aayag ok drop down se single select karega ok
-          "pickUp_date": "2024-01-15",
-          "pickUp_time": "10:30:00",
-          "pickUpLoc": ["Ghaziabad"],
-          "destinationLoc": ["Noida", "Delhi", "Gurgaon"],
-          "total_faire": 1150.00,
-          "driverCommission": 300.00,
-          "is_show_phoneNumber": false,
-          "remarks": "Please arrive 5 minutes early"
+          "subType": subType,
+          "carCategoryId": carCategoryId,
+          "pickUp_date": pickUp_date,
+          "pickUp_time": pickUp_time,
+          "no_of_days": noOfDay,
+          "trip_notes": tripNotes,
+          "pickUpLoc": pickUpLoc,
+          "destinationLoc": destinationLoc,
+          "total_faire": total_faire,
+          "driverCommission": driverCommission,
+          "is_show_phoneNumber": is_show_phoneNumber,
+          "remarks": remarks,
         },
         requiresAuth: true,
       );
@@ -59,6 +64,8 @@ class AddBookingRepo {
                 carCategoryId: carCategoryId,
                 destinationLoc: destinationLoc,
                 driverCommission: driverCommission,
+                noOfDay: noOfDay,
+                tripNotes: tripNotes,
                 is_show_phoneNumber: is_show_phoneNumber,
                 pickUp_date: pickUp_date,
                 pickUp_time: pickUp_time,
@@ -83,6 +90,8 @@ class AddBookingRepo {
                   pickUp_time: pickUp_time,
                   pickUpLoc: pickUpLoc,
                   remarks: remarks,
+                  tripNotes: tripNotes,
+                  noOfDay: noOfDay,
                   subType: subType,
                   total_faire: total_faire
               ),
@@ -113,6 +122,46 @@ class AddBookingRepo {
       );
 
       return CarCategoryModel.fromJson(response);
+      //  return LoginModel.fromJson(response['user']);
+    } on DioException catch (e) {
+      if (e.error is NoInternetException) {
+        showNoInternetScreen(
+          context,
+          onRetry: () => getCarCategory( context: context),
+        );
+        throw NoInternetException();
+      } else if (e.error is ServerException) {
+        showServerErrorScreen(
+          context,
+          onRetry: () => getCarCategory( context: context),
+        );
+        throw ServerException();
+      } else if (e.error is UnauthorizedException) {
+        await SecureStorageService.logout(context);
+        throw UnauthorizedException();
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      throw ApiException(0, e.toString());
+    }
+  }  Future<UpdateAssignMethodModel> updateAssignMethodApi({
+
+    required BuildContext context,
+    required String assignType,
+  }) async {
+    try {
+      final response = await _api.put(
+        ApiConstants.updateAssignMethod,
+        data: {
+          "assignType": assignType,
+
+        },
+
+        requiresAuth: true,
+      );
+
+      return UpdateAssignMethodModel.fromJson(response);
       //  return LoginModel.fromJson(response['user']);
     } on DioException catch (e) {
       if (e.error is NoInternetException) {

@@ -115,30 +115,45 @@ class ApiService {
 
   Future<dynamic> uploadFiles(
       String endpoint, {
-        required List<File> files,
+        required Map<String, File> files,
         Map<String, dynamic>? fields,
         bool requiresAuth = true,
       }) async {
     await _checkInternet();
+
     try {
       final formData = FormData();
+
       if (fields != null) {
-        formData.fields.addAll(fields.entries.map((e) => MapEntry(e.key, e.value.toString())));
+        formData.fields.addAll(
+          fields.entries.map(
+                (e) => MapEntry(e.key, e.value.toString()),
+          ),
+        );
       }
-      for (int i = 0; i < files.length; i++) {
-        formData.files.add(MapEntry(
-          'file$i',
-          await MultipartFile.fromFile(files[i].path, filename: files[i].path.split('/').last),
-        ));
+
+      for (var entry in files.entries) {
+        formData.files.add(
+          MapEntry(
+            entry.key, // 👈 key same as API
+            await MultipartFile.fromFile(
+              entry.value.path,
+              filename: entry.value.path.split('/').last,
+            ),
+          ),
+        );
       }
+
       final response = await _dio.post(
         endpoint,
         data: formData,
         options: Options(extra: {'requiresAuth': requiresAuth}),
       );
+
       return response.data;
     } catch (e) {
       rethrow;
     }
   }
+
 }

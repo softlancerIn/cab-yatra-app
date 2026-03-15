@@ -5,12 +5,13 @@ import 'addBookingEvent.dart';
 import 'addBookingState.dart';
 
 class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
-  final AddBookingRepo repo;
+  final AddBookingRepo repo=AddBookingRepo();
 
-  AddBookingBloc(this.repo) : super(const AddBookingState()) {
+  AddBookingBloc() : super(const AddBookingState()) {
     on<LoadCarCategories>(_onLoadCarCategories);
     on<SelectCarCategory>(_onSelectCarCategory);
     on<SubmitBooking>(_onSubmitBooking);
+    on<UpdateAssignMethodEvent>(_updateAssignMethodApi);
     on<ResetBooking>((event, emit) => emit(const AddBookingState()));
   }
 
@@ -25,6 +26,25 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
       emit(state.copyWith(
         isLoading: false,
         carCategories: model,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoading: false,
+        hasError: true,
+        errorMessage: e.toString(),
+      ));
+    }
+  }  Future<void> _updateAssignMethodApi(
+      UpdateAssignMethodEvent event,
+      Emitter<AddBookingState> emit,
+      ) async {
+    emit(state.copyWith(isLoading: true));
+
+    try {
+      final model = await repo.updateAssignMethodApi(context: event.context,assignType: event.assignType);
+      emit(state.copyWith(
+        isLoading: false,
+        updateAssignMethodModel: model,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -58,7 +78,9 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
         destinationLoc: event.destinationLocations,
         total_faire: event.totalFare,
         driverCommission: event.driverCommission,
-        is_show_phoneNumber: event.showPhoneNumber ? 1 : 0,
+        noOfDay: event.noOfDay,
+        tripNotes: event.tripNotes,
+        is_show_phoneNumber: event.showPhoneNumber ? true : false,
         remarks: event.remarks,
         context: event.context,
       );

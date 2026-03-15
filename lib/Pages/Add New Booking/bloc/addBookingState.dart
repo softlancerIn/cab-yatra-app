@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../model/car_category_model.dart';
+import '../model/updateAssignMethodModel.dart';
 class AddBookingState extends Equatable {
   final bool isLoading;
   final bool isSubmitting;
@@ -8,6 +9,7 @@ class AddBookingState extends Equatable {
   final bool hasError;
   final bool isSuccess;
   final CarCategoryModel? carCategories;
+  final UpdateAssignMethodModel? updateAssignMethodModel;
   final int? selectedCarCategoryId;
 
   const AddBookingState({
@@ -18,6 +20,7 @@ class AddBookingState extends Equatable {
     this.isSuccess = false,
     this.carCategories,
     this.selectedCarCategoryId,
+    this.updateAssignMethodModel,
   });
 
   AddBookingState copyWith({
@@ -27,6 +30,7 @@ class AddBookingState extends Equatable {
     bool? hasError,
     bool? isSuccess,
     CarCategoryModel? carCategories,
+    UpdateAssignMethodModel? updateAssignMethodModel,
     int? selectedCarCategoryId,
   }) {
     return AddBookingState(
@@ -37,6 +41,7 @@ class AddBookingState extends Equatable {
       isSuccess: isSuccess ?? this.isSuccess,
       carCategories: carCategories ?? this.carCategories,
       selectedCarCategoryId: selectedCarCategoryId ?? this.selectedCarCategoryId,
+      updateAssignMethodModel: updateAssignMethodModel ?? this.updateAssignMethodModel,
     );
   }
 
@@ -49,5 +54,6 @@ class AddBookingState extends Equatable {
     isSuccess,
     carCategories,
     selectedCarCategoryId,
+    updateAssignMethodModel,
   ];
 }

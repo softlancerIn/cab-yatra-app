@@ -13,25 +13,24 @@ import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
 import '../repo/editBookingRepo.dart';
 
-class EditBookingOneWayScreen extends StatelessWidget {
-  const EditBookingOneWayScreen({super.key});
+class EditBookingOneWayScreen extends StatefulWidget {
+  final String vehicalType;
+  final String pickUpLocation;
+  final String dropLocation;
+  final String pickUpDate;
+  final String pickUpTime;
+  final String totalFare;
+  final String driverCommission;
+  final String remark;
+  const EditBookingOneWayScreen({super.key,required this.pickUpTime,required this.remark,required this.driverCommission,required this.pickUpDate,required this.totalFare,required this.dropLocation,required this.pickUpLocation,required this.vehicalType});
 
   @override
-  Widget build(BuildContext context) {
-    return const _EditBookingOneWayScreenView();
-  }
+  State<EditBookingOneWayScreen> createState() =>
+      EditBookingOneWayScreenState();
 }
 
-class _EditBookingOneWayScreenView extends StatefulWidget {
-  const _EditBookingOneWayScreenView();
-
-  @override
-  State<_EditBookingOneWayScreenView> createState() =>
-      _EditBookingOneWayScreenViewState();
-}
-
-class _EditBookingOneWayScreenViewState
-    extends State<_EditBookingOneWayScreenView> {
+class EditBookingOneWayScreenState
+    extends State<EditBookingOneWayScreen> {
   // Controllers
   final _startDateCtrl = TextEditingController();
   final _startTimeCtrl = TextEditingController();
@@ -43,6 +42,18 @@ class _EditBookingOneWayScreenViewState
 
   String? _selectedTripType = 'One Way';
   bool _showPhoneNumber = false;
+  @override
+  void initState() {
+    super.initState();
+
+    _pickupCtrl.text = widget.pickUpLocation;
+    _dropCtrl.text = widget.dropLocation;
+    _startDateCtrl.text = widget.pickUpDate;
+    _startTimeCtrl.text = widget.pickUpTime;
+    _totalFareCtrl.text = widget.totalFare;
+    _driverCommCtrl.text = widget.driverCommission;
+    _remarksCtrl.text = widget.remark;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -281,7 +292,7 @@ class _EditBookingOneWayScreenViewState
 
                   const SizedBox(height: 40),
                   CommonAppButton(isLoading: state.isSubmitting,
-                    text: "Post Booking",   onPressed: state.isSubmitting
+                    text: "Update Booking",   onPressed: state.isSubmitting
                       ? null
                       : () {
                     if (state.selectedCarCategoryId == null) {
@@ -331,78 +342,7 @@ class _EditBookingOneWayScreenViewState
                     context.read<EditBookingBloc>().add(booking);
                   },),
 
-                  // ── Submit Button ───────────────────────────────────────────
-                  // SizedBox(
-                  //   width: double.infinity,
-                  //   height: 54,
-                  //   child: ElevatedButton(
-                  //     style: ElevatedButton.styleFrom(
-                  //       backgroundColor: const Color(0xFFFFB900),
-                  //       foregroundColor: Colors.black87,
-                  //     ),
-                  //     onPressed: state.isSubmitting
-                  //         ? null
-                  //         : () {
-                  //             if (state.selectedCarCategoryId == null) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Please select vehicle category");
-                  //               return;
-                  //             }
-                  //             if (_pickupCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Pickup location is required");
-                  //               return;
-                  //             }
-                  //             if (_dropCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Drop location is required");
-                  //               return;
-                  //             }
-                  //             if (_startDateCtrl.text.isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Pickup date is required");
-                  //               return;
-                  //             }
-                  //             if (_totalFareCtrl.text.trim().isEmpty) {
-                  //               Fluttertoast.showToast(
-                  //                   msg: "Total fare is required");
-                  //               return;
-                  //             }
-                  //
-                  //             final booking = SubmitBooking(
-                  //               subType: "0",
-                  //               // hardcoded as per requirement
-                  //               carCategoryId: state.selectedCarCategoryId!,
-                  //               pickUpDate: _startDateCtrl.text,
-                  //               pickUpTime: _startTimeCtrl.text,
-                  //               pickUpLocations: [_pickupCtrl.text.trim()],
-                  //               destinationLocations: [_dropCtrl.text.trim()],
-                  //               totalFare:
-                  //                   double.tryParse(_totalFareCtrl.text) ?? 0.0,
-                  //               driverCommission:
-                  //                   double.tryParse(_driverCommCtrl.text) ??
-                  //                       0.0,
-                  //               showPhoneNumber: _showPhoneNumber,
-                  //               remarks: _remarksCtrl.text.trim(),
-                  //               context: context,
-                  //             );
-                  //
-                  //             context.read<AddBookingBloc>().add(booking);
-                  //           },
-                  //     child: state.isSubmitting
-                  //         ? const SizedBox(
-                  //             height: 24,
-                  //             width: 24,
-                  //             child:
-                  //                 CircularProgressIndicator(strokeWidth: 2.5),
-                  //           )
-                  //         : const Text(
-                  //             "SUBMIT BOOKING",
-                  //             style: TextStyle(
-                  //                 fontSize: 16, fontWeight: FontWeight.w600),
-                  //           ),
-                  //   ),
-                  // ),
+
 
                   const SizedBox(height: 60),
                 ],

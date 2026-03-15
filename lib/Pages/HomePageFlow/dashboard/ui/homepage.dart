@@ -6,15 +6,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:get/get.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../Controllers/home_controller.dart';
 
-import '../../../../core/utils/helperFunctions.dart';
+import '../../../../cores/utils/helperFunctions.dart';
 
 
-import '../../StartRide_otp_widget.dart';
 
 import '../../custom/customToggleSwitch.dart';
 import '../bloc/dashboard_bloc.dart';
@@ -38,7 +35,7 @@ class _HomepageState extends State<Homepage>
   TimeOfDay? selectedTime;
   TextEditingController searchController = TextEditingController();
 
-  final controller = Get.put(HomeController());
+
   String numericPart = '0.0';
 
   @override
@@ -46,7 +43,7 @@ class _HomepageState extends State<Homepage>
     super.initState();
     context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
-    controller.getHomeData();
+    // controller.getHomeData();
     _loadNumericPart();
     selectedDate = DateTime.now();
     selectedTime = TimeOfDay.now();
@@ -187,7 +184,7 @@ class _HomepageState extends State<Homepage>
           controller: _tabController,
           indicatorSize: TabBarIndicatorSize.tab,
           onTap: (value) {
-            controller.getHomeData();
+            // controller.getHomeData();
           },
           indicator: BoxDecoration(
             border: Border(
@@ -419,111 +416,7 @@ class ServiceCallDialog extends StatelessWidget {
   }
 }
 
-class CancelBookingDialog extends StatelessWidget {
-  final String bookingId;
 
-  CancelBookingDialog({super.key, required this.bookingId});
-
-  final controller = Get.put(HomeController());
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      backgroundColor: Colors.white,
-      child: Obx(() {
-        return controller.homeLoading.value
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Are you Confirm to Cancel Booking',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFFFF0000),
-                        fontSize: 22,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                      softWrap: true,
-                    ),
-                    SizedBox(
-                      height: screenHeight * 0.02,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            controller.cancelActiveBooking(
-                                bookingId: bookingId);
-                          },
-                          child: Container(
-                            width: screenWidth * 0.27,
-                            height: screenHeight * 0.05,
-                            decoration: ShapeDecoration(
-                              color: const Color(0xFFFF0000),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Yes',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                            width: screenWidth * 0.27,
-                            height: screenHeight * 0.05,
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                  width: 2,
-                                  color: Colors.black.withOpacity(0.5),
-                                ),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'No',
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(0.5),
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-      }),
-    );
-  }
-}
 
 ///calculate
 class DistanceCalculator {

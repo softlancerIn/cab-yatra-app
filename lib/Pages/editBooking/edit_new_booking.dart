@@ -4,14 +4,25 @@ import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingOneWayScreen.dart';
 import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingRoundTripScreen.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../Add New Booking/bloc/addBookingBloc.dart';
+import '../Add New Booking/bloc/addBookingEvent.dart';
+import '../Custom_Widgets/custom_app_bar.dart';
 
 
-//todo special req: text size bigger
-//todo: list of vehical based on length
-//todo: list of location spacing reduce
-//todo: bold
+
 class EditBookingScreen extends StatefulWidget {
-  const EditBookingScreen({super.key});
+  final String bookingType;  //Round Trip  //Round Trip
+  final String vehicalType;
+  final String pickUpLocation;
+  final String dropLocation;
+  final String pickUpDate;
+  final String pickUpTime;
+  final String totalFare;
+  final String driverCommission;
+  final String remark;
+  const EditBookingScreen({super.key,required this.bookingType,required this.pickUpTime,required this.remark,required this.driverCommission,required this.pickUpDate,required this.totalFare,required this.dropLocation,required this.pickUpLocation,required this.vehicalType,});
 
   @override
   State<EditBookingScreen> createState() => _EditBookingScreenState();
@@ -19,10 +30,13 @@ class EditBookingScreen extends StatefulWidget {
 
 class _EditBookingScreenState extends State<EditBookingScreen> with SingleTickerProviderStateMixin  {
   late TabController _tabController;
+  late bool isOneWay;
   @override
   void initState() {
     super.initState();
     // context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+    context.read<AddBookingBloc>().add(LoadCarCategories(context));
+    isOneWay = widget.bookingType.toLowerCase() == "one way";
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     // controller.getHomeData();
     // _loadNumericPart();
@@ -37,72 +51,11 @@ class _EditBookingScreenState extends State<EditBookingScreen> with SingleTicker
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBAR(title: "Edit Booking",showLeading: true,showAction: true,),
+      body: widget.bookingType.toLowerCase() == "one way"
+          ?  EditBookingOneWayScreen( driverCommission: widget.driverCommission,dropLocation: widget.dropLocation,pickUpDate: widget.pickUpDate,pickUpLocation: widget.pickUpLocation,pickUpTime: widget.pickUpTime,remark: widget.remark,totalFare: widget.totalFare,vehicalType: widget.vehicalType,)
+          :  EditBookingRoundTripScreen(driverCommission: widget.driverCommission,dropLocation: widget.dropLocation,pickUpDate: widget.pickUpDate,pickUpLocation: widget.pickUpLocation,pickUpTime: widget.pickUpTime,remark: widget.remark,totalFare: widget.totalFare,vehicalType: widget.vehicalType),
 
-
-        toolbarHeight: 50,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            // color: Color.fromRGBO(0, 0, 0, 1),
-              color: Colors.white),
-        ),
-        centerTitle: false,
-        title: Text(
-          'Edit Booking',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          onTap: (value) {
-           // controller.getHomeData();
-          },
-          indicator: BoxDecoration(
-            border: Border(
-              bottom: const BorderSide(
-                  color: Color.fromRGBO(255, 216, 0, 1), width: 4),
-            ),
-          ),
-          labelColor: Colors.black,
-          labelStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelColor: const Color(0xFF5A6980),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          tabs: const [
-            Tab(text: "One way"),
-            Tab(text: "Round Trip"),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: GestureDetector(
-
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  EditBookingOneWayScreen(),
-                  EditBookingRoundTripScreen(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
       drawerEnableOpenDragGesture: true,
     );
   }
