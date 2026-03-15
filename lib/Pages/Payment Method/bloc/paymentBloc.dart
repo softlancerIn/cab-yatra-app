@@ -60,13 +60,16 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     LoadPayment event,
     Emitter<PaymentState> emit,
   ) async {
-    emit(state.copyWith(loading: true));
+    // Only show full screen loader if we don't have data yet
+    if (state.payment == null) {
+      emit(state.copyWith(loading: true));
+    }
 
     try {
       final result = await repo.getPaymentApi();
-      emit(state.copyWith(loading: false, success: true, payment: result));
+      emit(state.copyWith(loading: false, payment: result));
     } catch (e) {
-      emit(state.copyWith(loading: false));
+      emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
 }

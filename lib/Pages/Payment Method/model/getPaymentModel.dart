@@ -1,7 +1,7 @@
 class GetPaymentModel {
   final bool? status;
   final String? message;
-  final List<PaymentData>? data;
+  final PaymentData? data;
 
   GetPaymentModel({
     this.status,
@@ -10,12 +10,12 @@ class GetPaymentModel {
   });
 
   factory GetPaymentModel.fromJson(Map<String, dynamic> json) {
-    List<PaymentData> parsedData = [];
+    PaymentData? parsedData;
     if (json['data'] != null) {
-      if (json['data'] is List) {
-        parsedData = List<PaymentData>.from(
-          (json['data'] as List).map((x) => PaymentData.fromJson(x)),
-        );
+      if (json['data'] is Map<String, dynamic>) {
+        parsedData = PaymentData.fromJson(json['data']);
+      } else if (json['data'] is List && json['data'].isNotEmpty) {
+        parsedData = PaymentData.fromJson(json['data'][0]);
       }
     }
 
@@ -30,7 +30,7 @@ class GetPaymentModel {
     return {
       "status": status,
       "message": message,
-      "data": data?.map((e) => e.toJson()).toList(),
+      "data": data?.toJson(),
     };
   }
 }
@@ -70,20 +70,20 @@ class PaymentData {
 
   factory PaymentData.fromJson(Map<String, dynamic> json) {
     return PaymentData(
-      id: json['id'],
-      type: json['type'],
-      driverId: json['driver_id'],
-      bankName: json['bank_name'],
-      accountNumber: json['account_number'],
-      ifscCode: json['ifsc_code'],
-      accountHolderName: json['account_holderName'],
-      upiId: json['upi_id'],
-      paymentNumber: json['payment_number'],
-      qrImage: json['qr_image'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      qrImageUrl: json['qr_image_url'],
+      id: int.tryParse(json['id'].toString()),
+      type: int.tryParse(json['type'].toString()),
+      driverId: int.tryParse(json['driver_id'].toString()),
+      bankName: json['bank_name']?.toString(),
+      accountNumber: json['account_number']?.toString(),
+      ifscCode: json['ifsc_code']?.toString(),
+      accountHolderName: json['account_holderName']?.toString(),
+      upiId: json['upi_id']?.toString(),
+      paymentNumber: json['payment_number']?.toString(),
+      qrImage: json['qr_image']?.toString(),
+      status: int.tryParse(json['status'].toString()),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      qrImageUrl: json['qr_image_url']?.toString(),
     );
   }
 

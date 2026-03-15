@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import '../../../cores/constants/api_constants.dart';
 import '../../../cores/network/api_service.dart';
 
 import '../model/createPaymentModel.dart';
@@ -15,7 +16,7 @@ class PaymentRepo {
     required Map<String, File> files,
   }) async {
     final response = await _api.uploadFiles(
-      "https://cabyatra.com/api/driver/V2/profile/payment-methods",
+      ApiConstants.paymentMethods,
       fields: fields,
       files: files,
       requiresAuth: true,
@@ -27,7 +28,7 @@ class PaymentRepo {
   /// GET DRIVER LIST
   Future<GetPaymentModel> getPaymentApi() async {
     final response = await _api.get(
-      "https://cabyatra.com/api/driver/V2/profile/payment-methods",
+      ApiConstants.paymentMethods,
       requiresAuth: true,
     );
 

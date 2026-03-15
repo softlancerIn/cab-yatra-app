@@ -4,7 +4,6 @@ import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../widget/customTextField.dart';
@@ -12,6 +11,8 @@ import '../../../widget/customTextField.dart';
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';
 import '../bloc/addBookingState.dart';
+import '../../Booking/bloc/booking_bloc.dart';
+import '../../Booking/bloc/booking_event.dart';
 
 class AddBookingRoundTripScreen extends StatelessWidget {
   const AddBookingRoundTripScreen({super.key});
@@ -128,11 +129,7 @@ class _AddBookingRoundTripScreenViewState
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            Fluttertoast.showToast(
-              msg: "Booking created successfully!",
-              backgroundColor: Colors.green,
-            );
-            Get.back();
+            showAssignDriverBottomSheet(context);
           }
           if (state.hasError && state.errorMessage != null) {
             Fluttertoast.showToast(
@@ -231,6 +228,11 @@ class _AddBookingRoundTripScreenViewState
                   CommonTextFormField(
                     controller: tripNotes,
                     hintText: "Trip Notes",
+                  ),
+                  const SizedBox(height: 16),
+                  LocationAutocompleteField(
+                    controller: _dropCtrl,
+                    hint: "Drop Location",
                   ),
 
                   // containerShadow(
@@ -381,14 +383,9 @@ class _AddBookingRoundTripScreenViewState
                                   msg: "Pickup location is required");
                               return;
                             }
-                            if (noOfDays.text.trim().isEmpty) {
+                            if (_dropCtrl.text.trim().isEmpty) {
                               Fluttertoast.showToast(
-                                  msg: "No Of Days is required");
-                              return;
-                            }
-                            if (tripNotes.text.trim().isEmpty) {
-                              Fluttertoast.showToast(
-                                  msg: "Trip Notes is required");
+                                  msg: "Drop location is required");
                               return;
                             }
                             if (_startDateCtrl.text.isEmpty) {
@@ -670,6 +667,116 @@ class _AddBookingRoundTripScreenViewState
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+
+  void showAssignDriverBottomSheet(BuildContext context) {
+    int selectedValue = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.check_circle, size: 70, color: Colors.red),
+                  const SizedBox(height: 10),
+                  const Text(
+                    "Booking posted Successfully",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        RadioListTile<int>(
+                          value: 0,
+                          groupValue: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedValue = value!;
+                            });
+                          },
+                          title: const Text(
+                            "Auto Assign Driver – The first driver who pays the commission will get the booking",
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+                        RadioListTile<int>(
+                          value: 1,
+                          groupValue: selectedValue,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedValue = value!;
+                            });
+                          },
+                          title: const Text(
+                            "Manual Selection – You will choose the driver yourself",
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        final bookingId =
+                            context.read<AddBookingBloc>().state.bookingId;
+                        context.read<AddBookingBloc>().add(
+                              UpdateAssignMethodEvent(
+                                context: context,
+                                assignType: selectedValue.toString(),
+                                bookingId: bookingId ?? "",
+                              ),
+                            );
+
+                        context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+
+                        Navigator.pop(context); // Pop bottom sheet
+                        
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (context.mounted) {
+                            Navigator.pop(context); // Redirect back from screen
+                            context.read<AddBookingBloc>().add(ResetBooking());
+                          }
+                        });
+                      },
+                      child: const Text(
+                        "Done",
+                        style: TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10)
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';
 import '../bloc/addBookingState.dart';
+import '../../Booking/bloc/booking_bloc.dart';
+import '../../Booking/bloc/booking_event.dart';
 
 class AddBookingOneWayScreen extends StatelessWidget {
   const AddBookingOneWayScreen({super.key});
@@ -95,11 +97,6 @@ class _AddBookingOneWayScreenViewState
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            Fluttertoast.showToast(
-              msg: "Booking created successfully!",
-              backgroundColor: Colors.green,
-              textColor: Colors.white,
-            );
             showAssignDriverBottomSheet(context);
           }
           // if (state.hasError && state.errorMessage != null) {
@@ -642,14 +639,25 @@ class _AddBookingOneWayScreenViewState
                         ),
                       ),
                       onPressed: () {
+                        final bookingId = context.read<AddBookingBloc>().state.bookingId;
                         context.read<AddBookingBloc>().add(
                               UpdateAssignMethodEvent(
                                 context: context,
                                 assignType: selectedValue.toString(),
+                                bookingId: bookingId ?? "",
                               ),
                             );
 
-                        Navigator.pop(context);
+                        context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+
+                        Navigator.pop(context); // Pop bottom sheet
+                        
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          if (context.mounted) {
+                            Navigator.pop(context); // Redirect back from screen
+                            context.read<AddBookingBloc>().add(ResetBooking());
+                          }
+                        });
                       },
                       child: const Text(
                         "Done",

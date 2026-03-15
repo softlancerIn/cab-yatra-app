@@ -21,6 +21,7 @@
     static const String bookingDetail = 'api/driver/V2/booking';
     static const String profile = 'api/driver/V2/profile/';
     static const String transactions = 'api/driver/V2/profile/transactions';
+    static const String paymentMethods = 'api/driver/V2/profile/payment-methods';
 
 
     static const String location = 'api/driver/home/location';

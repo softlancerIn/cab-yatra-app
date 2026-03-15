@@ -146,34 +146,34 @@ class AddBookingRepo {
       throw ApiException(0, e.toString());
     }
   }  Future<UpdateAssignMethodModel> updateAssignMethodApi({
-
     required BuildContext context,
     required String assignType,
+    required String bookingId,
   }) async {
     try {
       final response = await _api.put(
         ApiConstants.updateAssignMethod,
         data: {
+          "id": bookingId,
           "assignType": assignType,
-
         },
-
         requiresAuth: true,
       );
 
       return UpdateAssignMethodModel.fromJson(response);
-      //  return LoginModel.fromJson(response['user']);
     } on DioException catch (e) {
       if (e.error is NoInternetException) {
         showNoInternetScreen(
           context,
-          onRetry: () => getCarCategory( context: context),
+          onRetry: () => updateAssignMethodApi(
+              context: context, assignType: assignType, bookingId: bookingId),
         );
         throw NoInternetException();
       } else if (e.error is ServerException) {
         showServerErrorScreen(
           context,
-          onRetry: () => getCarCategory( context: context),
+          onRetry: () => updateAssignMethodApi(
+              context: context, assignType: assignType, bookingId: bookingId),
         );
         throw ServerException();
       } else if (e.error is UnauthorizedException) {

@@ -11,6 +11,10 @@ import '../bloc/editBookingBloc.dart';
 import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
 import '../repo/editBookingRepo.dart';
+import '../../../app/router/navigation/nav.dart';
+import '../../Booking/bloc/booking_bloc.dart';
+import '../../Booking/bloc/booking_event.dart';
+import '../../Booking/bloc/booking_state.dart';
 
 class EditBookingOneWayScreen extends StatefulWidget {
   final String sId;
@@ -138,7 +142,8 @@ class EditBookingOneWayScreenState extends State<EditBookingOneWayScreen> {
               msg: "Booking updated successfully!",
               backgroundColor: Colors.green,
             );
-            Get.back();
+            context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+            Nav.pop(context);
           }
           if (state.hasError && state.errorMessage != null) {
             Fluttertoast.showToast(

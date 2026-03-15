@@ -9,6 +9,8 @@ import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
 import '../HomePageFlow/custom/apply_filter_dialog.dart';
+import 'package:share_plus/share_plus.dart';
+import 'model/postBookingListModel.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
@@ -492,7 +494,7 @@ class _BookingPageState extends State<BookingPage> {
                                   padding:
                                       const EdgeInsets.fromLTRB(12, 10, 12, 15),
                                   child: GestureDetector(
-                                    onTap: () {},
+                                    onTap: () => _shareBooking(newBookingData),
                                     child: Container(
                                       height: 44,
                                       width: double.infinity,
@@ -572,6 +574,61 @@ class _BookingPageState extends State<BookingPage> {
         ),
       ),
     );
+  }
+
+  void _shareBooking(SeeBookingData booking) {
+    final String type = (booking.subTypeLabel ?? "TRIP").toUpperCase();
+    final String orderId = booking.orderId ?? "";
+    final String pickup = booking.pickUpLoc ?? "";
+    final String drop = booking.destinationLoc ?? "";
+    final String carCategory = (booking.carCategory?.name ?? "").toUpperCase();
+    final String earning = booking.driverCommission ?? "0";
+    final String date = booking.pickUpDate ?? "";
+    final String time = booking.pickUpTime ?? "";
+    final String remark = (booking.remark != null && booking.remark!.isNotEmpty)
+        ? booking.remark!
+        : "N/A";
+
+    String message = "🚕 Cab yatra - Booking summary / ID -$orderId\n\n";
+    message += "$type BOOKING\n\n";
+
+    if (type.contains("ROUND")) {
+      message += "Pickup: $pickup\n";
+      message += "|\n";
+
+      List<String> destinations = drop.split(',');
+      if (destinations.length > 1) {
+        for (int i = 0; i < destinations.length - 1; i++) {
+          String loc = destinations[i].trim();
+          if (loc.isNotEmpty) {
+            message += "stop: $loc\n\n";
+          }
+        }
+        message += "Drop : ${destinations.last.trim()}\n\n";
+      } else {
+        message += "Drop : $drop\n\n";
+      }
+      message += "ALL INCLUSIVE PRICE (Tolls, taxes, parking, Driver charges)\n\n";
+    } else {
+      // One Way
+      message += "Pickup: $pickup\n";
+      message += "|\n";
+      message += "Drop: $drop\n\n";
+    }
+
+    message += "Cab: $carCategory\n";
+    message += "-Driver earning ₹$earning Inclusive All\n\n";
+
+    message += "Call: 7011873145 \n\n";
+
+    message += "Dated&time - $date@ $time\n\n";
+
+    message += "*extra requirement:\n$remark\n\n";
+
+    message +=
+        "DOWNLOAD DRIVER APP NOW - https://play.google.com/store/apps/details?id=cabyatra.com.users";
+
+    Share.share(message);
   }
 }
 

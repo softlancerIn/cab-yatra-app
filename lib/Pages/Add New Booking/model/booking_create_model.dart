@@ -6,9 +6,20 @@ class BookingCreateModel {
   BookingCreateModel({this.status, this.message, this.data});
 
   BookingCreateModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    message = json['message'];
-    data = json['data'] != null ? Data.fromJson(json['data']) : null;
+    status = json['status'] == true ||
+        json['status'] == 1 ||
+        json['status'] == "true" ||
+        json['status'] == "success";
+    message = json['message']?.toString();
+    if (json['data'] != null) {
+      if (json['data'] is Map<String, dynamic>) {
+        data = Data.fromJson(json['data']);
+      } else if (json['data'] is int) {
+        data = Data(id: json['data']);
+      } else if (json['data'] is String) {
+        data = Data(id: int.tryParse(json['data']));
+      }
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -69,27 +80,29 @@ class Data {
       this.isAirportLabel});
 
   Data.fromJson(Map<String, dynamic> json) {
-    orderId = json['orderId'];
-    driverId = json['driver_id'];
-    type = json['type'];
-    subType = json['subType'];
-    carCategoryId = json['carCategory_id'];
-    pickUpDate = json['pickUp_date'];
-    pickUpTime = json['pickUp_time'];
-    pickUpLoc = json['pickUpLoc'];
-    destinationLoc = json['destinationLoc'];
-    totalFaire = json['total_faire'];
-    driverCommission = json['driverCommission'];
-    isShowPhoneNumber = json['is_show_phoneNumber'];
-    isDriverCreateBooking = json['is_driver_createBooking'];
-    isAssigned = json['is_assigned'];
-    remark = json['remark'];
-    updatedAt = json['updated_at'];
-    createdAt = json['created_at'];
-    id = json['id'];
-    typeLabel = json['type_label'];
-    subTypeLabel = json['sub_type_label'];
-    isAirportLabel = json['is_airport_label'];
+    orderId = int.tryParse(json['orderId']?.toString() ?? "");
+    driverId = int.tryParse(json['driver_id']?.toString() ?? "");
+    type = json['type']?.toString();
+    subType = json['subType']?.toString();
+    carCategoryId = int.tryParse(json['carCategory_id']?.toString() ?? "");
+    pickUpDate = json['pickUp_date']?.toString();
+    pickUpTime = json['pickUp_time']?.toString();
+    pickUpLoc = json['pickUpLoc']?.toString();
+    destinationLoc = json['destinationLoc']?.toString();
+    totalFaire = int.tryParse(json['total_faire']?.toString() ?? "");
+    driverCommission = int.tryParse(json['driverCommission']?.toString() ?? "");
+    isShowPhoneNumber = json['is_show_phoneNumber'] == true ||
+        json['is_show_phoneNumber'] == 1 ||
+        json['is_show_phoneNumber'] == "1";
+    isDriverCreateBooking = json['is_driver_createBooking']?.toString();
+    isAssigned = json['is_assigned']?.toString();
+    remark = json['remark']?.toString();
+    updatedAt = json['updated_at']?.toString();
+    createdAt = json['created_at']?.toString();
+    id = int.tryParse(json['id']?.toString() ?? "");
+    typeLabel = json['type_label']?.toString();
+    subTypeLabel = json['sub_type_label']?.toString();
+    isAirportLabel = json['is_airport_label']?.toString();
   }
 
   Map<String, dynamic> toJson() {

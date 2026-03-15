@@ -11,6 +11,7 @@ class AddBookingState extends Equatable {
   final CarCategoryModel? carCategories;
   final UpdateAssignMethodModel? updateAssignMethodModel;
   final int? selectedCarCategoryId;
+  final String? bookingId;
 
   const AddBookingState({
     this.isLoading = false,
@@ -21,6 +22,7 @@ class AddBookingState extends Equatable {
     this.carCategories,
     this.selectedCarCategoryId,
     this.updateAssignMethodModel,
+    this.bookingId,
   });
 
   AddBookingState copyWith({
@@ -32,6 +34,7 @@ class AddBookingState extends Equatable {
     CarCategoryModel? carCategories,
     UpdateAssignMethodModel? updateAssignMethodModel,
     int? selectedCarCategoryId,
+    String? bookingId,
   }) {
     return AddBookingState(
       isLoading: isLoading ?? this.isLoading,
@@ -40,20 +43,24 @@ class AddBookingState extends Equatable {
       hasError: hasError ?? this.hasError,
       isSuccess: isSuccess ?? this.isSuccess,
       carCategories: carCategories ?? this.carCategories,
-      selectedCarCategoryId: selectedCarCategoryId ?? this.selectedCarCategoryId,
-      updateAssignMethodModel: updateAssignMethodModel ?? this.updateAssignMethodModel,
+      selectedCarCategoryId:
+          selectedCarCategoryId ?? this.selectedCarCategoryId,
+      updateAssignMethodModel:
+          updateAssignMethodModel ?? this.updateAssignMethodModel,
+      bookingId: bookingId ?? this.bookingId,
     );
   }
 
   @override
   List<Object?> get props => [
-    isLoading,
-    isSubmitting,
-    errorMessage,
-    hasError,
-    isSuccess,
-    carCategories,
-    selectedCarCategoryId,
-    updateAssignMethodModel,
-  ];
+        isLoading,
+        isSubmitting,
+        errorMessage,
+        hasError,
+        isSuccess,
+        carCategories,
+        selectedCarCategoryId,
+        updateAssignMethodModel,
+        bookingId,
+      ];
 }

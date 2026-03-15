@@ -7,6 +7,8 @@ import '../../../widget/primary_button.dart';
 import '../bloc/paymentBloc.dart';
 import '../bloc/paymentEvent.dart';
 import '../bloc/paymentState.dart';
+import '../../../cores/services/secure_storage_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({super.key});
@@ -33,7 +35,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // context.read<PaymentBloc>().add(LoadPayment());
+    context.read<PaymentBloc>().add(LoadPayment());
   }
 
   @override
@@ -61,6 +63,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Payment Updated Successfully")),
             );
+            Navigator.pop(context, true);
           }
         },
         builder: (context, state) {
@@ -68,15 +71,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
             return const Center(child: CircularProgressIndicator());
           }
 
-          final firstPayment = state.payment?.data?.isNotEmpty == true
-              ? state.payment!.data!.first
-              : null;
+          final firstPayment = state.payment?.data;
+
           if (firstPayment != null) {
             if (_bankNameController.text.isEmpty) {
               _bankNameController.text = firstPayment.bankName ?? "";
             }
             if (_accountNumberController.text.isEmpty) {
               _accountNumberController.text = firstPayment.accountNumber ?? "";
+              _reAccountNumberController.text = firstPayment.accountNumber ?? "";
             }
             if (_ifscCodeController.text.isEmpty) {
               _ifscCodeController.text = firstPayment.ifscCode ?? "";
@@ -96,9 +99,14 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
           return Column(
             children: [
               Expanded(
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    context.read<PaymentBloc>().add(LoadPayment());
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -157,6 +165,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
                   ),
                 ),
               ),
+            ),
 
               /// BOTTOM ACTION
               Padding(
@@ -234,13 +243,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
                           fit: BoxFit.cover),
                     ),
                   )
-                : state.payment?.data?.isNotEmpty == true &&
-                        state.payment!.data!.first.qrImageUrl != null &&
-                        state.payment!.data!.first.qrImageUrl!.isNotEmpty
+                : state.payment?.data?.qrImageUrl != null &&
+                        state.payment!.data!.qrImageUrl!.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(18),
                         child: Image.network(
-                          state.payment!.data!.first.qrImageUrl!,
+                          state.payment!.data!.qrImageUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               Image.asset('assets/images/qr_code.png',
@@ -310,14 +318,39 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
     );
   }
 
-  void _handleSubmit(BuildContext context) {
+  void _handleSubmit(BuildContext context) async {
     final bloc = context.read<PaymentBloc>();
     final isBankTab = _tabController?.index == 1;
+    final userId = await SecureStorageService.getUserId() ?? "0";
+
+    if (!isBankTab) {
+      if (_upiIdController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter UPI ID")),
+        );
+        return;
+      }
+    }
+
+    if (!mounted) return; // FIXES THE TOAST/CONTEXT CRASH
 
     if (isBankTab) {
+      if (_bankNameController.text.isEmpty ||
+          _accountNumberController.text.isEmpty ||
+          _ifscCodeController.text.isEmpty ||
+          _accountHolderController.text.isEmpty) {
+        Fluttertoast.showToast(msg: "Please fill all bank details");
+        return;
+      }
+
+      if (_accountNumberController.text != _reAccountNumberController.text) {
+        Fluttertoast.showToast(msg: "Account numbers do not match");
+        return;
+      }
+
       final fields = {
-        "driver_id": "26",
-        "type": "1",
+        "driver_id": userId,
+        "type": "1", // Bank = 1
         "bank_name": _bankNameController.text,
         "account_number": _accountNumberController.text,
         "ifsc_code": _ifscCodeController.text,
@@ -325,9 +358,15 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
       };
       bloc.add(SubmitPayment(fields: fields, files: {}));
     } else {
+      if (_upiIdController.text.isEmpty &&
+          _paymentNumberController.text.isEmpty) {
+        Fluttertoast.showToast(msg: "Please enter UPI ID or Payment Number");
+        return;
+      }
+
       final fields = {
-        "driver_id": "26",
-        "type": "2",
+        "driver_id": userId,
+        "type": "0", // UPI = 0 based on image
         "upi_id": _upiIdController.text,
         "payment_number": _paymentNumberController.text,
       };

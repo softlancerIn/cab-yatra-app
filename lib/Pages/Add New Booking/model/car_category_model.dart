@@ -6,8 +6,11 @@ class CarCategoryModel {
   CarCategoryModel({this.status, this.message, this.data});
 
   CarCategoryModel.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    message = json['message'];
+    status = json['status'] == true ||
+        json['status'] == 1 ||
+        json['status'] == "true" ||
+        json['status'] == "success";
+    message = json['message']?.toString();
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {

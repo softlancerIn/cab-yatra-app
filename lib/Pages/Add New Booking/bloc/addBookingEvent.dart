@@ -21,10 +21,15 @@ class SelectCarCategory extends AddBookingEvent {
   List<Object?> get props => [carCategoryId];
 }class UpdateAssignMethodEvent extends AddBookingEvent {
   final String assignType;
+  final String bookingId;
   final BuildContext context;
-  const UpdateAssignMethodEvent({required this.assignType,required this.context});
+  const UpdateAssignMethodEvent({
+    required this.assignType,
+    required this.bookingId,
+    required this.context,
+  });
   @override
-  List<Object?> get props => [assignType,context];
+  List<Object?> get props => [assignType, bookingId, context];
 }
 
 class SubmitBooking extends AddBookingEvent {
