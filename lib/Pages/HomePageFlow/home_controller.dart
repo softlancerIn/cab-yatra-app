@@ -1,3 +1,5 @@
+import 'package:cab_taxi_app/Pages/Chat/chats_screen.dart';
+import 'package:cab_taxi_app/Pages/Profile/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../Add New Booking/add_new_booking.dart';
@@ -28,7 +30,8 @@ class _MainHomeControllerState extends State<MainHomeController> {
       const Homepage(),
       const BookingPage(),
       AddBookingScreen(onBack: () => _onItemTapped(0)),
-      const ChatListingScreen(),
+      const ChatsScreen(),
+      const ProfileScreen(),
       const EditProfilePage(),
     ];
     final args = Get.arguments;
