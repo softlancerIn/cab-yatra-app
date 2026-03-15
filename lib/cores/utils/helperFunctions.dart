@@ -3,12 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
-
-
 class HelperFunctions {
   static bool isPickupTime(String? pickupDate, String? pickUpTime) {
-
     if (pickupDate == null || pickUpTime == null) {
       return false;
     }
@@ -17,18 +13,18 @@ class HelperFunctions {
       final String combinedDateTimeString = '$pickupDate $pickUpTime';
       final DateTime currentDateTime = DateTime.now();
       final DateTime pickUpDateTime = dateFormat.parse(combinedDateTimeString);
-      return currentDateTime.isAfter(pickUpDateTime) || currentDateTime.isAtSameMomentAs(pickUpDateTime);
+      return currentDateTime.isAfter(pickUpDateTime) ||
+          currentDateTime.isAtSameMomentAs(pickUpDateTime);
     } catch (e) {
       print('Error parsing date or time: $e');
       return false;
     }
   }
 
-
   static void makePhoneCall(BuildContext context, String? phoneNumber) async {
     if (phoneNumber == null || phoneNumber.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No contact found')),
+        const SnackBar(content: Text('No contact found')),
       );
       return;
     }
@@ -60,18 +56,18 @@ class HelperFunctions {
   }
 
   static Future<void> shareMessage(
-      String bookingId,
-      String picDate,
-      String picLoc,
-      String dropLoc,
-      String? vehicle,
-      String bookingType,
-      String? bookingAmount,
-      String? commission,
-      String? extraRequirement,
-      // String? bookingPostedBy,
-      String contactNumber,
-      ) async {
+    String bookingId,
+    String picDate,
+    String picLoc,
+    String dropLoc,
+    String? vehicle,
+    String bookingType,
+    String? bookingAmount,
+    String? commission,
+    String? extraRequirement,
+    // String? bookingPostedBy,
+    String contactNumber,
+  ) async {
     String message = "🌟 *Cab Yatra Partners* 🌟\n\n"
         "📋 *Booking Details:* \n"
         "---------------------------------\n"
@@ -92,4 +88,3 @@ class HelperFunctions {
     await Share.share(message);
   }
 }
-

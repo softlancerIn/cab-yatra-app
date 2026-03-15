@@ -31,4 +31,13 @@ class DriverRepo {
 
     return DriverListModel.fromJson(response);
   }
+
+  /// DELETE DRIVER
+  Future<bool> deleteDriver(int id) async {
+    final response = await _api.delete(
+      "api/driver/V2/profile/sub-drivers/$id",
+      requiresAuth: true,
+    );
+    return response['status'] == true;
+  }
 }

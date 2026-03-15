@@ -11,11 +11,13 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   BookingRepo repo = BookingRepo();
 //ResetDashboardEvent
   BookingBloc() : super(const BookingState()) {
- on<GetPostedBooingEvent>(getBookingEvent);
- on<DeleteBooingEvent>(deleteBookingEvent);
+  on<GetPostedBooingEvent>(getBookingEvent);
+  on<DeleteBooingEvent>(deleteBookingEvent);
+  on<UpdatePostedBookingSearchQueryEvent>((event, emit) {
+    emit(state.copyWith(searchQuery: event.searchQuery));
+  });
 
-
-    on<ResetBookingEvent>((event, emit) {
+    on<RESETBookingEvent>((event, emit) {
       emit(const BookingState()); // pura state reset
     });
   }

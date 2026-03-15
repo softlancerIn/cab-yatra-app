@@ -8,8 +8,12 @@ class AgentReviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Colors.white,
-      appBar: AppBAR(title: "",showLeading: true,showAction: false,),
+      backgroundColor: Colors.white,
+      appBar: const AppBAR(
+        title: "",
+        showLeading: true,
+        showAction: false,
+      ),
       // appBar: AppBar(
       //   backgroundColor: Colors.transparent,
       //   elevation: 0,
@@ -22,10 +26,10 @@ class AgentReviewScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
-        //    const SizedBox(height: 10),
+            //    const SizedBox(height: 10),
 
             /// Profile Image
-            CircleAvatar(
+            const CircleAvatar(
               radius: 45,
               backgroundImage: AssetImage(
                 'assets/images/profile_image.png', // replace with your asset
@@ -35,9 +39,9 @@ class AgentReviewScreen extends StatelessWidget {
             const SizedBox(height: 12),
 
             /// Rating
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.star, color: Colors.amber, size: 22),
                 SizedBox(width: 6),
                 Text(
@@ -71,9 +75,9 @@ class AgentReviewScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Row(
                     children: [
                       Text(
@@ -89,7 +93,7 @@ class AgentReviewScreen extends StatelessWidget {
                       Text(
                         '(Agent)',
                         style: TextStyle(
-                          color: const Color(0xFF787878),
+                          color: Color(0xFF787878),
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -102,13 +106,16 @@ class AgentReviewScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Company name: ',
-                        style: TextStyle(color: Colors.grey,fontSize: 12),
-                      ),  Text(
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      Text(
                         ' Mayank tour and travel',
-                        style: TextStyle( color: Colors.black,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontSize: 12,
                           fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -117,13 +124,16 @@ class AgentReviewScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Booking Cancelled Count: ',
-                        style: TextStyle(color: Colors.grey,fontSize: 12),
-                      ), Text(
+                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                      ),
+                      Text(
                         ' 610',
-                        style: TextStyle( color: Colors.black,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontSize: 12,
                           fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -177,7 +187,7 @@ class AgentReviewScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        shadows: [
+        shadows: const [
           BoxShadow(
             color: Color(0x3F000000),
             blurRadius: 4,
@@ -190,7 +200,7 @@ class AgentReviewScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// User Image
-          CircleAvatar(
+          const CircleAvatar(
             radius: 28,
             backgroundImage: AssetImage(
               'assets/images/profile_image.png', // replace with your asset
@@ -204,9 +214,9 @@ class AgentReviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
+                  children: [
                     Text(
                       'Raju Kumar',
                       style: TextStyle(
@@ -240,7 +250,7 @@ class AgentReviewScreen extends StatelessWidget {
                 Row(
                   children: List.generate(
                     5,
-                        (index) => const Icon(
+                    (index) => const Icon(
                       Icons.star,
                       size: 16,
                       color: Colors.amber,
@@ -252,7 +262,7 @@ class AgentReviewScreen extends StatelessWidget {
 
                 const Text(
                   'It is a long established fact that a reader '
-                      'It is a long established fact that a reader',
+                  'It is a long established fact that a reader',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey,

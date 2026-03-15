@@ -51,7 +51,6 @@ class _SplashScreenState extends State<SplashScreen> {
           "assets/images/spalshSCreen.png",
           height: screenHeight,
           width: screenWidth,
-          // width: screenWidth * 0.5,
           fit: BoxFit.cover,
         ),
       ),

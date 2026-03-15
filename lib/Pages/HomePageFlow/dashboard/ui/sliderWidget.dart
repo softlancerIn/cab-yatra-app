@@ -11,7 +11,10 @@ class SliderWidget extends StatefulWidget {
 }
 
 class _SliderWidgetState extends State<SliderWidget> {
-  List bannerList=[     'assets/images/banner22.png',     'assets/images/banner22.png',     'assets/images/banner22.png'];
+  List bannerList = [
+    'assets/images/banner22.png',
+    'assets/images/banner22.png',
+  ];
   @override
   Widget build(BuildContext context) {
     return CarouselSlider(
@@ -28,7 +31,7 @@ class _SliderWidgetState extends State<SliderWidget> {
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                margin: const EdgeInsets.symmetric(horizontal: 10.0),
+                margin: const EdgeInsets.symmetric(horizontal: 14.0),
                 decoration: BoxDecoration(
                   color: Colors.grey,
                   borderRadius: BorderRadius.circular(20),

@@ -1,24 +1,16 @@
-
-import 'dart:ui';
-
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../../../cores/utils/helperFunctions.dart';
-
-
-
 import '../../custom/customToggleSwitch.dart';
-import '../bloc/dashboard_bloc.dart';
-import '../bloc/dashboard_event.dart';
-import '../bloc/dashboard_state.dart';
+import '../../custom/customSearchBar.dart';
+import '../../../../app/router/navigation/nav.dart';
+import '../../../../app/router/navigation/routes.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 import 'activeBookingSection.dart';
 import 'newBookingSection.dart';
+import '../../../../Pages/Custom_Widgets/service_call_dialog.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -35,7 +27,6 @@ class _HomepageState extends State<Homepage>
   TimeOfDay? selectedTime;
   TextEditingController searchController = TextEditingController();
 
-
   String numericPart = '0.0';
 
   @override
@@ -49,18 +40,12 @@ class _HomepageState extends State<Homepage>
     selectedTime = TimeOfDay.now();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> _loadNumericPart() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? storedNumericPart = prefs.getString('numericPart');
     if (storedNumericPart != null) {
       setState(() {
-        numericPart =
-            storedNumericPart;
+        numericPart = storedNumericPart;
       });
     }
   }
@@ -77,22 +62,43 @@ class _HomepageState extends State<Homepage>
           child: Image.asset("assets/images/menu.png", height: 20),
         ),
         toolbarHeight: 50,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
-              // color: Color.fromRGBO(0, 0, 0, 1),
-              color: Colors.white),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
         ),
         centerTitle: false,
-        title: Text(
-          'CabYatra',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-          ),
+        title: const Row(
+          children: [
+            Text(
+              'Cab',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 22,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              'Yatra',
+              style: TextStyle(
+                color: Color(0xFFFFB300),
+                fontSize: 22,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
         ),
         // leading: Builder(
         //   builder: (context) => IconButton(
@@ -102,167 +108,191 @@ class _HomepageState extends State<Homepage>
         // ),
         actions: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.only(right: 14),
             child: Row(
               children: [
+                /// Alert Button
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  height: 28,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    color: Colors.black.withValues(alpha: 0.09),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: const Row(
                     children: [
                       Text(
                         'Alert',
-                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 11,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins'),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
+                      SizedBox(width: 8),
                       CustomToggleSwitch(),
                     ],
                   ),
                 ),
-                SizedBox(width: size.width * 0.03),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  height: 28,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: ShapeDecoration(
-                    color: Colors.black.withValues(alpha: 0.09),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                const SizedBox(width: 8),
+
+                /// Help Button
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => ServiceCallDialog(),
+                    );
+                  },
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Help',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 11,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+                    child: Row(
+                      children: [
+                        const Text(
+                          'Help',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Poppins'),
                         ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      GestureDetector(
-                        child: Image.asset('assets/images/caall.png', scale: 4),
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return ServiceCallDialog();
-                            },
-                          );
-                        },
-                      ),
-                    ],
+                        const SizedBox(width: 6),
+                        Image.asset('assets/images/caall.png', height: 14),
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          onTap: (value) {
-            // controller.getHomeData();
-          },
-          indicator: BoxDecoration(
-            border: Border(
-              bottom: const BorderSide(
-                  color: Color.fromRGBO(255, 216, 0, 1), width: 4),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: const UnderlineTabIndicator(
+                borderSide: BorderSide(color: Color(0xFFFFB300), width: 3),
+              ),
+              labelColor: Colors.black,
+              labelStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+              ),
+              unselectedLabelColor: Colors.grey,
+              unselectedLabelStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+              ),
+              tabs: const [
+                Tab(text: "New Booking"),
+                Tab(text: "Active Booking"),
+              ],
             ),
           ),
-          labelColor: Colors.black,
-          labelStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          unselectedLabelColor: const Color(0xFF5A6980),
-          unselectedLabelStyle: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-          tabs: const [
-            Tab(text: "New Booking"),
-            Tab(text: "Active Booking"),
-          ],
         ),
       ),
-      body: BlocBuilder<DashboardBloc,DashboardState>(
-          builder: (context,state) {
-            if(state.isLoading){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));;
+      body:
+          BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
+        if (state.isLoading) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
+        if (state.homeDataResponseModel == null) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()));
+        }
 
-            }
-            if(state.homeDataResponseModel==null){
-              return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: Center(child: const CircularProgressIndicator()));;
+        final activeBookings = state.homeDataResponseModel!.activeBooking.data;
+        final newBooking = state.homeDataResponseModel!.newBooking.data;
 
-            }
-            final activeBookings=state.homeDataResponseModel!.activeBooking.data;
-            final newBooking=state.homeDataResponseModel!.newBooking.data;
+        // Watch for search query changes to keep controller in sync (e.g. on clear)
+        if (state.searchQuery != searchController.text &&
+            state.searchQuery.isEmpty) {
+          searchController.text = state.searchQuery;
+        }
 
-
-            return  Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        NewBookingSection(),
-                        ActiveBookingSection(),
-                      ],
+        return Column(
+          children: [
+            /// Search and Filter Section
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: CustomSearchBar(
+                      controller: searchController,
+                      onSearch: () {
+                        context.read<DashboardBloc>().add(
+                            UpdateSearchQueryEvent(
+                                searchQuery: searchController.text.trim()));
+                      },
+                      onChanged: (value) {
+                        context.read<DashboardBloc>().add(
+                            UpdateSearchQueryEvent(searchQuery: value.trim()));
+                      },
                     ),
                   ),
-                ),
-              ],
-            );
-        }
-      ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Nav.push(context, Routes.applyFilter);
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        border:
+                            Border.all(color: Colors.grey.shade300, width: 1),
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.white,
+                      ),
+                      child: Center(
+                        child: Image.asset(
+                          "assets/images/seetingFilter.png",
+                          height: 24,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            // Content Section
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: const [
+                  NewBookingSection(),
+                  ActiveBookingSection(),
+                ],
+              ),
+            ),
+          ],
+        );
+      }),
       drawerEnableOpenDragGesture: true,
     );
   }
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
 
 class DashedLinePainter extends CustomPainter {
   @override
@@ -284,139 +314,6 @@ class DashedLinePainter extends CustomPainter {
     return false;
   }
 }
-
-class ServiceCallDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'Our Services Number Available for call from',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' ',
-                    style: TextStyle(
-                      color: Color(0xFFC41B1B),
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                      letterSpacing: 0.32,
-                    ),
-                  ),
-                  TextSpan(
-                    text: '06:00 AM',
-                    style: TextStyle(
-                      color: Color(0xFFC41B1B),
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' ',
-                    style: TextStyle(
-                      color: Color(0xFFC41B1B),
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'To',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  TextSpan(
-                    text: ' ',
-                    style: TextStyle(
-                      color: Color(0xFFC41B1B),
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  TextSpan(
-                    text: '09:00 PM.',
-                    style: TextStyle(
-                      color: Color(0xFFC41B1B),
-                      fontSize: 16,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(
-              height: screenHeight * 0.02,
-            ),
-            Container(
-              width: screenWidth * 0.25,
-              height: screenHeight * 0.05,
-              decoration: ShapeDecoration(
-                color: const Color(0xFF008A0D),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)),
-              ),
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    HelperFunctions.makePhoneCall(context, '7011873145');
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.phone,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.02,
-                      ),
-                      const Text(
-                        'Call',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
 
 ///calculate
 class DistanceCalculator {

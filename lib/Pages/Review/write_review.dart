@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -18,9 +17,9 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   int _selectedStars = 0;
-  List<bool> _checkBoxValues = [false, false, false, false];
-  TextEditingController _reviewController = TextEditingController();
-  String _driverName = '';
+  final List<bool> _checkBoxValues = [false, false, false, false];
+  final TextEditingController _reviewController = TextEditingController();
+  final String _driverName = '';
   Color _getStarColor(int index) {
     if (_selectedStars >= index) {
       switch (index) {
@@ -38,15 +37,11 @@ class _ReviewPageState extends State<ReviewPage> {
     }
     return Colors.grey;
   }
+
   @override
   void initState() {
     super.initState();
-
   }
-
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +52,7 @@ class _ReviewPageState extends State<ReviewPage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          AppBAR(title: "Write Review"),
+          const AppBAR(title: "Write Review"),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -67,9 +62,10 @@ class _ReviewPageState extends State<ReviewPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        CircleAvatar(
+                        const CircleAvatar(
                           radius: 40,
-                          backgroundImage: const AssetImage('assets/images/profile_sample.png'),
+                          backgroundImage:
+                              AssetImage('assets/images/profile_sample.png'),
                           // child: Text(
                           //   'N/A',
                           //   style: TextStyle(color: Colors.white),
@@ -82,7 +78,7 @@ class _ReviewPageState extends State<ReviewPage> {
                           // widget.driverId.toString(),
                           _driverName.isNotEmpty ? _driverName : 'Loading...',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 16,
                             fontFamily: 'Segoe UI',
@@ -120,7 +116,7 @@ class _ReviewPageState extends State<ReviewPage> {
                             _checkBoxValues[0] = value!;
                           });
                         },
-                        title: Text(
+                        title: const Text(
                           'Neat & clean Cab.',
                           style: TextStyle(
                             color: Colors.black,
@@ -138,7 +134,7 @@ class _ReviewPageState extends State<ReviewPage> {
                             _checkBoxValues[1] = value!;
                           });
                         },
-                        title: Text(
+                        title: const Text(
                           'Good Behavior.',
                           style: TextStyle(
                             color: Colors.black,
@@ -156,7 +152,7 @@ class _ReviewPageState extends State<ReviewPage> {
                             _checkBoxValues[2] = value!;
                           });
                         },
-                        title: Text(
+                        title: const Text(
                           'On Time.',
                           style: TextStyle(
                             color: Colors.black,
@@ -174,7 +170,7 @@ class _ReviewPageState extends State<ReviewPage> {
                             _checkBoxValues[3] = value!;
                           });
                         },
-                        title: Text(
+                        title: const Text(
                           'Good Music System.',
                           style: TextStyle(
                             color: Colors.black,
@@ -187,16 +183,15 @@ class _ReviewPageState extends State<ReviewPage> {
                       ),
                     ],
                   ),
-
                   SizedBox(height: screenHeight * 0.02),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Container(
                       decoration: ShapeDecoration(
                         color: Colors.white,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(9)),
-                        shadows: [
+                        shadows: const [
                           BoxShadow(
                             color: Color(0x3F000000),
                             blurRadius: 4,
@@ -224,26 +219,25 @@ class _ReviewPageState extends State<ReviewPage> {
                             borderRadius: BorderRadius.circular(9),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: EdgeInsets.all(16),
+                          contentPadding: const EdgeInsets.all(16),
                         ),
                       ),
                     ),
                   ),
-
                   SizedBox(height: screenHeight * 0.02),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: () {},
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Container(
                         width: double.infinity,
                         height: screenHeight * 0.06,
                         decoration: ShapeDecoration(
-                          color: Color(0xFFFFB900),
+                          color: const Color(0xFFFFB900),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6)),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             'Submit Review',
                             style: TextStyle(

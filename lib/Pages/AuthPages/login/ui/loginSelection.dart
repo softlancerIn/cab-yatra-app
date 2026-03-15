@@ -20,42 +20,45 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          image: DecorationImage(image: AssetImage("assets/images/loginSelection.png"),fit: BoxFit.fill)
-        ),
-        child:SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 12,vertical: 12),
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage("assets/images/loginSelection.png"),
+                fit: BoxFit.fill)),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Column(
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height*0.62,),
-              Text(
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.62,
+              ),
+              const Text(
                 'Welcome to Cabyatra',
                 style: TextStyle(
-                  color: const Color(0xFF3E4959),
+                  color: Color(0xFF3E4959),
                   fontSize: 20,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.40,
                 ),
               ),
-              SizedBox(height: 10,),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   GestureDetector(
-                    onTap: (){
-                      Nav.push(context,Routes.loginMobile);
-                  //    Get.to(const OtpPage(phone: "324472734734",));
+                    onTap: () {
+                      Nav.push(context, Routes.loginMobile);
                     },
                     child: Container(
                       width: 150,
-                      height: 38,
+                      height: 35,
                       clipBehavior: Clip.antiAlias,
                       decoration: ShapeDecoration(
                         color: const Color(0xFF3E4959),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Stack(
+                      child: const Stack(
                         children: [
                           Positioned(
                             left: 53,
@@ -75,9 +78,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: (){
-                      Nav.push(context,Routes.loginRegister);
-                     // Get.to(const NewRegisterScreen());
+                    onTap: () {
+                      Nav.push(context, Routes.loginRegister);
                     },
                     child: Container(
                       width: 150,
@@ -85,9 +87,10 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                       clipBehavior: Clip.antiAlias,
                       decoration: ShapeDecoration(
                         color: const Color(0xFFFCB117),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: Stack(
+                      child: const Stack(
                         children: [
                           Positioned(
                             left: 41,
@@ -108,7 +111,9 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                   )
                 ],
               ),
-              SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               SizedBox(
                 width: 300,
                 child: Text.rich(
@@ -124,14 +129,14 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: 'Terms of Use',
                         style: TextStyle(
-                          color: const Color(0xFF3E4959),
+                          color: Color(0xFF3E4959),
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                      //    textDecoration: TextDecoration.underline,
+                          //    textDecoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),
@@ -145,14 +150,14 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: 'Privacy Policy',
                         style: TextStyle(
-                          color: const Color(0xFF3E4959),
+                          color: Color(0xFF3E4959),
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                        //  textDecoration: TextDecoration.underline,
+                          //  textDecoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),
@@ -163,7 +168,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
               )
             ],
           ),
-        ) ,
+        ),
       ),
     );
   }

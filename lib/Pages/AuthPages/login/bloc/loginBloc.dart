@@ -20,9 +20,7 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
     SendOtpEvent event,
     Emitter<SignInState> emit,
   ) async {
-    if (event.mobileNumber == null ||
-        event.mobileNumber!.trim().isEmpty ||
-        event.mobileNumber!.length != 10) {
+    if (event.mobileNumber.trim().isEmpty || event.mobileNumber.length != 10) {
       emit(
         state.copyWith(
           isLoading: false,
@@ -39,12 +37,12 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
         phone: event.mobileNumber,
         context: event.context,
       );
-      if (response != null && response.status == true) {
+      if (response.status == true) {
         // Nav.push(event.context,Routes.otp,extra: {
         //
         //
         // });
-      //  Nav.go(context, Router.)
+        //  Nav.go(context, Router.)
         emit(
           state.copyWith(
             errorMessage: "Send OTP Successfully",
@@ -52,7 +50,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
             isSuccess: true,
           ),
         );
-
       } else {
         emit(
           state.copyWith(

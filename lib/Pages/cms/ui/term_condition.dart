@@ -15,26 +15,25 @@ class TermsConditionPage extends StatefulWidget {
 }
 
 class _TermsConditionPageState extends State<TermsConditionPage> {
-
   @override
   void initState() {
     super.initState();
 
     context.read<CmsBloc>().add(
-      LoadCms(context),
-    );
+          LoadCms(context),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-      appBar: AppBAR(title: "Terms Condition",showLeading: true,showAction: true,),
-
-
+      appBar: const AppBAR(
+        title: "Terms Condition",
+        showLeading: true,
+        showAction: true,
+      ),
       body: BlocBuilder<CmsBloc, CmsState>(
         builder: (context, state) {
-
           if (state.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -50,17 +49,13 @@ class _TermsConditionPageState extends State<TermsConditionPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
             children: [
-
-
               /// TERMS
               _cmsCard(
                 "Terms & Conditions",
                 cms.termCondition ?? "",
               ),
-
-
             ],
           );
         },
@@ -69,35 +64,38 @@ class _TermsConditionPageState extends State<TermsConditionPage> {
   }
 
   Widget _cmsCard(String title, String htmlContent) {
-
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-
       child: Padding(
-        padding: const EdgeInsets.all(8),
-
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Text(
               title,
               style: const TextStyle(
-                fontSize: 20,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
               ),
             ),
-
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 16),
             Html(
               data: htmlContent,
+              style: {
+                "body": Style(
+                  fontSize: FontSize(14),
+                  lineHeight: const LineHeight(1.5),
+                  color: Colors.black87,
+                  margin: Margins.zero,
+                  padding: HtmlPaddings.zero,
+                ),
+              },
             ),
-
           ],
         ),
       ),

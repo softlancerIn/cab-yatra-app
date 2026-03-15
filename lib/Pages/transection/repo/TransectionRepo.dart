@@ -1,5 +1,4 @@
 // 1. Auth Repository
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -12,25 +11,18 @@ import '../../../../cores/services/secure_storage_service.dart';
 
 import '../model/getTransectionModel.dart';
 
-
-
-
 class TransectionRepo {
   final ApiService _api = ApiService();
 
-
-
   Future<GetTransectionModel> getTransction({
     required BuildContext context,
-
   }) async {
     try {
       final response = await _api.get(
         ApiConstants.transactions,
         requiresAuth: true,
-
       );
-print("👌👌👌👌driverImageUrldriverImageUrldriverImageUrldriverImageUrl");
+      print("👌👌👌👌driverImageUrldriverImageUrldriverImageUrldriverImageUrl");
 
       return GetTransectionModel.fromJson(response);
     } on DioException catch (e) {
@@ -39,7 +31,6 @@ print("👌👌👌👌driverImageUrldriverImageUrldriverImageUrldriverImageUrl"
           context,
           onRetry: () => getTransction(
             context: context,
-
           ),
         );
         throw NoInternetException();
@@ -48,8 +39,6 @@ print("👌👌👌👌driverImageUrldriverImageUrldriverImageUrldriverImageUrl"
           context,
           onRetry: () => getTransction(
             context: context,
-
-
           ),
         );
         throw ServerException();

@@ -43,7 +43,23 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
       }
     });
 
+    on<DeleteDriver>(_deleteDriver);
 
+
+  }
+
+  Future<void> _deleteDriver(
+      DeleteDriver event,
+      Emitter<DriverState> emit,
+      ) async {
+    try {
+      final success = await repo.deleteDriver(event.id);
+      if(success){
+        add(LoadDrivers());
+      }
+    } catch (e) {
+      print("Error deleting driver: $e");
+    }
   }
 
   Future<void> _submitDriver(

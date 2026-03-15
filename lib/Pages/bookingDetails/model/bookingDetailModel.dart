@@ -1,59 +1,69 @@
 class BookingDetailModel {
   final bool status;
-  final BookingData data;
   final String message;
+  final BookingData? data;
 
   BookingDetailModel({
     required this.status,
-    required this.data,
     required this.message,
+    this.data,
   });
 
   factory BookingDetailModel.fromJson(Map<String, dynamic> json) {
     return BookingDetailModel(
       status: json['status'] ?? false,
-      data: BookingData.fromJson(json['data'] ?? {}),
       message: json['message'] ?? '',
+      data: json['data'] != null ? BookingData.fromJson(json['data']) : null,
     );
   }
 }
+
 class BookingData {
-  final String bookingId;
+  final int id;
+  final String orderId;
   final String pickupLocation;
   final String dropLocation;
   final String pickupDate;
   final String pickupTime;
   final String vehicleType;
   final double totalAmount;
-  final String bookingStatus;
-  final DriverDetail driver;
+  final double driverCommission;
+  final String remark;
+  final String subTypeLabel;
 
   BookingData({
-    required this.bookingId,
+    required this.id,
+    required this.orderId,
     required this.pickupLocation,
     required this.dropLocation,
     required this.pickupDate,
     required this.pickupTime,
     required this.vehicleType,
     required this.totalAmount,
-    required this.bookingStatus,
-    required this.driver,
+    required this.driverCommission,
+    required this.remark,
+    required this.subTypeLabel,
   });
 
   factory BookingData.fromJson(Map<String, dynamic> json) {
     return BookingData(
-      bookingId: json['booking_id'] ?? '',
-      pickupLocation: json['pickup_location'] ?? '',
-      dropLocation: json['drop_location'] ?? '',
-      pickupDate: json['pickup_date'] ?? '',
-      pickupTime: json['pickup_time'] ?? '',
-      vehicleType: json['vehicle_type'] ?? '',
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
-      bookingStatus: json['booking_status'] ?? '',
-      driver: DriverDetail.fromJson(json['driver'] ?? {}),
+      id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      orderId: json['orderId']?.toString() ?? '',
+      pickupLocation: json['pickUpLoc'] ?? '',
+      dropLocation: json['destinationLoc'] ?? '',
+      pickupDate: json['pickUp_date'] ?? '',
+      pickupTime: json['pickUp_time'] ?? '',
+      vehicleType: json['car_category'] != null ? json['car_category']['name']?.toString() ?? '' : '',
+      totalAmount: double.tryParse(json['total_faire']?.toString() ?? '0') ?? 0.0,
+      driverCommission: double.tryParse(json['driverCommission']?.toString() ?? '0') ?? 0.0,
+      remark: json['remark'] ?? '',
+      subTypeLabel: json['sub_type_label'] ?? '',
     );
   }
 }
+
+// Keeping DriverDetail structure in case it's added later by other endpoints,
+// but making it optional in mapping or handling it safely in UI.
 class DriverDetail {
   final String name;
   final String agencyName;

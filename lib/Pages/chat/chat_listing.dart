@@ -1,7 +1,3 @@
-
-
-
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -37,7 +33,8 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
   bool _isConnected = false;
   String? _username;
-  String? _authToken="251|ge2tcBrvHYt3sYIqMqBKdVDbj727s8CmxdVc7Pqrc1a027e9"; // ← add your auth token here (JWT / Sanctum / etc)
+  final String? _authToken =
+      "251|ge2tcBrvHYt3sYIqMqBKdVDbj727s8CmxdVc7Pqrc1a027e9"; // ← add your auth token here (JWT / Sanctum / etc)
 
   @override
   void initState() {
@@ -119,20 +116,23 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
               headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': 'Bearer $_authToken',  // your token "251|ge2tcBrv..."
+                'Authorization':
+                    'Bearer $_authToken', // your token "251|ge2tcBrv..."
               },
               body: jsonEncode({
-                'socket_id': socketId,          // ← Pusher sends this
-                'channel_name': channelName,    // ← e.g. "private-chat.booking.505"
+                'socket_id': socketId, // ← Pusher sends this
+                'channel_name':
+                    channelName, // ← e.g. "private-chat.booking.505"
               }),
             );
 
             if (response.statusCode == 200) {
               final json = jsonDecode(response.body);
               debugPrint("Auth success → ${response.body}");
-              return json;  // Must be {"auth": "8a3c4b441150f546090a:signature..."}
+              return json; // Must be {"auth": "8a3c4b441150f546090a:signature..."}
             } else {
-              debugPrint("Auth failed → Status: ${response.statusCode} | Body: ${response.body}");
+              debugPrint(
+                  "Auth failed → Status: ${response.statusCode} | Body: ${response.body}");
               return null;
             }
           } catch (e) {
@@ -146,7 +146,6 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
       // Now subscribe
       await pusher!.subscribe(channelName: channelName);
-
     } catch (e) {
       debugPrint("Pusher init/subscribe error: $e");
       if (mounted) {
@@ -158,12 +157,11 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
   }
 
   Future<void> _sendMessage() async {
-
     final text = _messageController.text.trim();
 
     if (text.isEmpty) return;
 
-    final url = "https://cabyatra.com/api/driver/V2/send-message";
+    const url = "https://cabyatra.com/api/driver/V2/send-message";
 
     final body = {
       "receiver_id": "1",
@@ -172,7 +170,6 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
     };
 
     try {
-
       final response = await http.post(
         Uri.parse(url),
         headers: {
@@ -187,7 +184,6 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
       debugPrint("SEND BODY: ${response.body}");
 
       if (response.statusCode == 200) {
-
         final newMsg = Message(
           id: 0,
           senderId: int.parse(currentUserId!),
@@ -204,18 +200,16 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
         _scrollToBottom();
       }
-
     } catch (e) {
       debugPrint("Send error $e");
     }
   }
 
   Future<void> getMessages() async {
-
-    final url = "https://cabyatra.com/api/driver/V2/get-messages/${_channelIdController.text}";
+    final url =
+        "https://cabyatra.com/api/driver/V2/get-messages/${_channelIdController.text}";
 
     try {
-
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -228,7 +222,6 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
       debugPrint("CHAT BODY: ${response.body}");
 
       if (response.statusCode == 200) {
-
         final List data = jsonDecode(response.body);
 
         _messages.clear();
@@ -241,7 +234,6 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
         _scrollToBottom();
       }
-
     } catch (e) {
       debugPrint("Chat list error $e");
     }
@@ -274,6 +266,20 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Private Chat (Pusher)'),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 4,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -314,7 +320,8 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                   ElevatedButton(
                     onPressed: () {
                       final name = _nameController.text.trim();
-                      if (name.isNotEmpty && _channelIdController.text.trim().isNotEmpty) {
+                      if (name.isNotEmpty &&
+                          _channelIdController.text.trim().isNotEmpty) {
                         setState(() => _username = name);
                         _connectAndSubscribe();
                       } else {
@@ -332,33 +339,33 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
           // Messages list
           Expanded(
             child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8),
-              itemCount: _messages.length,
+                controller: _scrollController,
+                padding: const EdgeInsets.all(8),
+                itemCount: _messages.length,
                 itemBuilder: (context, index) {
-
                   final msg = _messages[index];
 
                   final isMe = msg.senderId.toString() == currentUserId;
 
                   return Align(
-                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment:
+                        isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 4, horizontal: 8),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 14),
                       decoration: BoxDecoration(
                         color: isMe ? Colors.green[200] : Colors.grey[300],
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
-                        crossAxisAlignment:
-                        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
                         children: [
-
                           Text(msg.message),
-
                           const SizedBox(height: 4),
-
                           Text(
                             msg.formattedTime,
                             style: const TextStyle(
@@ -366,13 +373,11 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                               color: Colors.grey,
                             ),
                           ),
-
                         ],
                       ),
                     ),
                   );
-                }
-            ),
+                }),
           ),
 
           // Input
@@ -384,9 +389,13 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: _isConnected ? 'Type a message...' : 'Not connected...',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      hintText: _isConnected
+                          ? 'Type a message...'
+                          : 'Not connected...',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
                     enabled: _isConnected,
                     onSubmitted: (_) => _sendMessage(),
@@ -434,6 +443,6 @@ class Message {
 
   String get formattedTime {
     final dt = DateTime.parse(createdAt);
-    return "${dt.hour.toString().padLeft(2,'0')}:${dt.minute.toString().padLeft(2,'0')}";
+    return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 }

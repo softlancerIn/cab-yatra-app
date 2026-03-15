@@ -29,9 +29,12 @@ class BookingDetailBloc extends Bloc<BookingDetailEvent, BookingDetailState> {
       final response = await repo.getBookingDetailApi(context: event.context,bookingId: event.bookingId);
       if (response.status == true) {
         emit(state.copyWith(isLoading: false, bookingDetailModel: response));
+      } else {
+        emit(state.copyWith(isLoading: false, errorMessage: response.message));
       }
     } catch (e) {
       print(">>>>>>>>>>>>>>>>>>get booking Data Exception Error>>>>$e");
+      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }
   }
 

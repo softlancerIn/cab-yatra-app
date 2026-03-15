@@ -7,7 +7,7 @@ import '../../../app/router/navigation/nav.dart';
 import 'alertFilterScreen.dart';
 
 class CustomToggleSwitch extends StatefulWidget {
-  const CustomToggleSwitch({Key? key}) : super(key: key);
+  const CustomToggleSwitch({super.key});
 
   @override
   State<CustomToggleSwitch> createState() => _CustomToggleSwitchState();
@@ -23,9 +23,9 @@ class _CustomToggleSwitchState extends State<CustomToggleSwitch> {
         setState(() {
           isOn = !isOn;
         });
-        Nav.push(context,Routes.alertFilter);
-      //  Get.to(const AlertFilterScreen());
-    //    Get.to()AlertFilterScreen
+        Nav.push(context, Routes.alertFilter);
+        //  Get.to(const AlertFilterScreen());
+        //    Get.to()AlertFilterScreen
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),

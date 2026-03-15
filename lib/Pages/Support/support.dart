@@ -32,12 +32,12 @@ class _SupportScreennnState extends State<SupportScreennn> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: InkWell(
-          child: Icon(Icons.arrow_back_ios_new),
+          child: const Icon(Icons.arrow_back_ios_new),
           onTap: () {
             Navigator.pop(context);
           },
         ),
-        title: Text(
+        title: const Text(
           "Support",
           textAlign: TextAlign.center,
           style: TextStyle(
@@ -51,21 +51,21 @@ class _SupportScreennnState extends State<SupportScreennn> {
         actions: [Image.asset("assets/images/car_icon_n.png")],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: screenHeight * 0.02,
             ),
-            Text("Tell us how we can help",
+            const Text("Tell us how we can help",
                 // textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 18,
                     color: Colors.black,
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.w600)),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             Text(
@@ -76,7 +76,7 @@ class _SupportScreennnState extends State<SupportScreennn> {
                     color: Colors.black.withOpacity(0.4),
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.w400)),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Container(
@@ -86,7 +86,7 @@ class _SupportScreennnState extends State<SupportScreennn> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadiusDirectional.circular(10),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.grey,
                     offset: Offset(0, 2),
@@ -98,7 +98,7 @@ class _SupportScreennnState extends State<SupportScreennn> {
               child: TextFormField(
                 //controller: provider.controller,
                 //maxLines: 100,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.search),
                   hintText: 'Search',
                   hintStyle: TextStyle(
@@ -112,7 +112,7 @@ class _SupportScreennnState extends State<SupportScreennn> {
                       EdgeInsets.only(left: 11, top: 10, bottom: 10, right: 40),
                   border: InputBorder.none,
                 ),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.black,
                   fontSize: 14,
                   fontFamily: 'Poppins',
@@ -135,13 +135,13 @@ class _SupportScreennnState extends State<SupportScreennn> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [],
         ),
         ListView.builder(
           // reverse: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           // itemCount: 7,
           itemCount: helpSupportData.length,
@@ -168,14 +168,14 @@ class _SupportScreennnState extends State<SupportScreennn> {
 
 class QAItem extends StatelessWidget {
   const QAItem({
-    Key? key,
+    super.key,
     required this.title,
     required this.children,
     this.titleColor = Colors.black,
     this.titleFontSize = 14.0,
     this.titleFontWeight = FontWeight.w500,
     this.backgroundColor = Colors.white,
-  }) : super(key: key);
+  });
 
   final Widget title;
   final List<Widget> children;

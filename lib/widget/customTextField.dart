@@ -1,16 +1,5 @@
-
-
-
-
-
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-
-
-
 
 class CommonTextFormField extends StatelessWidget {
   // Sabhi properties same as CommonTextFormField
@@ -81,7 +70,7 @@ class CommonTextFormField extends StatelessWidget {
     this.autofocus = false,
     this.height = 50.0,
     this.backgroundColor = Colors.white,
-    this.borderColor ,
+    this.borderColor,
     this.borderRadius = 10.0,
   });
 
@@ -110,16 +99,8 @@ class CommonTextFormField extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border.all(color: borderColor??Color(0xffDBDBDB)),
+        border: Border.all(color: borderColor ?? const Color(0xffDBDBDB)),
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow:   [
-          BoxShadow(
-          color: Color(0x3F000000),
-      blurRadius: 4,
-      offset: Offset(0, 0),
-      spreadRadius: 0,
-    )
-    ],
       ),
       child: TextFormField(
         controller: controller,
@@ -148,14 +129,15 @@ class CommonTextFormField extends StatelessWidget {
           counterText: counterText ?? "", // Hide counter by default
           prefixIcon: prefixIcon != null
               ? Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Icon(prefixIcon, size: 20, color: Colors.black54),
-          )
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Icon(prefixIcon, size: 20, color: Colors.black54),
+                )
               : null,
           suffixIcon: customSuffix ?? suffixIcon,
           border: InputBorder.none, // No border, just container handles it
-          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          hintStyle: TextStyle(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          hintStyle: const TextStyle(
             color: Colors.black54,
             fontSize: 13,
           ),

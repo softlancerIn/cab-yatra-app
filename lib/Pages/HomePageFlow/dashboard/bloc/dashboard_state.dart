@@ -9,6 +9,10 @@ class DashboardState extends Equatable {
   final String? errorMessage;
 
   final HomePageResponse? homeDataResponseModel;
+  final String searchQuery;
+  final String? selectedVehicleType;
+  final String? pickupLocationFilter;
+  final String? dropLocationFilter;
 
 
   const DashboardState({
@@ -17,6 +21,10 @@ class DashboardState extends Equatable {
     this.isLoading = false,
 
     this.homeDataResponseModel,
+    this.searchQuery = '',
+    this.selectedVehicleType,
+    this.pickupLocationFilter,
+    this.dropLocationFilter,
 
 
   });
@@ -27,6 +35,10 @@ class DashboardState extends Equatable {
     String? errorMessage,
 
     HomePageResponse? homeDataResponseModel,
+    String? searchQuery,
+    String? selectedVehicleType,
+    String? pickupLocationFilter,
+    String? dropLocationFilter,
 
   }) {
     return DashboardState(
@@ -35,6 +47,10 @@ class DashboardState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
 
       homeDataResponseModel: homeDataResponseModel ?? this.homeDataResponseModel,
+      searchQuery: searchQuery ?? this.searchQuery,
+      selectedVehicleType: selectedVehicleType ?? this.selectedVehicleType,
+      pickupLocationFilter: pickupLocationFilter ?? this.pickupLocationFilter,
+      dropLocationFilter: dropLocationFilter ?? this.dropLocationFilter,
 
 
     );
@@ -48,8 +64,10 @@ class DashboardState extends Equatable {
     errorMessage,
 
     homeDataResponseModel,
+    searchQuery,
+    selectedVehicleType,
+    pickupLocationFilter,
+    dropLocationFilter,
 
   ];
 }
-
-

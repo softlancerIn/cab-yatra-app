@@ -3,23 +3,25 @@ import 'package:flutter/material.dart';
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSearch;
+  final ValueChanged<String>? onChanged;
 
   const CustomSearchBar({
     super.key,
     required this.controller,
     required this.onSearch,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 47,
+      height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        color: Colors.white,
+        color: Colors.transparent,
         shape: RoundedRectangleBorder(
-          side: BorderSide(width: 0.50),
+          side: const BorderSide(width: 0.50, color: Colors.grey),
           borderRadius: BorderRadius.circular(10),
         ),
       ),
@@ -35,6 +37,8 @@ class CustomSearchBar extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              onSubmitted: (_) => onSearch(),
+              onChanged: onChanged,
               decoration: const InputDecoration(
                 hintText: 'Search your post booking ...',
                 hintStyle: TextStyle(

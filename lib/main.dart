@@ -18,6 +18,7 @@ import 'Pages/addDriver/bloc/driverBloc.dart';
 import 'Pages/bookingDetails/bloc/bookingDetailsBloc.dart';
 import 'Pages/cms/bloc/cms_bloc.dart';
 import 'Pages/editBooking/bloc/editBookingBloc.dart';
+import 'Pages/manage_vehicles/bloc/vehicle_bloc.dart';
 import 'Pages/transection/bloc/transections_bloc.dart';
 import 'app/router/app_router.dart';
 
@@ -32,8 +33,6 @@ void main()async  {
 
   await NotificationService.initialize();
   await FCMService.init();
-
-
   runApp(const MyApp());
 }
 
@@ -61,6 +60,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<DriverBloc>(create: (context) => DriverBloc(),),
     BlocProvider<PaymentBloc>(create: (context) => PaymentBloc(),),
         BlocProvider<TransectionsBloc>(create: (context) => TransectionsBloc(),),
+        BlocProvider<VehicleBloc>(create: (context) => VehicleBloc(),),
          BlocProvider<CmsBloc>(create: (context) => CmsBloc(),),
         // BlocProvider<SettingsBloc>(create: (context) => SettingsBloc(),),
         // BlocProvider<BookingHistoryBloc>(create: (context) => BookingHistoryBloc(),),
