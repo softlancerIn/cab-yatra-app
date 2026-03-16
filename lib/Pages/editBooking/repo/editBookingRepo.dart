@@ -10,12 +10,10 @@ import '../../../../cores/services/secure_storage_service.dart';
 
 import '../model/edit_Booking_model.dart';
 import '../model/edit_car_category_model.dart';
-
+import '../../Add New Booking/model/updateAssignMethodModel.dart';
 
 class EditBookingRepo {
   final ApiService _api = ApiService();
-
-
 
   Future<EditBookingModel> editBookingApi({
     required String id,
@@ -27,8 +25,10 @@ class EditBookingRepo {
     required List destinationLoc,
     required double total_faire,
     required double driverCommission,
-    required double is_show_phoneNumber,
+    required int is_show_phoneNumber,
     required String remarks,
+    required String? noOfDays,
+    required String? tripNotes,
     required BuildContext context,
   }) async {
     try {
@@ -43,8 +43,10 @@ class EditBookingRepo {
           "destinationLoc": destinationLoc,
           "total_faire": total_faire,
           "driverCommission": driverCommission,
-          "is_show_phoneNumber": is_show_phoneNumber == 1,
+          "is_show_phoneNumber": is_show_phoneNumber,
           "remarks": remarks,
+          "no_of_days": noOfDays,
+          "trip_notes": tripNotes,
         },
         requiresAuth: true,
       );
@@ -66,6 +68,8 @@ class EditBookingRepo {
             remarks: remarks,
             subType: subType,
             total_faire: total_faire,
+            noOfDays: noOfDays,
+            tripNotes: tripNotes,
           ),
         );
         throw NoInternetException();
@@ -85,6 +89,8 @@ class EditBookingRepo {
             remarks: remarks,
             subType: subType,
             total_faire: total_faire,
+            noOfDays: noOfDays,
+            tripNotes: tripNotes,
           ),
         );
         throw ServerException();
@@ -99,16 +105,12 @@ class EditBookingRepo {
     }
   }
 
-
-
   Future<EditCarCategoryModel> getCarCategory({
-
     required BuildContext context,
   }) async {
     try {
       final response = await _api.get(
         ApiConstants.getCarCategory,
-
         requiresAuth: true,
       );
 
@@ -118,13 +120,52 @@ class EditBookingRepo {
       if (e.error is NoInternetException) {
         showNoInternetScreen(
           context,
-          onRetry: () => getCarCategory( context: context),
+          onRetry: () => getCarCategory(context: context),
         );
         throw NoInternetException();
       } else if (e.error is ServerException) {
         showServerErrorScreen(
           context,
-          onRetry: () => getCarCategory( context: context),
+          onRetry: () => getCarCategory(context: context),
+        );
+        throw ServerException();
+      } else if (e.error is UnauthorizedException) {
+        await SecureStorageService.logout(context);
+        throw UnauthorizedException();
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      throw ApiException(0, e.toString());
+    }
+  }
+
+  Future<UpdateAssignMethodModel> updateAssignMethodApi({
+    required BuildContext context,
+    required String assignType,
+  }) async {
+    try {
+      final response = await _api.put(
+        ApiConstants.updateAssignMethod,
+        data: {
+          "assignType": assignType,
+        },
+        requiresAuth: true,
+      );
+      return UpdateAssignMethodModel.fromJson(response);
+    } on DioException catch (e) {
+      if (e.error is NoInternetException) {
+        showNoInternetScreen(
+          context,
+          onRetry: () =>
+              updateAssignMethodApi(context: context, assignType: assignType),
+        );
+        throw NoInternetException();
+      } else if (e.error is ServerException) {
+        showServerErrorScreen(
+          context,
+          onRetry: () =>
+              updateAssignMethodApi(context: context, assignType: assignType),
         );
         throw ServerException();
       } else if (e.error is UnauthorizedException) {

@@ -23,8 +23,8 @@ class EditSelectCarCategory extends EditBookingEvent {
 }
 
 class EditSubmitBooking extends EditBookingEvent {
-  final String id;               // "0", "1", etc.
-  final String subType;               // "0", "1", etc.
+  final String id;
+  final String subType;
   final int carCategoryId;
   final String pickUpDate;
   final String pickUpTime;
@@ -34,6 +34,8 @@ class EditSubmitBooking extends EditBookingEvent {
   final double driverCommission;
   final bool showPhoneNumber;
   final String remarks;
+  final String? noOfDays;
+  final String? tripNotes;
   final BuildContext context;
 
   const EditSubmitBooking({
@@ -48,11 +50,14 @@ class EditSubmitBooking extends EditBookingEvent {
     required this.driverCommission,
     required this.showPhoneNumber,
     required this.remarks,
+    this.noOfDays,
+    this.tripNotes,
     required this.context,
   });
 
   @override
   List<Object?> get props => [
+    id,
     subType,
     carCategoryId,
     pickUpDate,
@@ -63,7 +68,17 @@ class EditSubmitBooking extends EditBookingEvent {
     driverCommission,
     showPhoneNumber,
     remarks,
+    noOfDays,
+    tripNotes,
   ];
 }
 
 class ResetBooking extends EditBookingEvent {}
+
+class EditUpdateAssignMethodEvent extends EditBookingEvent {
+  final BuildContext context;
+  final String assignType;
+  const EditUpdateAssignMethodEvent({required this.context, required this.assignType});
+  @override
+  List<Object?> get props => [context, assignType];
+}

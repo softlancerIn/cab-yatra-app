@@ -69,24 +69,26 @@ class Data {
       this.isAirportLabel});
 
   Data.fromJson(Map<String, dynamic> json) {
-    orderId = json['orderId'];
-    driverId = json['driver_id'];
-    type = json['type'];
-    subType = json['subType'];
-    carCategoryId = json['carCategory_id'];
+    orderId = json['orderId'] == null ? null : (double.tryParse(json['orderId'].toString())?.toInt());
+    driverId = json['driver_id'] == null ? null : (double.tryParse(json['driver_id'].toString())?.toInt());
+    type = json['type']?.toString();
+    subType = json['subType']?.toString();
+    carCategoryId = json['carCategory_id'] == null ? null : (double.tryParse(json['carCategory_id'].toString())?.toInt());
     pickUpDate = json['pickUp_date'];
     pickUpTime = json['pickUp_time'];
     pickUpLoc = json['pickUpLoc'];
     destinationLoc = json['destinationLoc'];
-    totalFaire = json['total_faire'];
-    driverCommission = json['driverCommission'];
-    isShowPhoneNumber = json['is_show_phoneNumber'];
-    isDriverCreateBooking = json['is_driver_createBooking'];
-    isAssigned = json['is_assigned'];
+    totalFaire = json['total_faire'] == null ? null : (double.tryParse(json['total_faire'].toString())?.toInt());
+    driverCommission = json['driverCommission'] == null ? null : (double.tryParse(json['driverCommission'].toString())?.toInt());
+    isShowPhoneNumber = json['is_show_phoneNumber'] == 1 || 
+                        json['is_show_phoneNumber'] == true || 
+                        json['is_show_phoneNumber'].toString() == "1";
+    isDriverCreateBooking = json['is_driver_createBooking']?.toString();
+    isAssigned = json['is_assigned']?.toString();
     remark = json['remark'];
     updatedAt = json['updated_at'];
     createdAt = json['created_at'];
-    id = json['id'];
+    id = json['id'] == null ? null : (double.tryParse(json['id'].toString())?.toInt());
     typeLabel = json['type_label'];
     subTypeLabel = json['sub_type_label'];
     isAirportLabel = json['is_airport_label'];
@@ -105,7 +107,7 @@ class Data {
     data['destinationLoc'] = destinationLoc;
     data['total_faire'] = totalFaire;
     data['driverCommission'] = driverCommission;
-    data['is_show_phoneNumber'] = isShowPhoneNumber;
+    data['is_show_phoneNumber'] = isShowPhoneNumber == true ? 1 : 0;
     data['is_driver_createBooking'] = isDriverCreateBooking;
     data['is_assigned'] = isAssigned;
     data['remark'] = remark;

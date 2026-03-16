@@ -44,6 +44,8 @@ class SeeBookingData {
   String? isDriverCreateBooking;
   String? isAssigned;
   String? remark;
+  String? noOfDays;
+  String? tripNotes;
   String? typeLabel;
   String? subTypeLabel;
   String? isAirportLabel;
@@ -67,6 +69,8 @@ class SeeBookingData {
       this.isDriverCreateBooking,
       this.isAssigned,
       this.remark,
+      this.noOfDays,
+      this.tripNotes,
       this.typeLabel,
       this.subTypeLabel,
       this.isAirportLabel,
@@ -90,6 +94,8 @@ class SeeBookingData {
     isDriverCreateBooking = json['is_driver_createBooking'];
     isAssigned = json['is_assigned'];
     remark = json['remark'];
+    noOfDays = json['no_of_days'];
+    tripNotes = json['trip_notes'];
     typeLabel = json['type_label'];
     subTypeLabel = json['sub_type_label'];
     isAirportLabel = json['is_airport_label'];
@@ -117,6 +123,8 @@ class SeeBookingData {
     data['is_driver_createBooking'] = isDriverCreateBooking;
     data['is_assigned'] = isAssigned;
     data['remark'] = remark;
+    data['no_of_days'] = noOfDays;
+    data['trip_notes'] = tripNotes;
     data['type_label'] = typeLabel;
     data['sub_type_label'] = subTypeLabel;
     data['is_airport_label'] = isAirportLabel;

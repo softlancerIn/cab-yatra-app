@@ -10,6 +10,7 @@ import '../../../widget/customTextField.dart';
 import '../bloc/editBookingBloc.dart';
 import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
+import '../../HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 
 class EditBookingRoundTripScreen extends StatefulWidget {
   final String sId;
@@ -21,6 +22,8 @@ class EditBookingRoundTripScreen extends StatefulWidget {
   final String totalFare;
   final String driverCommission;
   final String remark;
+  final String? noOfDays;
+  final String? tripNotes;
 
   const EditBookingRoundTripScreen({
     super.key,
@@ -33,6 +36,8 @@ class EditBookingRoundTripScreen extends StatefulWidget {
     required this.dropLocation,
     required this.pickUpLocation,
     required this.vehicalType,
+    this.noOfDays,
+    this.tripNotes,
   });
 
   @override
@@ -50,6 +55,8 @@ class _EditBookingRoundTripScreenState
   final _totalFareCtrl = TextEditingController();
   final _driverCommCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
+  final noOfDaysCtrl = TextEditingController();
+  final tripNotesCtrl = TextEditingController();
 
   bool _showPhoneNumber = false;
   final List<String> _selectedRequirements = [];
@@ -65,6 +72,8 @@ class _EditBookingRoundTripScreenState
     _totalFareCtrl.text = widget.totalFare;
     _driverCommCtrl.text = widget.driverCommission;
     _remarksCtrl.text = widget.remark;
+    noOfDaysCtrl.text = widget.noOfDays ?? "";
+    tripNotesCtrl.text = widget.tripNotes ?? "";
   }
 
   void _onRemarksChanged() {
@@ -137,7 +146,8 @@ class _EditBookingRoundTripScreenState
               msg: "Booking updated successfully!",
               backgroundColor: Colors.green,
             );
-            Get.back();
+            context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+            showAssignDriverBottomSheet(context);
           }
           if (state.hasError && state.errorMessage != null) {
             Fluttertoast.showToast(
@@ -173,7 +183,7 @@ class _EditBookingRoundTripScreenState
                                 style: TextStyle(color: Colors.red))
                             : containerShadow(
                                 child: DropdownButtonFormField<int>(
-                                  value: state.selectedCarCategoryId,
+                                  initialValue: state.selectedCarCategoryId,
                                   isExpanded: true,
                                   decoration: const InputDecoration(
                                     border: InputBorder.none,
@@ -217,6 +227,16 @@ class _EditBookingRoundTripScreenState
                     CommonTextFormField(
                       controller: _dropCtrl,
                       hintText: "Drop Location",
+                    ),
+                    const SizedBox(height: 16),
+                    CommonTextFormField(
+                      controller: noOfDaysCtrl,
+                      hintText: "No Of Days",
+                    ),
+                    const SizedBox(height: 16),
+                    CommonTextFormField(
+                      controller: tripNotesCtrl,
+                      hintText: "Trip Notes",
                     ),
 
                     const SizedBox(height: 24),
@@ -380,6 +400,8 @@ class _EditBookingRoundTripScreenState
                                         0.0,
                                 showPhoneNumber: _showPhoneNumber,
                                 remarks: _remarksCtrl.text.trim(),
+                                noOfDays: noOfDaysCtrl.text.trim(),
+                                tripNotes: tripNotesCtrl.text.trim(),
                                 context: context,
                               );
 
@@ -545,6 +567,197 @@ class _EditBookingRoundTripScreenState
     _totalFareCtrl.dispose();
     _driverCommCtrl.dispose();
     _remarksCtrl.dispose();
+    noOfDaysCtrl.dispose();
+    tripNotesCtrl.dispose();
     super.dispose();
+  }
+
+  void showAssignDriverBottomSheet(BuildContext context) {
+    String? selectedValue = "1";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: DiskIndicatorReplacement(),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Booking updated Successfully",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Choose how you want to assign this booking",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildOption(
+                    title: "Assign to All Drivers",
+                    subtitle: "Broadcasting to all nearby available drivers",
+                    value: "1",
+                    selectedValue: selectedValue,
+                    onChanged: (val) => setModalState(() => selectedValue = val),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildOption(
+                    title: "Personal Booking",
+                    subtitle: "Keep this booking for yourself",
+                    value: "2",
+                    selectedValue: selectedValue,
+                    onChanged: (val) => setModalState(() => selectedValue = val),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFCB117),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        context.read<EditBookingBloc>().add(
+                              EditUpdateAssignMethodEvent(
+                                context: context,
+                                assignType: selectedValue.toString(),
+                              ),
+                            );
+
+                        Navigator.pop(context); // Close bottom sheet
+                        Get.back(); // Return to home
+                      },
+                      child: const Text(
+                        "Done",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildOption({
+    required String title,
+    required String subtitle,
+    required String value,
+    required String? selectedValue,
+    required ValueChanged<String?> onChanged,
+  }) {
+    final isSelected = value == selectedValue;
+    return GestureDetector(
+      onTap: () => onChanged(value),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFF8E6) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color:
+                isSelected ? const Color(0xFFFCB117) : const Color(0xFFE2E8F0),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 24,
+              width: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFFFCB117)
+                      : const Color(0xFFCBD5E1),
+                  width: 2,
+                ),
+                color:
+                    isSelected ? const Color(0xFFFCB117) : Colors.transparent,
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? const Color(0xFF92400E)
+                          : const Color(0xFF1E293B),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected
+                          ? const Color(0xFFB45309)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DiskIndicatorReplacement extends StatelessWidget {
+  const DiskIndicatorReplacement({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
   }
 }

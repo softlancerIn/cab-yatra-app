@@ -9,9 +9,9 @@ import 'registerState.dart';
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   AuthRepo authRepo = AuthRepo();
 
-  RegisterBloc() : super(RegisterState()) {
+  RegisterBloc() : super(const RegisterState()) {
     on<ResetRegisterEvent>((event, emit) {
-      emit(RegisterState()); // pura state reset
+      emit(const RegisterState()); // pura state reset
     });
     on<RegisterSummitedEvent>(_onRegisterSubmitted);
   }

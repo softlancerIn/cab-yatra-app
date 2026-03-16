@@ -7,6 +7,7 @@ import '../../../widget/primary_button.dart';
 import '../bloc/paymentBloc.dart';
 import '../bloc/paymentEvent.dart';
 import '../bloc/paymentState.dart';
+import '../../../cores/services/secure_storage_service.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({super.key});
@@ -29,11 +30,21 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
   final _upiIdController = TextEditingController();
   final _paymentNumberController = TextEditingController();
 
+  String? _driverId;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadDriverId();
     // context.read<PaymentBloc>().add(LoadPayment());
+  }
+
+  Future<void> _loadDriverId() async {
+    final id = await SecureStorageService.getUserId();
+    setState(() {
+      _driverId = id;
+    });
   }
 
   @override
@@ -316,7 +327,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
 
     if (isBankTab) {
       final fields = {
-        "driver_id": "26",
+        "driver_id": _driverId ?? "0",
         "type": "1",
         "bank_name": _bankNameController.text,
         "account_number": _accountNumberController.text,
@@ -326,7 +337,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
       bloc.add(SubmitPayment(fields: fields, files: {}));
     } else {
       final fields = {
-        "driver_id": "26",
+        "driver_id": _driverId ?? "0",
         "type": "2",
         "upi_id": _upiIdController.text,
         "payment_number": _paymentNumberController.text,

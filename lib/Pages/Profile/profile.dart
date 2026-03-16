@@ -181,7 +181,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         showDialog(
                           context: context,
                           builder: (BuildContext context) =>
-                              ServiceCallDialog(),
+                              const ServiceCallDialog(),
                         );
                       }),
                 ],

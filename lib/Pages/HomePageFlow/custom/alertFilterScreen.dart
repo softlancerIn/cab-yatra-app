@@ -119,7 +119,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                     ),
                   ),
                   Switch(
-                    thumbColor: WidgetStatePropertyAll(Colors.orange),
+                    thumbColor: const WidgetStatePropertyAll(Colors.orange),
                     value: manualPickup,
                     onChanged: (val) {
                       setState(() {

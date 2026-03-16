@@ -208,6 +208,8 @@ class AppRouter {
             totalFare: bookingData.totalFaire ?? "",
             driverCommission: bookingData.driverCommission ?? "",
             remark: bookingData.remark ?? "",
+            noOfDays: bookingData.noOfDays,
+            tripNotes: bookingData.tripNotes,
           );
         },
       ),
@@ -218,7 +220,7 @@ class AppRouter {
       ),
       GoRoute(
         path: Routes.profile,
-        builder: (_, __) => PersonalInfoScreen(),
+        builder: (_, __) => const PersonalInfoScreen(),
       ),
       GoRoute(
         path: Routes.chatListing,

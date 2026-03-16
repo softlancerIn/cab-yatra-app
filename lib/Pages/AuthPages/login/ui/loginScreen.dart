@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';

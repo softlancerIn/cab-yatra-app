@@ -4,27 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:intl/intl.dart';
 
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';
 import '../bloc/addBookingState.dart';
+import '../../HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 
-class AddBookingOneWayScreen extends StatelessWidget {
-  const AddBookingOneWayScreen({super.key});
+class AddBookingOneWayScreen extends StatefulWidget {
+  final VoidCallback? onBack;
+  const AddBookingOneWayScreen({super.key, this.onBack});
 
+  @override
+  State<AddBookingOneWayScreen> createState() => _AddBookingOneWayScreenState();
+}
+
+class _AddBookingOneWayScreenState extends State<AddBookingOneWayScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AddBookingBloc()..add(LoadCarCategories(context)),
-      child: const _AddBookingOneWayScreenView(),
+      child: _AddBookingOneWayScreenView(onBack: widget.onBack),
     );
   }
 }
 
 class _AddBookingOneWayScreenView extends StatefulWidget {
-  const _AddBookingOneWayScreenView();
+  final VoidCallback? onBack;
+  const _AddBookingOneWayScreenView({this.onBack});
 
   @override
   State<_AddBookingOneWayScreenView> createState() =>
@@ -42,7 +49,6 @@ class _AddBookingOneWayScreenViewState
   final _driverCommCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
 
-  final String? _selectedTripType = 'One Way';
   bool _showPhoneNumber = false;
   final List<String> _selectedRequirements = [];
 
@@ -87,11 +93,8 @@ class _AddBookingOneWayScreenViewState
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: Colors.white,
-      // appBar: AppBAR(title: "Add New Booking"),
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
         listener: (context, state) {
           if (state.isSuccess) {
@@ -102,12 +105,6 @@ class _AddBookingOneWayScreenViewState
             );
             showAssignDriverBottomSheet(context);
           }
-          // if (state.hasError && state.errorMessage != null) {
-          //   Fluttertoast.showToast(
-          //     msg: state.errorMessage!,
-          //     backgroundColor: Colors.red,
-          //   );
-          // }
         },
         builder: (context, state) {
           return RefreshIndicator(
@@ -119,7 +116,6 @@ class _AddBookingOneWayScreenViewState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Vehicle Category Dropdown ───────────────────────────────
                   const Text("Select Vehicle Category",
                       style: TextStyle(fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
@@ -132,7 +128,7 @@ class _AddBookingOneWayScreenViewState
                               style: TextStyle(color: Colors.red))
                           : containerShadow(
                               child: DropdownButtonFormField<int>(
-                                value: state.selectedCarCategoryId,
+                                initialValue: state.selectedCarCategoryId,
                                 isExpanded: true,
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
@@ -168,44 +164,18 @@ class _AddBookingOneWayScreenViewState
 
                   const SizedBox(height: 24),
 
-                  // ── Trip Type (simple for now) ──────────────────────────────
-                  // _buildDropdownField(
-                  //   label: "Trip Type",
-                  //   value: _selectedTripType,
-                  //   items: const ['One Way', 'Round Trip'],
-                  //   onChanged: (val) => setState(() => _selectedTripType = val),
-                  // ),
-
-                  //  const SizedBox(height: 16),
-
-                  // ── Pickup & Drop (single field for now) ────────────────────
                   LocationAutocompleteField(
                     controller: _pickupCtrl,
                     hint: "Pickup Location",
                   ),
-                  // containerShadow(
-                  //   child: _buildTextField(
-                  //     label: "Pickup Location",
-                  //     controller: _pickupCtrl,
-                  //     hint: "e.g. Ghaziabad",
-                  //   ),
-                  // ),
                   const SizedBox(height: 16),
                   LocationAutocompleteField(
                     controller: _dropCtrl,
                     hint: "Drop Location",
                   ),
-                  // containerShadow(
-                  //   child: _buildTextField(
-                  //     label: "Drop Location",
-                  //     controller: _dropCtrl,
-                  //     hint: "e.g. Noida",
-                  //   ),
-                  // ),
 
                   const SizedBox(height: 24),
 
-                  // ── Date & Time ─────────────────────────────────────────────
                   Row(
                     children: [
                       Expanded(
@@ -230,7 +200,6 @@ class _AddBookingOneWayScreenViewState
 
                   const SizedBox(height: 24),
 
-                  // ── Total Fare & Driver Commission ──────────────────────────
                   Row(
                     children: [
                       Expanded(
@@ -247,21 +216,13 @@ class _AddBookingOneWayScreenViewState
                           controller: _driverCommCtrl,
                           keyboardType: TextInputType.number,
                         ),
-                        // child: containerShadow(
-                        //   child: _buildNumberField(
-                        //     label: "Driver Commission",
-                        //     controller: _driverCommCtrl,
-                        //   ),
-                        // ),
                       ),
                     ],
                   ),
 
                   const SizedBox(height: 24),
 
-                  // ── Show Phone Number Switch ────────────────────────────────
                   Container(
-                    // width: 333,
                     height: 60,
                     clipBehavior: Clip.antiAlias,
                     decoration: ShapeDecoration(
@@ -291,9 +252,9 @@ class _AddBookingOneWayScreenViewState
 
                   const SizedBox(height: 24),
 
-                  // ── Extra Requirements Chips ───────────────────────────────────────
                   const Text("Extra Requirements",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      style:
+                          TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,
@@ -307,7 +268,6 @@ class _AddBookingOneWayScreenViewState
                   ),
                   const SizedBox(height: 24),
 
-                  // ── Remarks / Extra Requirements TextField ──────────────────
                   containerShadow(
                     height: 100,
                     child: TextField(
@@ -317,7 +277,9 @@ class _AddBookingOneWayScreenViewState
                       decoration: const InputDecoration(
                         hintText: "Extra Requirements...",
                         hintStyle: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w400, color: Colors.grey),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                       ),
@@ -361,7 +323,6 @@ class _AddBookingOneWayScreenViewState
                               subType: "0",
                               noOfDay: "",
                               tripNotes: "",
-                              // hardcoded as per requirement
                               carCategoryId: state.selectedCarCategoryId!,
                               pickUpDate: _startDateCtrl.text,
                               pickUpTime: _startTimeCtrl.text,
@@ -389,8 +350,6 @@ class _AddBookingOneWayScreenViewState
       ),
     );
   }
-
-  // ── Helper Widgets ──────────────────────────────────────────────────────────────
 
   Widget _buildDateField({
     required String label,
@@ -463,7 +422,6 @@ class _AddBookingOneWayScreenViewState
 
   Widget containerShadow({required Widget child, double height = 50}) {
     return Container(
-      // width: 333,
       height: height,
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -530,27 +488,22 @@ class _AddBookingOneWayScreenViewState
 
   void _updateTextField(String label, bool isAdding) {
     String currentText = _remarksCtrl.text.trim();
-    
-    // Split by comma and clean whitespace
-    List<String> parts = currentText.split(',')
+    List<String> parts = currentText
+        .split(',')
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
 
     if (isAdding) {
-      // Case-insensitive check to prevent duplicates if user typed it manually
       bool exists = parts.any((e) => e.toLowerCase() == label.toLowerCase());
       if (!exists) {
         parts.insert(0, label);
       }
     } else {
-      // Remove all instances of the label (case-insensitive)
       parts.removeWhere((e) => e.toLowerCase() == label.toLowerCase());
     }
 
     _remarksCtrl.text = parts.join(", ");
-    
-    // Position cursor at the end to allow for continued manual typing
     _remarksCtrl.selection = TextSelection.fromPosition(
       TextPosition(offset: _remarksCtrl.text.length),
     );
@@ -586,7 +539,7 @@ class _AddBookingOneWayScreenViewState
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.check_circle, size: 70, color: Colors.red),
+                  const Icon(Icons.check_circle, size: 70, color: Colors.orange),
                   const SizedBox(height: 10),
                   const Text(
                     "Booking posted Successfully",
@@ -649,7 +602,13 @@ class _AddBookingOneWayScreenViewState
                               ),
                             );
 
-                        Navigator.pop(context);
+                        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+
+                        if (widget.onBack != null) {
+                          widget.onBack!();
+                        } else {
+                          Navigator.pop(context);
+                        }
                       },
                       child: const Text(
                         "Done",

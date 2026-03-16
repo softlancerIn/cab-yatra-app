@@ -1,10 +1,7 @@
 import 'package:cab_taxi_app/app/router/navigation/routes.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 import '../../../app/router/navigation/nav.dart';
-import 'alertFilterScreen.dart';
 
 class CustomToggleSwitch extends StatefulWidget {
   const CustomToggleSwitch({super.key});

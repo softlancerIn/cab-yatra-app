@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../app/router/navigation/nav.dart';
-import '../../../../app/router/navigation/routes.dart';
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
-import '../../custom/customSearchBar.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 import 'sliderWidget.dart';
 
@@ -20,7 +17,7 @@ class _NewBookingSectionState extends State<NewBookingSection> {
     final size = MediaQuery.of(context).size;
     return RefreshIndicator(
       onRefresh: () async {
-        //await controller.getHomeData();
+        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
       },
       child:
           BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {

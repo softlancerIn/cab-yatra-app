@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
-import 'homepage.dart';
 import 'sliderWidget.dart';
 
 class ActiveBookingSection extends StatefulWidget {
@@ -19,7 +18,7 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
     final size = MediaQuery.of(context).size;
     return RefreshIndicator(
       onRefresh: () async {
-        // await controller.getHomeData();
+        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
       },
       child:
           BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {

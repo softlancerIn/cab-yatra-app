@@ -141,7 +141,8 @@ class _HomepageState extends State<Homepage>
                   onTap: () {
                     showDialog(
                       context: context,
-                      builder: (BuildContext context) => ServiceCallDialog(),
+                      builder: (BuildContext context) =>
+                          const ServiceCallDialog(),
                     );
                   },
                   child: Container(

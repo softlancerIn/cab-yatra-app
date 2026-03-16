@@ -33,7 +33,7 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
 
   bool _isConnected = false;
   String? _username;
-  final String? _authToken =
+  final String _authToken =
       "251|ge2tcBrvHYt3sYIqMqBKdVDbj727s8CmxdVc7Pqrc1a027e9"; // ← add your auth token here (JWT / Sanctum / etc)
 
   @override

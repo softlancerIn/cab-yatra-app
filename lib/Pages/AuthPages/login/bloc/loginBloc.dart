@@ -9,9 +9,9 @@ import 'loginState.dart';
 class SignInBloc extends Bloc<SignInEvent, SignInState> {
   AuthRepo authRepo = AuthRepo();
 
-  SignInBloc() : super(SignInState()) {
+  SignInBloc() : super(const SignInState()) {
     on<ResetSendOtpEvent>((event, emit) {
-      emit(SignInState()); // pura state reset
+      emit(const SignInState()); // pura state reset
     });
     on<SendOtpEvent>(_onSendOTPSubmitted);
   }

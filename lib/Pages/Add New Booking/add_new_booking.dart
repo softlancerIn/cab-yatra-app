@@ -100,9 +100,9 @@ class _AddBookingScreenState extends State<AddBookingScreen>
             child: GestureDetector(
               child: TabBarView(
                 controller: _tabController,
-                children: const [
-                  AddBookingOneWayScreen(),
-                  AddBookingRoundTripScreen(),
+                children: [
+                  AddBookingOneWayScreen(onBack: widget.onBack),
+                  AddBookingRoundTripScreen(onBack: widget.onBack),
                 ],
               ),
             ),

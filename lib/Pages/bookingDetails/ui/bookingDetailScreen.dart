@@ -7,8 +7,6 @@ import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:intl/intl.dart';
-
 import '../bloc/bookingDetailsBloc.dart';
 import '../bloc/bookingDetailsState.dart';
 import 'driverInfoCard.dart';

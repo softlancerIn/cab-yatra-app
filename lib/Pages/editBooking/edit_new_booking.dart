@@ -1,12 +1,8 @@
-import 'package:cab_taxi_app/Pages/Add%20New%20Booking/ui/addBookingRoundTripScreen.dart';
 import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingOneWayScreen.dart';
 import 'package:cab_taxi_app/Pages/editBooking/ui/editBookingRoundTripScreen.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../Add New Booking/bloc/addBookingBloc.dart';
-import '../Add New Booking/bloc/addBookingEvent.dart';
 import '../Custom_Widgets/custom_app_bar.dart';
 
 class EditBookingScreen extends StatefulWidget {
@@ -20,6 +16,8 @@ class EditBookingScreen extends StatefulWidget {
   final String totalFare;
   final String driverCommission;
   final String remark;
+  final String? noOfDays;
+  final String? tripNotes;
   const EditBookingScreen({
     super.key,
     required this.bookingType,
@@ -32,6 +30,8 @@ class EditBookingScreen extends StatefulWidget {
     required this.dropLocation,
     required this.pickUpLocation,
     required this.vehicalType,
+    this.noOfDays,
+    this.tripNotes,
   });
 
   @override
@@ -65,7 +65,7 @@ class _EditBookingScreenState extends State<EditBookingScreen>
       ),
       body: widget.bookingType.toLowerCase() == "one way"
           ? EditBookingOneWayScreen(
-        sId: widget.sId.toString(),
+              sId: widget.sId.toString(),
               driverCommission: widget.driverCommission,
               dropLocation: widget.dropLocation,
               pickUpDate: widget.pickUpDate,
@@ -83,6 +83,8 @@ class _EditBookingScreenState extends State<EditBookingScreen>
               pickUpLocation: widget.pickUpLocation,
               pickUpTime: widget.pickUpTime,
               remark: widget.remark,
+              noOfDays: widget.noOfDays,
+              tripNotes: widget.tripNotes,
               totalFare: widget.totalFare,
               vehicalType: widget.vehicalType),
       drawerEnableOpenDragGesture: true,

@@ -1,24 +1,24 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 import '../repo/editBookingRepo.dart';
 import 'editBookingEvent.dart';
 import 'editBookingState.dart';
 
 class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
-  final EditBookingRepo repo=EditBookingRepo();
+  final EditBookingRepo repo = EditBookingRepo();
 
   EditBookingBloc() : super(const EditBookingState()) {
     on<EditLoadCarCategories>(_onLoadCarCategories);
     on<EditSelectCarCategory>(_onSelectCarCategory);
     on<EditSubmitBooking>(_onSubmitBooking);
+    on<EditUpdateAssignMethodEvent>(_updateAssignMethodApi);
     on<ResetBooking>((event, emit) => emit(const EditBookingState()));
   }
 
   Future<void> _onLoadCarCategories(
-      EditLoadCarCategories event,
-      Emitter<EditBookingState> emit,
-      ) async {
+    EditLoadCarCategories event,
+    Emitter<EditBookingState> emit,
+  ) async {
     emit(state.copyWith(isLoading: true));
 
     try {
@@ -38,16 +38,16 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
   }
 
   void _onSelectCarCategory(
-      EditSelectCarCategory event,
-      Emitter<EditBookingState> emit,
-      ) {
+    EditSelectCarCategory event,
+    Emitter<EditBookingState> emit,
+  ) {
     emit(state.copyWith(selectedCarCategoryId: event.carCategoryId));
   }
 
   Future<void> _onSubmitBooking(
-      EditSubmitBooking event,
-      Emitter<EditBookingState> emit,
-      ) async {
+    EditSubmitBooking event,
+    Emitter<EditBookingState> emit,
+  ) async {
     emit(state.copyWith(isSubmitting: true, errorMessage: null, hasError: false));
 
     try {
@@ -63,6 +63,8 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
         driverCommission: event.driverCommission,
         is_show_phoneNumber: event.showPhoneNumber ? 1 : 0,
         remarks: event.remarks,
+        noOfDays: event.noOfDays,
+        tripNotes: event.tripNotes,
         context: event.context,
       );
 
@@ -70,18 +72,40 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
         emit(state.copyWith(
           isSubmitting: false,
           isSuccess: true,
-          errorMessage: response.message ?? "Booking created successfully",
+          errorMessage: response.message ?? "Booking updated successfully",
         ));
       } else {
         emit(state.copyWith(
           isSubmitting: false,
           hasError: true,
-          errorMessage: response.message ?? "Failed to create booking",
+          errorMessage: response.message ?? "Failed to update booking",
         ));
       }
     } catch (e) {
       emit(state.copyWith(
         isSubmitting: false,
+        hasError: true,
+        errorMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _updateAssignMethodApi(
+    EditUpdateAssignMethodEvent event,
+    Emitter<EditBookingState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+
+    try {
+      final model = await repo.updateAssignMethodApi(
+          context: event.context, assignType: event.assignType);
+      emit(state.copyWith(
+        isLoading: false,
+        updateAssignMethodModel: model,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoading: false,
         hasError: true,
         errorMessage: e.toString(),
       ));

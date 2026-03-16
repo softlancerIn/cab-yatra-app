@@ -1,32 +1,32 @@
-import 'package:cab_taxi_app/Pages/Add%20New%20Booking/repo/addCreateRepo.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../widget/customTextField.dart';
-
 import '../bloc/addBookingBloc.dart';
 import '../bloc/addBookingEvent.dart';
 import '../bloc/addBookingState.dart';
+import '../../HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 
 class AddBookingRoundTripScreen extends StatelessWidget {
-  const AddBookingRoundTripScreen({super.key});
+  final VoidCallback? onBack;
+  const AddBookingRoundTripScreen({super.key, this.onBack});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AddBookingBloc()..add(LoadCarCategories(context)),
-      child: const _AddBookingRoundTripScreenView(),
+      child: _AddBookingRoundTripScreenView(onBack: onBack),
     );
   }
 }
 
 class _AddBookingRoundTripScreenView extends StatefulWidget {
-  const _AddBookingRoundTripScreenView();
+  final VoidCallback? onBack;
+  const _AddBookingRoundTripScreenView({this.onBack});
 
   @override
   State<_AddBookingRoundTripScreenView> createState() =>
@@ -40,13 +40,13 @@ class _AddBookingRoundTripScreenViewState
   final _startTimeCtrl = TextEditingController();
   final _pickupCtrl = TextEditingController();
   final _dropCtrl = TextEditingController();
-  final noOfDays = TextEditingController(); //no_of_days
-  final tripNotes = TextEditingController(); //no_of_days
+  final noOfDays = TextEditingController();
+  final tripNotes = TextEditingController();
   final _totalFareCtrl = TextEditingController();
   final _driverCommCtrl = TextEditingController();
   final _remarksCtrl = TextEditingController();
 
-  final String? _selectedTripType = 'One Way';
+  final String _selectedTripType = 'One Way';
   bool _showPhoneNumber = false;
   final List<String> _selectedRequirements = [];
 
@@ -132,7 +132,11 @@ class _AddBookingRoundTripScreenViewState
               msg: "Booking created successfully!",
               backgroundColor: Colors.green,
             );
-            Get.back();
+            // Trigger refresh of dashboard data
+            context
+                .read<DashboardBloc>()
+                .add(GetHomeDataEvent(context: context));
+            showAssignDriverBottomSheet(context);
           }
           if (state.hasError && state.errorMessage != null) {
             Fluttertoast.showToast(
@@ -164,7 +168,7 @@ class _AddBookingRoundTripScreenViewState
                               style: TextStyle(color: Colors.red))
                           : containerShadow(
                               child: DropdownButtonFormField<int>(
-                                value: state.selectedCarCategoryId,
+                                initialValue: state.selectedCarCategoryId,
                                 isExpanded: true,
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,
@@ -272,11 +276,12 @@ class _AddBookingRoundTripScreenViewState
                   Row(
                     children: [
                       Expanded(
-                          child: CommonTextFormField(
-                        controller: _totalFareCtrl,
-                        hintText: "Total Fare",
-                      )),
-
+                        child: CommonTextFormField(
+                          controller: _totalFareCtrl,
+                          hintText: "Total Fare",
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
                       const SizedBox(width: 12),
                       Expanded(
                           child: CommonTextFormField(
@@ -363,8 +368,8 @@ class _AddBookingRoundTripScreenViewState
                       ),
                     ),
                   ),
- 
-                   const SizedBox(height: 40),
+
+                  const SizedBox(height: 40),
                   CommonAppButton(
                     isLoading: state.isSubmitting,
                     text: "Post Booking",
@@ -658,7 +663,7 @@ class _AddBookingRoundTripScreenViewState
         Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         const SizedBox(height: 6),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           isExpanded: true,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
@@ -673,6 +678,189 @@ class _AddBookingRoundTripScreenViewState
     );
   }
 
+  void showAssignDriverBottomSheet(BuildContext context) {
+    String? selectedValue = "1";
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: DiskIndicatorReplacement(),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    "Booking posted Successfully",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Choose how you want to assign this booking",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildOption(
+                    title: "Assign to All Drivers",
+                    subtitle: "Broadcasting to all nearby available drivers",
+                    value: "1",
+                    selectedValue: selectedValue,
+                    onChanged: (val) =>
+                        setModalState(() => selectedValue = val),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildOption(
+                    title: "Personal Booking",
+                    subtitle: "Keep this booking for yourself",
+                    value: "2",
+                    selectedValue: selectedValue,
+                    onChanged: (val) =>
+                        setModalState(() => selectedValue = val),
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFCB117),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        context.read<AddBookingBloc>().add(
+                              UpdateAssignMethodEvent(
+                                context: context,
+                                assignType: selectedValue.toString(),
+                              ),
+                            );
+
+                        // Trigger refresh of dashboard data
+                        context
+                            .read<DashboardBloc>()
+                            .add(GetHomeDataEvent(context: context));
+
+                        if (widget.onBack != null) {
+                          widget.onBack!();
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text(
+                        "Done",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildOption({
+    required String title,
+    required String subtitle,
+    required String value,
+    required String? selectedValue,
+    required ValueChanged<String?> onChanged,
+  }) {
+    final isSelected = value == selectedValue;
+    return GestureDetector(
+      onTap: () => onChanged(value),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFF8E6) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color:
+                isSelected ? const Color(0xFFFCB117) : const Color(0xFFE2E8F0),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 24,
+              width: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFFFCB117)
+                      : const Color(0xFFCBD5E1),
+                  width: 2,
+                ),
+                color:
+                    isSelected ? const Color(0xFFFCB117) : Colors.transparent,
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? const Color(0xFF92400E)
+                          : const Color(0xFF1E293B),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isSelected
+                          ? const Color(0xFFB45309)
+                          : const Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _remarksCtrl.removeListener(_onRemarksChanged);
@@ -684,5 +872,21 @@ class _AddBookingRoundTripScreenViewState
     _driverCommCtrl.dispose();
     _remarksCtrl.dispose();
     super.dispose();
+  }
+}
+
+class DiskIndicatorReplacement extends StatelessWidget {
+  const DiskIndicatorReplacement({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE2E8F0),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
   }
 }

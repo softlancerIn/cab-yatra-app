@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-import '../../register/ui/newRegister.dart';
 
 class LoginSelectionScreen extends StatefulWidget {
   const LoginSelectionScreen({super.key});
