@@ -450,7 +450,9 @@ class _BookingPageState extends State<BookingPage> {
                                           icon: "assets/images/chatNew.png",
                                           label: "Chat",
                                           color: const Color(0xffFCB117),
-                                          onTap: () {},
+                                          onTap: () {
+                                            Nav.push(context, Routes.chatListing);
+                                          },
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -492,7 +494,9 @@ class _BookingPageState extends State<BookingPage> {
                                   padding:
                                       const EdgeInsets.fromLTRB(12, 10, 12, 15),
                                   child: GestureDetector(
-                                    onTap: () {},
+                                    onTap: () {
+                                      Nav.push(context, Routes.home);
+                                    },
                                     child: Container(
                                       height: 44,
                                       width: double.infinity,

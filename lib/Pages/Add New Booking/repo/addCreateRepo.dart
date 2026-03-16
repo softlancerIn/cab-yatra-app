@@ -26,7 +26,7 @@ class AddBookingRepo {
     required List destinationLoc,
     required double total_faire,
     required double driverCommission,
-    required bool is_show_phoneNumber,
+    required int is_show_phoneNumber,
     required String remarks,
     required String noOfDay,
     required String tripNotes,

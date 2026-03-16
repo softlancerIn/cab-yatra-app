@@ -227,6 +227,11 @@ class _AddBookingRoundTripScreenViewState
                     hint: "Pickup Location",
                   ),
                   const SizedBox(height: 16),
+                  LocationAutocompleteField(
+                    controller: _dropCtrl,
+                    hint: "Drop Location",
+                  ),
+                  const SizedBox(height: 16),
                   CommonTextFormField(
                     controller: noOfDays,
                     hintText: "No Of Days",
@@ -408,27 +413,28 @@ class _AddBookingRoundTripScreenViewState
                             }
 
                             final booking = SubmitBooking(
-                              subType: "1",
-                              // hardcoded as per requirement
+                              subType: "0",
+                              noOfDay: "",
+                              tripNotes: "",
                               carCategoryId: state.selectedCarCategoryId!,
                               pickUpDate: _startDateCtrl.text,
                               pickUpTime: _startTimeCtrl.text,
-                              tripNotes: tripNotes.text,
-                              noOfDay: noOfDays.text,
                               pickUpLocations: [_pickupCtrl.text.trim()],
                               destinationLocations: [_dropCtrl.text.trim()],
                               totalFare:
-                                  double.tryParse(_totalFareCtrl.text) ?? 0.0,
+                              double.tryParse(_totalFareCtrl.text) ?? 0.0,
                               driverCommission:
-                                  double.tryParse(_driverCommCtrl.text) ?? 0.0,
+                              double.tryParse(_driverCommCtrl.text) ?? 0.0,
                               showPhoneNumber: _showPhoneNumber,
                               remarks: _remarksCtrl.text.trim(),
                               context: context,
                             );
 
                             context.read<AddBookingBloc>().add(booking);
-                          },
+                    },
                   ),
+
+
 
                   // ── Submit Button ───────────────────────────────────────────
                   // SizedBox(
@@ -761,6 +767,10 @@ class _AddBookingRoundTripScreenViewState
                             .read<DashboardBloc>()
                             .add(GetHomeDataEvent(context: context));
 
+                        // 1. Close the bottom sheet
+                        Navigator.pop(context);
+
+                        // 2. Navigate back to Home tab
                         if (widget.onBack != null) {
                           widget.onBack!();
                         } else {

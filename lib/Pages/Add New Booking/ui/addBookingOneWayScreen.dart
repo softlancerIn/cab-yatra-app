@@ -604,6 +604,10 @@ class _AddBookingOneWayScreenViewState
 
                         context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
 
+                        // 1. Close the bottom sheet
+                        Navigator.pop(context);
+
+                        // 2. Navigate back to Home tab
                         if (widget.onBack != null) {
                           widget.onBack!();
                         } else {

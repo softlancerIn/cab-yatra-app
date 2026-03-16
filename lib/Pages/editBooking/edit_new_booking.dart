@@ -77,6 +77,7 @@ class _EditBookingScreenState extends State<EditBookingScreen>
             )
           : EditBookingRoundTripScreen(
               sId: widget.sId.toString(),
+              subType: "1",
               driverCommission: widget.driverCommission,
               dropLocation: widget.dropLocation,
               pickUpDate: widget.pickUpDate,

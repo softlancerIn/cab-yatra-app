@@ -80,7 +80,7 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
         driverCommission: event.driverCommission,
         noOfDay: event.noOfDay,
         tripNotes: event.tripNotes,
-        is_show_phoneNumber: event.showPhoneNumber ? true : false,
+        is_show_phoneNumber: event.showPhoneNumber ? 1 : 0,
         remarks: event.remarks,
         context: event.context,
       );

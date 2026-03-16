@@ -24,6 +24,7 @@ class EditBookingRoundTripScreen extends StatefulWidget {
   final String remark;
   final String? noOfDays;
   final String? tripNotes;
+  final String subType;
 
   const EditBookingRoundTripScreen({
     super.key,
@@ -36,6 +37,7 @@ class EditBookingRoundTripScreen extends StatefulWidget {
     required this.dropLocation,
     required this.pickUpLocation,
     required this.vehicalType,
+    required this.subType,
     this.noOfDays,
     this.tripNotes,
   });
@@ -385,9 +387,9 @@ class _EditBookingRoundTripScreenState
                                 return;
                               }
 
-                              final booking = EditSubmitBooking(
-                                id: widget.sId,
-                                subType: "1",
+                                final booking = EditSubmitBooking(
+                                  id: widget.sId,
+                                  subType: widget.subType,
                                 carCategoryId: state.selectedCarCategoryId!,
                                 pickUpDate: _startDateCtrl.text,
                                 pickUpTime: _startTimeCtrl.text,
