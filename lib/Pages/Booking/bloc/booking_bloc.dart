@@ -13,9 +13,32 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   BookingBloc() : super(const BookingState()) {
   on<GetPostedBooingEvent>(getBookingEvent);
   on<DeleteBooingEvent>(deleteBookingEvent);
-  on<UpdatePostedBookingSearchQueryEvent>((event, emit) {
-    emit(state.copyWith(searchQuery: event.searchQuery));
-  });
+    on<UpdatePostedBookingSearchQueryEvent>((event, emit) {
+      emit(state.copyWith(searchQuery: event.searchQuery));
+    });
+
+    on<UpdatePostedBookingFilterEvent>((event, emit) {
+      emit(state.copyWith(
+        selectedVehicleTypes: event.vehicleTypes,
+        pickupLocationFilters: event.pickupLocations,
+        dropLocationFilter: event.dropLocation,
+        bookingStatusFilter: event.bookingStatus,
+        clearVehicleType: event.vehicleTypes == null,
+        clearPickupLocation: event.pickupLocations == null,
+        clearDropLocation: event.dropLocation == null,
+        clearBookingStatus: event.bookingStatus == null,
+      ));
+    });
+
+    on<ClearPostedBookingFilterEvent>((event, emit) {
+      emit(state.copyWith(
+        searchQuery: '',
+        clearVehicleType: true,
+        clearPickupLocation: true,
+        clearDropLocation: true,
+        clearBookingStatus: true,
+      ));
+    });
 
     on<RESETBookingEvent>((event, emit) {
       emit(const BookingState()); // pura state reset

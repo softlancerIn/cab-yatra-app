@@ -1,448 +1,324 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
-import 'package:uuid/uuid.dart';
-import 'package:http/http.dart' as http;
-
-import '../../cores/services/secure_storage_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../app/router/navigation/nav.dart';
+import '../../app/router/navigation/routes.dart';
+import '../Custom_Widgets/custom_app_bar.dart';
+import 'bloc/chat_bloc.dart';
+import 'bloc/chat_event.dart';
+import 'bloc/chat_state.dart';
 
 class ChatListingScreen extends StatefulWidget {
-  const ChatListingScreen({super.key});
+  final String? bookingId;
+  final bool isBottomSheet;
+  final VoidCallback? onBack;
+  const ChatListingScreen({super.key, this.bookingId, this.isBottomSheet = false, this.onBack});
+
+  static void show(BuildContext context, {String? bookingId}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.7, // Adjust as needed for 'half screen'
+          child: BlocProvider(
+            create: (context) => ChatListBloc(),
+            child: ChatListingScreen(bookingId: bookingId, isBottomSheet: true),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   State<ChatListingScreen> createState() => _ChatListingScreenState();
 }
 
 class _ChatListingScreenState extends State<ChatListingScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController(
-    text: 'Guest_${DateTime.now().millisecond}',
-  );
-
-  final TextEditingController _channelIdController = TextEditingController(
-    text: '546', // ← change to your booking_id or driver id
-  );
-  String? currentUserId;
-  final List<Message> _messages = [];
-  final ScrollController _scrollController = ScrollController();
-
-  PusherChannelsFlutter? pusher;
-  String channelName = ''; // will be set dynamically
-
-  bool _isConnected = false;
-  String? _username;
-  final String _authToken =
-      "251|ge2tcBrvHYt3sYIqMqBKdVDbj727s8CmxdVc7Pqrc1a027e9"; // ← add your auth token here (JWT / Sanctum / etc)
+  bool isPostedSelected = false;
 
   @override
   void initState() {
     super.initState();
-    loadUser();
-    getMessages();
-  }
-
-  Future<void> loadUser() async {
-    currentUserId = await SecureStorageService.getUserId();
-    setState(() {});
-  }
-
-  Future<void> _connectAndSubscribe() async {
-    if (_username == null || _channelIdController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter name and channel ID")),
-      );
-      return;
+    if (widget.bookingId != null) {
+      context.read<ChatListBloc>().add(
+          GetChatHistoryForBookingEvent(
+              context: context, bookingId: widget.bookingId!));
+    } else {
+      context.read<ChatListBloc>().add(
+          GetAllChatDriversEvent(context: context, type: "1"));
     }
-
-    setState(() {
-      channelName = 'private-chat.booking.${_channelIdController.text.trim()}';
-      // OR: 'private-App.Models.Driver.${_channelIdController.text.trim()}';
-    });
-
-    try {
-      pusher = PusherChannelsFlutter.getInstance();
-
-      await pusher!.init(
-        apiKey: '8a3c4b441150f546090a',
-        cluster: 'ap2',
-        // Do NOT set authEndpoint if using onAuthorizer
-        onConnectionStateChange: (currentState, previousState) {
-          debugPrint("Connection: $currentState");
-          if (mounted) {
-            setState(() {
-              _isConnected = currentState == 'CONNECTED';
-            });
-          }
-        },
-        onError: (message, code, error) {
-          debugPrint("Pusher error: $message (code: $code, error: $error)");
-        },
-        onSubscriptionSucceeded: (channelName, data) {
-          debugPrint("Subscribed to $channelName successfully");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Joined $channelName")),
-          );
-        },
-        onEvent: (event) {
-          if (event.eventName == 'client-new-message') {
-            try {
-              final data = jsonDecode(event.data as String);
-              final msg = Message.fromJson(data);
-              if (mounted) {
-                setState(() {
-                  _messages.add(msg);
-                });
-                _scrollToBottom();
-              }
-            } catch (e) {
-              debugPrint("JSON decode error: $e");
-            }
-          }
-        },
-        // ── Most important part for private channels ──
-        // Inside pusher!.init(...)
-
-        onAuthorizer: (channelName, socketId, options) async {
-          try {
-            // ← CHANGE THIS TO THE REAL AUTH ENDPOINT (most likely one of these)
-            final uri = Uri.parse('https://cabyatra.com/broadcasting/auth');
-            // OR: 'https://cabyatra.com/api/broadcasting/auth'
-            // OR: 'https://cabyatra.com/api/driver/V2/broadcast/auth'  ← ask backend team
-
-            final response = await http.post(
-              uri,
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization':
-                    'Bearer $_authToken', // your token "251|ge2tcBrv..."
-              },
-              body: jsonEncode({
-                'socket_id': socketId, // ← Pusher sends this
-                'channel_name':
-                    channelName, // ← e.g. "private-chat.booking.505"
-              }),
-            );
-
-            if (response.statusCode == 200) {
-              final json = jsonDecode(response.body);
-              debugPrint("Auth success → ${response.body}");
-              return json; // Must be {"auth": "8a3c4b441150f546090a:signature..."}
-            } else {
-              debugPrint(
-                  "Auth failed → Status: ${response.statusCode} | Body: ${response.body}");
-              return null;
-            }
-          } catch (e) {
-            debugPrint("Authorizer error: $e");
-            return null;
-          }
-        },
-      );
-
-      await pusher!.connect();
-
-      // Now subscribe
-      await pusher!.subscribe(channelName: channelName);
-    } catch (e) {
-      debugPrint("Pusher init/subscribe error: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Connection failed: $e")),
-        );
-      }
-    }
-  }
-
-  Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
-
-    if (text.isEmpty) return;
-
-    const url = "https://cabyatra.com/api/driver/V2/send-message";
-
-    final body = {
-      "receiver_id": "1",
-      "booking_id": _channelIdController.text.trim(),
-      "message": text
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          "Accept": "application/json",
-          "Authorization": "Bearer $_authToken",
-          "Content-Type": "application/json"
-        },
-        body: jsonEncode(body),
-      );
-
-      debugPrint("SEND STATUS: ${response.statusCode}");
-      debugPrint("SEND BODY: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final newMsg = Message(
-          id: 0,
-          senderId: int.parse(currentUserId!),
-          receiverId: 1,
-          message: text,
-          createdAt: DateTime.now().toIso8601String(),
-        );
-
-        setState(() {
-          _messages.add(newMsg);
-        });
-
-        _messageController.clear();
-
-        _scrollToBottom();
-      }
-    } catch (e) {
-      debugPrint("Send error $e");
-    }
-  }
-
-  Future<void> getMessages() async {
-    final url =
-        "https://cabyatra.com/api/driver/V2/get-messages/${_channelIdController.text}";
-
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Authorization": "Bearer $_authToken",
-          "Accept": "application/json"
-        },
-      );
-
-      debugPrint("CHAT STATUS: ${response.statusCode}");
-      debugPrint("CHAT BODY: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final List data = jsonDecode(response.body);
-
-        _messages.clear();
-
-        for (var item in data) {
-          _messages.add(Message.fromJson(item));
-        }
-
-        setState(() {});
-
-        _scrollToBottom();
-      }
-    } catch (e) {
-      debugPrint("Chat list error $e");
-    }
-  }
-
-  void _scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    pusher?.disconnect();
-    _messageController.dispose();
-    _nameController.dispose();
-    _channelIdController.dispose();
-    _scrollController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Private Chat (Pusher)'),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 4,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    final content = Column(
+      children: [
+        if (widget.isBottomSheet) ...[
+          const SizedBox(height: 12),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Text(
-              _isConnected ? '🟢 Connected' : '🔴 Disconnected',
-              style: TextStyle(color: _isConnected ? Colors.green : Colors.red),
+          const SizedBox(height: 15),
+          Text(
+            widget.bookingId != null ? 'Chat History' : 'Chats',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
             ),
           ),
         ],
-      ),
-      body: Column(
-        children: [
-          // Join form
-          if (_username == null)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        if (widget.bookingId == null) ...[
+          const SizedBox(height: 10),
+          /// Toggle Switch (posted / Received)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                border: Border.all(color: Colors.grey.shade100),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: Row(
                 children: [
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Your name',
-                      border: OutlineInputBorder(),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => isPostedSelected = true);
+                        context.read<ChatListBloc>().add(
+                            GetAllChatDriversEvent(context: context, type: "0"));
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isPostedSelected
+                              ? const Color(0xFFFFB300)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          'posted',
+                          style: TextStyle(
+                            color: isPostedSelected
+                                ? Colors.white
+                                : Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _channelIdController,
-                    decoration: const InputDecoration(
-                      labelText: 'Booking ID / Driver ID',
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g. 12345',
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() => isPostedSelected = false);
+                        context.read<ChatListBloc>().add(
+                            GetAllChatDriversEvent(context: context, type: "1"));
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: !isPostedSelected
+                              ? const Color(0xFFFFB300)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          'Received',
+                          style: TextStyle(
+                            color: !isPostedSelected
+                                ? Colors.white
+                                : Colors.grey.shade600,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ),
                     ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      final name = _nameController.text.trim();
-                      if (name.isNotEmpty &&
-                          _channelIdController.text.trim().isNotEmpty) {
-                        setState(() => _username = name);
-                        _connectAndSubscribe();
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Fill all fields")),
-                        );
-                      }
-                    },
-                    child: const Text('Join Chat'),
                   ),
                 ],
               ),
             ),
+          ),
+        ],
+        const SizedBox(height: 20),
+        
+        /// Chat List
+        Expanded(
+          child: BlocBuilder<ChatListBloc, ChatListState>(
+            builder: (context, state) {
+              if (state.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              
+              if (state.errorMessage != null) {
+                return Center(child: Text(state.errorMessage!));
+              }
 
-          // Messages list
-          Expanded(
-            child: ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(8),
-                itemCount: _messages.length,
+              final drivers = state.chatDriversResponse?.drivers ?? [];
+
+              if (drivers.isEmpty) {
+                return const Center(child: Text("No chats found"));
+              }
+
+              return ListView.separated(
+                itemCount: drivers.length,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                separatorBuilder: (context, index) => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 2),
+                  child: DottedDivider(),
+                ),
                 itemBuilder: (context, index) {
-                  final msg = _messages[index];
-
-                  final isMe = msg.senderId.toString() == currentUserId;
-
-                  return Align(
-                    alignment:
-                        isMe ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 4, horizontal: 8),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 14),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.green[200] : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: isMe
-                            ? CrossAxisAlignment.end
-                            : CrossAxisAlignment.start,
+                  final item = drivers[index];
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      if (widget.isBottomSheet) {
+                        Navigator.pop(context); // Close bottom sheet
+                      }
+                      Nav.push(context, Routes.chatScreen, extra: {
+                        'userName': item.name ?? "User",
+                        'bookingId': item.bookingId?.toString() ?? widget.bookingId ?? "N/A",
+                        'creatorName': item.name ?? "Guddu",
+                        'receiverId': item.id?.toString() ?? "0",
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(msg.message),
-                          const SizedBox(height: 4),
-                          Text(
-                            msg.formattedTime,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey,
+                          /// User Avatar
+                          CircleAvatar(
+                            radius: 28,
+                            backgroundImage: NetworkImage(item.driverImageUrl ?? "https://cabyatra.com/assets/images/user.png"),
+                            backgroundColor: Colors.grey.shade200,
+                          ),
+                          const SizedBox(width: 15),
+
+                          /// Name and Message
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name ?? "User",
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  item.lastMessage ?? "Last message snippet here...",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
                             ),
+                          ),
+
+                          /// Booking ID (on the right)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Booking ID : ${item.bookingId ?? widget.bookingId ?? "N/A"}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
                   );
-                }),
+                },
+              );
+            },
           ),
+        ),
+      ],
+    );
 
-          // Input
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: _isConnected
-                          ? 'Type a message...'
-                          : 'Not connected...',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24)),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
-                    enabled: _isConnected,
-                    onSubmitted: (_) => _sendMessage(),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton.filled(
-                  onPressed: _isConnected ? _sendMessage : null,
-                  icon: const Icon(Icons.send),
-                ),
-              ],
-            ),
-          ),
-        ],
+    if (widget.isBottomSheet) {
+      return Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: content,
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBAR(
+        showLeading: true,
+        title: widget.bookingId != null ? 'Chat History' : 'Chats',
+        onLeadingPressed: widget.onBack ?? () => Navigator.pop(context),
       ),
+      body: content,
     );
   }
 }
 
-// Message model (unchanged)
-class Message {
-  final int id;
-  final int senderId;
-  final int receiverId;
-  final String message;
-  final String createdAt;
+class DottedDivider extends StatelessWidget {
+  const DottedDivider({super.key});
 
-  Message({
-    required this.id,
-    required this.senderId,
-    required this.receiverId,
-    required this.message,
-    required this.createdAt,
-  });
-
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      id: json["id"],
-      senderId: json["sender_id"],
-      receiverId: json["receiver_id"],
-      message: json["message"],
-      createdAt: json["created_at"],
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final boxWidth = constraints.constrainWidth();
+        const dashWidth = 3.0;
+        final dashCount = (boxWidth / (2 * dashWidth)).floor();
+        return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
+          children: List.generate(dashCount, (_) {
+            return const SizedBox(
+              width: dashWidth,
+              height: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: Colors.grey),
+              ),
+            );
+          }),
+        );
+      },
     );
-  }
-
-  String get formattedTime {
-    final dt = DateTime.parse(createdAt);
-    return "${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}";
   }
 }

@@ -1,12 +1,12 @@
 class UpdateAssignMethodModel {
-  String? status;
+  bool? status;
   String? message;
 
   UpdateAssignMethodModel({this.status, this.message});
 
   UpdateAssignMethodModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    message = json['message'];
+    message = json['message']?.toString();
   }
 
   Map<String, dynamic> toJson() {

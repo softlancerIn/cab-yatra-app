@@ -55,9 +55,14 @@ class CommonAppButton extends StatelessWidget {
   final FontWeight fontWeight;
   final double fontSize;
 
+  final IconData? icon;
+  final String? assetIcon;
+
   const CommonAppButton({
     super.key,
     required this.text,
+    this.icon,
+    this.assetIcon,
     required this.onPressed,
     this.isLoading = false,
     this.backgroundColor,
@@ -108,14 +113,30 @@ class CommonAppButton extends StatelessWidget {
               strokeWidth: 2.5,
             ),
           )
-              : Text(
-            text,
-            style: TextStyle(
-              color: textColor ?? Colors.white,
-              fontWeight: fontWeight,
-              fontSize: fontSize,
-            ),
-          ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (icon != null) ...[
+                      Icon(icon, color: textColor ?? Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                    ] else if (assetIcon != null) ...[
+                      Image.asset(
+                        assetIcon!,
+                        height: 20,
+                        color: textColor ?? Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      text,
+                      style: TextStyle(
+                        color: textColor ?? Colors.white,
+                        fontWeight: fontWeight,
+                        fontSize: fontSize,
+                      ),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

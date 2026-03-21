@@ -37,6 +37,7 @@ class CustomSearchBar extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              keyboardType: TextInputType.number,
               onSubmitted: (_) => onSearch(),
               onChanged: onChanged,
               decoration: const InputDecoration(

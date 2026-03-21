@@ -55,20 +55,20 @@ class Data {
       this.qrImageUrl});
 
   Data.fromJson(Map<String, dynamic> json) {
-    driverId = json['driver_id'];
-    type = json['type'];
-    bankName = json['bank_name'];
-    accountNumber = json['account_number'];
-    ifscCode = json['ifsc_code'];
-    accountHolderName = json['account_holderName'];
-    upiId = json['upi_id'];
-    paymentNumber = json['payment_number'];
-    qrImage = json['qr_image'];
-    status = json['status'];
-    updatedAt = json['updated_at'];
-    createdAt = json['created_at'];
-    id = json['id'];
-    qrImageUrl = json['qr_image_url'];
+    driverId = json['driver_id'] is int ? json['driver_id'] : int.tryParse(json['driver_id']?.toString() ?? "");
+    type = json['type'] is int ? json['type'] : int.tryParse(json['type']?.toString() ?? "");
+    bankName = json['bank_name']?.toString();
+    accountNumber = json['account_number']?.toString();
+    ifscCode = json['ifsc_code']?.toString();
+    accountHolderName = json['account_holderName']?.toString();
+    upiId = json['upi_id']?.toString();
+    paymentNumber = json['payment_number']?.toString();
+    qrImage = json['qr_image']?.toString();
+    status = json['status'] is int ? json['status'] : int.tryParse(json['status']?.toString() ?? "");
+    updatedAt = json['updated_at']?.toString();
+    createdAt = json['created_at']?.toString();
+    id = json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? "");
+    qrImageUrl = json['qr_image_url']?.toString();
   }
 
   Map<String, dynamic> toJson() {

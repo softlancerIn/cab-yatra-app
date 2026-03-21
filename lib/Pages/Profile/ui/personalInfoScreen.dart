@@ -20,7 +20,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final nameController = TextEditingController();
   final companyController = TextEditingController();
   final license1Controller = TextEditingController();
-  final license2Controller = TextEditingController();
 
   final ImagePicker picker = ImagePicker();
 
@@ -35,7 +34,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     nameController.dispose();
     companyController.dispose();
     license1Controller.dispose();
-    license2Controller.dispose();
     super.dispose();
   }
 
@@ -51,7 +49,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const AppBAR(
-          title: "Personal information", showLeading: true, showAction: true),
+          title: "Personal information", showLeading: true, showAction: false),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -62,7 +60,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               nameController.text = state.name;
               companyController.text = state.company;
               license1Controller.text = state.licenseNumber;
-              license2Controller.text = state.licenseNumber2;
 
               // Optional: only update if user hasn't typed anything yet
               // if (nameController.text.isEmpty || nameController.text == "Name") {
@@ -170,13 +167,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 15),
-
-                  CommonTextFormField(
-                    controller: license2Controller,
-                    hintText: "Licence Number (optional)",
-                  ),
-
                   const SizedBox(height: 40),
 
                   SizedBox(
@@ -210,8 +200,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                       name: nameController.text.trim(),
                                       licenseNumber:
                                           license1Controller.text.trim(),
-                                      licenseNumber2:
-                                          license2Controller.text.trim(),
+                                      licenseNumber2: "",
                                       cInfo: companyController.text.trim(),
                                       driverImage: imageToSend,
                                     ),

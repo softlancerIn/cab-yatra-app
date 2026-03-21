@@ -15,11 +15,11 @@ class MessageListModel {
 
   factory MessageListModel.fromJson(Map<String, dynamic> json) {
     return MessageListModel(
-      id: json['id'],
-      senderId: json['sender_id'],
-      receiverId: json['receiver_id'],
-      text: json['MessageListModel'],
-      timestamp: json['created_at'],
+      id: json['id'] ?? 0,
+      senderId: json['sender_id'] ?? 0,
+      receiverId: json['receiver_id'] ?? 0,
+      text: json['message'] ?? "",
+      timestamp: json['created_at'] ?? DateTime.now().toIso8601String(),
     );
   }
 

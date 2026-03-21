@@ -156,19 +156,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 20,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  LogOutButton(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    LogOutButton(
                       title: 'Logout',
                       image: 'assets/images/logoutIcon.png',
                       onTap: () {
@@ -187,7 +185,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
               const SizedBox(
-                height: 10,
+                height: 30,
               ),
               BlocConsumer<PersonalInfoBloc, PersonalInfoState>(
                   listener: (context, state) {},
@@ -236,8 +234,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     if (loadingProgress == null) return child;
                                     return const Center(
                                       child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
+                                        valueColor: AlwaysStoppedAnimation<Color>(
                                                 Color(0xFFFCB117)),
                                       ),
                                     );
@@ -249,51 +246,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               height: 5,
                             ),
                             Text(
-                              state.name ?? 'Brijesh',
+                              state.name,
                               style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600),
+                                  fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                             ),
-                            //SizedBox(height: 5,),
                             Text(
-                              state.phone ?? '6389716535',
+                              state.phone,
                               style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey,
+                                  fontFamily: 'Poppins'),
                             ),
-                            const SizedBox(
-                              height: 5,
-                            ),
+                            const SizedBox(height: 8),
                             GestureDetector(
                               onTap: () {
                                 Nav.push(context, Routes.reviewScreen);
                               },
                               behavior: HitTestBehavior.opaque,
-                              child: const Row(
+                              child: Row(
                                 children: [
                                   Text(
-                                    '4.9',
-                                    style: TextStyle(
+                                    state.rating,
+                                    style: const TextStyle(
                                       color: Colors.black,
                                       fontSize: 12,
                                       fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  Icon(
+                                  const SizedBox(width: 4),
+                                  const Icon(
                                     Icons.star,
                                     color: Color(0xFFFCB117),
                                     size: 16,
                                   ),
-                                  // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                                  // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                                  // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
-                                  // Icon(Icons.star,color:Color(0xFFFCB117) ,size: 16,),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    '(1 review)',
-                                    style: TextStyle(
+                                    '(${state.ratingCount} review)',
+                                    style: const TextStyle(
                                       color: Color(0xFF787878),
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -306,9 +299,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ],
                     );
                   }),
-              const SizedBox(
-                height: 10,
-              ),
+              const SizedBox(height: 20),
+
+              const SizedBox(height: 10),
               titleData(title: 'Account'),
               const SizedBox(
                 height: 10,
@@ -432,8 +425,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget titleCardData({
     required String image,
@@ -486,19 +481,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        height: 32, // Consistent with AppBar pills
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          color: const Color(0xADEFEFEF),
+          color: const Color(0xFFEFEFEF),
         ),
         child: Row(
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+              style: const TextStyle(
+                fontSize: 13, // Increased from 12
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+              ),
             ),
             const SizedBox(
-              width: 5,
+              width: 8,
             ),
             Image(
               image: AssetImage(image),

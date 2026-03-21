@@ -20,6 +20,8 @@ import 'Pages/cms/bloc/cms_bloc.dart';
 import 'Pages/editBooking/bloc/editBookingBloc.dart';
 import 'Pages/manage_vehicles/bloc/vehicle_bloc.dart';
 import 'Pages/transection/bloc/transections_bloc.dart';
+import 'Pages/Profile/repo/profileRepo.dart';
+import 'Pages/Review/bloc/review_bloc.dart';
 import 'app/router/app_router.dart';
 
 import 'cores/services/notification_service.dart';
@@ -62,6 +64,7 @@ class MyApp extends StatelessWidget {
         BlocProvider<TransectionsBloc>(create: (context) => TransectionsBloc(),),
         BlocProvider<VehicleBloc>(create: (context) => VehicleBloc(),),
          BlocProvider<CmsBloc>(create: (context) => CmsBloc(),),
+         BlocProvider<ReviewBloc>(create: (context) => ReviewBloc(profileRepo: ProfileRepo()),),
         // BlocProvider<SettingsBloc>(create: (context) => SettingsBloc(),),
         // BlocProvider<BookingHistoryBloc>(create: (context) => BookingHistoryBloc(),),
         // BlocProvider(create: (_) => AuthBloc()..add(CheckAuthStatusEvent())),

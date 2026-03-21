@@ -31,7 +31,7 @@ class _SliderWidgetState extends State<SliderWidget> {
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                margin: const EdgeInsets.symmetric(horizontal: 14.0),
+                margin: const EdgeInsets.symmetric(horizontal: 12.0),
                 decoration: BoxDecoration(
                   color: Colors.grey,
                   borderRadius: BorderRadius.circular(20),
@@ -56,7 +56,7 @@ class _SliderWidgetState extends State<SliderWidget> {
       options: CarouselOptions(
           onPageChanged: (index, reason) {},
           autoPlay: true,
-          aspectRatio: 20 / 9,
+          aspectRatio: 22 / 7,
           enlargeCenterPage: true,
           viewportFraction: 1,
           initialPage: 0,

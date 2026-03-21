@@ -37,7 +37,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadDriverId();
-    // context.read<PaymentBloc>().add(LoadPayment());
+    context.read<PaymentBloc>().add(LoadPayment());
   }
 
   Future<void> _loadDriverId() async {
@@ -68,40 +68,37 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
           title: "Payment Method", showLeading: true, showAction: false),
       body: BlocConsumer<PaymentBloc, PaymentState>(
         listener: (context, state) {
-          if (state.success) {
+          if (state.updated) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Payment Updated Successfully")),
             );
           }
+
+          if (state.loaded && state.payment?.data?.isNotEmpty == true) {
+            final firstPayment = state.payment!.data!.first;
+            print("--- PAYMENT DATA LOADED ---");
+            print("Bank: ${firstPayment.bankName}");
+            print("Acc: ${firstPayment.accountNumber}");
+            
+            _bankNameController.text = firstPayment.bankName ?? "";
+            _accountNumberController.text = firstPayment.accountNumber ?? "";
+            _reAccountNumberController.text = firstPayment.accountNumber ?? "";
+            _ifscCodeController.text = firstPayment.ifscCode ?? "";
+            _accountHolderController.text = firstPayment.accountHolderName ?? "";
+            _upiIdController.text = firstPayment.upiId ?? "";
+            _paymentNumberController.text = firstPayment.paymentNumber ?? "";
+
+            // If bank data exists, default to Bank tab (index 1)
+            if (firstPayment.bankName != null && firstPayment.bankName!.isNotEmpty) {
+              if (_tabController?.index == 0) {
+                _tabController?.animateTo(1);
+              }
+            }
+          }
         },
         builder: (context, state) {
-          if (state.loading) {
+          if (state.loading && state.payment == null) {
             return const Center(child: CircularProgressIndicator());
-          }
-
-          final firstPayment = state.payment?.data?.isNotEmpty == true
-              ? state.payment!.data!.first
-              : null;
-          if (firstPayment != null) {
-            if (_bankNameController.text.isEmpty) {
-              _bankNameController.text = firstPayment.bankName ?? "";
-            }
-            if (_accountNumberController.text.isEmpty) {
-              _accountNumberController.text = firstPayment.accountNumber ?? "";
-            }
-            if (_ifscCodeController.text.isEmpty) {
-              _ifscCodeController.text = firstPayment.ifscCode ?? "";
-            }
-            if (_accountHolderController.text.isEmpty) {
-              _accountHolderController.text =
-                  firstPayment.accountHolderName ?? "";
-            }
-            if (_upiIdController.text.isEmpty) {
-              _upiIdController.text = firstPayment.upiId ?? "";
-            }
-            if (_paymentNumberController.text.isEmpty) {
-              _paymentNumberController.text = firstPayment.paymentNumber ?? "";
-            }
           }
 
           return Column(
@@ -285,12 +282,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
                   color: Color(0xff444444))),
           const SizedBox(height: 18),
           CommonTextFormField(
-              hintText: 'Bank Name', controller: _bankNameController),
+              hintText: 'Bank Name',
+              controller: _bankNameController,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'Bank name is required' : null),
           const SizedBox(height: 15),
           CommonTextFormField(
-              hintText: 'Accoun Number',
+              hintText: 'Account Number',
               controller: _accountNumberController,
-              keyboardType: TextInputType.number),
+              keyboardType: TextInputType.number,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'Account number is required' : null),
           const SizedBox(height: 15),
           CommonTextFormField(
               hintText: 'Re Account Number',
@@ -298,11 +300,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
               keyboardType: TextInputType.number),
           const SizedBox(height: 15),
           CommonTextFormField(
-              hintText: 'IFSC Code', controller: _ifscCodeController),
+              hintText: 'IFSC Code',
+              controller: _ifscCodeController,
+              validator: (value) =>
+                  value?.isEmpty == true ? 'IFSC code is required' : null),
           const SizedBox(height: 15),
           CommonTextFormField(
               hintText: 'Account Holder name',
-              controller: _accountHolderController),
+              controller: _accountHolderController,
+              validator: (value) => value?.isEmpty == true
+                  ? 'Account holder name is required'
+                  : null),
           const SizedBox(height: 22),
           const Row(
             children: [
@@ -322,6 +330,16 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
   }
 
   void _handleSubmit(BuildContext context) {
+    if (_tabController?.index == 1) {
+      if (!_bankFormKey.currentState!.validate()) return;
+      if (_accountNumberController.text != _reAccountNumberController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Account numbers do not match")),
+        );
+        return;
+      }
+    }
+
     final bloc = context.read<PaymentBloc>();
     final isBankTab = _tabController?.index == 1;
 
@@ -338,7 +356,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen>
     } else {
       final fields = {
         "driver_id": _driverId ?? "0",
-        "type": "2",
+        "type": "0",
         "upi_id": _upiIdController.text,
         "payment_number": _paymentNumberController.text,
       };

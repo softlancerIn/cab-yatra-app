@@ -1,16 +1,21 @@
 class BookingCreateModel {
   bool? status;
   String? message;
+  int? bookingId;
   Data? data;
 
-  BookingCreateModel({this.status, this.message, this.data});
+  BookingCreateModel({this.status, this.message, this.bookingId, this.data});
 
   BookingCreateModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
-    data = (json['data'] != null && json['data'] is Map<String, dynamic>) 
-        ? Data.fromJson(json['data']) 
-        : null;
+    // API can return data as just an int (booking ID) or as a map object
+    if (json['data'] is int) {
+      bookingId = json['data'];
+    } else if (json['data'] is Map<String, dynamic>) {
+      data = Data.fromJson(json['data']);
+      bookingId = data?.id;
+    }
   }
 
   Map<String, dynamic> toJson() {

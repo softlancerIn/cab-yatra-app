@@ -121,6 +121,9 @@ class ApiService {
     await _checkInternet();
 
     try {
+      if (files.isEmpty) {
+        return await post(endpoint, data: fields, requiresAuth: requiresAuth);
+      }
       final formData = FormData();
 
       if (fields != null) {
@@ -145,17 +148,20 @@ class ApiService {
 
       // Print FormData for debugging
       print("---- FORMDATA DEBUG ----");
-      print("Fields: \${formData.fields}");
+      print("Fields: ${formData.fields}");
       print("Files:");
       for (var file in formData.files) {
-        print("\${file.key}: \${file.value.filename}");
+        print("${file.key}: ${file.value.filename}");
       }
       print("------------------------");
 
       final response = await _dio.post(
         endpoint,
         data: formData,
-        options: Options(extra: {'requiresAuth': requiresAuth}),
+        options: Options(
+          extra: {'requiresAuth': requiresAuth},
+          contentType: 'multipart/form-data',
+        ),
       );
 
       return response.data;

@@ -36,13 +36,13 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       );
 
       // Success true karo
-      emit(state.copyWith(loading: false, success: true));
+      emit(state.copyWith(loading: false, updated: true));
 
       // 300ms wait
       await Future.delayed(const Duration(milliseconds: 300));
 
       // Success false karo (reset)
-      emit(state.copyWith(success: false));
+      emit(state.copyWith(updated: false));
 
       // Reload payment list
       add(LoadPayment());
@@ -50,7 +50,6 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       emit(state.copyWith(
         loading: false,
         error: e.toString(),
-        success: false,
       ));
     }
   }
@@ -63,7 +62,11 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
     try {
       final result = await repo.getPaymentApi();
-      emit(state.copyWith(loading: false, success: true, payment: result));
+      emit(state.copyWith(loading: false, loaded: true, payment: result));
+
+      // Reset loaded flag so it doesn't trigger listener again
+      await Future.delayed(const Duration(milliseconds: 300));
+      emit(state.copyWith(loaded: false));
     } catch (e) {
       emit(state.copyWith(loading: false));
     }

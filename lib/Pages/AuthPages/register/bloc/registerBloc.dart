@@ -39,7 +39,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
             isSuccess: true,
           ),
         );
-        Nav.go(event.context, Routes.login);
+        Nav.go(event.context, Routes.home);
       } else {
         emit(
           state.copyWith(

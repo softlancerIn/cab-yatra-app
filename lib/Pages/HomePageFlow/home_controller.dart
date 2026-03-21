@@ -7,6 +7,8 @@ import '../chat/chat_listing.dart';
 import 'package:flutter/services.dart';
 import '../Profile/profile.dart';
 import 'dashboard/ui/homepage.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../chat/bloc/chat_bloc.dart';
 
 class MainHomeController extends StatefulWidget {
   const MainHomeController({super.key});
@@ -25,9 +27,12 @@ class _MainHomeControllerState extends State<MainHomeController> {
     super.initState();
     _pages = [
       const Homepage(),
-      const BookingPage(),
+      BookingPage(onBack: () => _onItemTapped(0)),
       AddBookingScreen(onBack: () => _onItemTapped(0)),
-      const ChatListingScreen(),
+      BlocProvider(
+        create: (context) => ChatListBloc(),
+        child: ChatListingScreen(onBack: () => _onItemTapped(0)),
+      ),
       const EditProfilePage(),
     ];
     final args = Get.arguments;

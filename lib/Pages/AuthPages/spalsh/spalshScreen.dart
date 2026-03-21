@@ -20,8 +20,9 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 3), () async {
       //SharedPreferences prefs = await SharedPreferences.getInstance();
       // prefs.getString('auth_token');
+
       final userToken = await SecureStorageService.getToken();
-   //   String? userToken = prefs.getString('auth_token');
+   //  String? userToken = prefs.getString('auth_token');
 
       print('token============>$userToken');
       if (userToken == null || userToken == "") {

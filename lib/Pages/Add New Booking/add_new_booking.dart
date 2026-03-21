@@ -99,6 +99,7 @@ class _AddBookingScreenState extends State<AddBookingScreen>
           Expanded(
             child: GestureDetector(
               child: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
                 children: [
                   AddBookingOneWayScreen(onBack: widget.onBack),

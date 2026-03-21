@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 
 class GooglePlacesService {
-  final String apiKey = 'AIzaSyDhTJHj8fT_dHJMkH0ndpW0guo4EQzXhHY';
+  final String apiKey = 'AIzaSyCyO9SWzEn8SWchaaqa6T_yCmCD8cLHPfg';
   final Dio _dio = Dio();
 
   Future<List<String>> getSuggestions(String query) async {

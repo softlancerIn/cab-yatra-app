@@ -55,40 +55,6 @@ class _AddBookingOneWayScreenViewState
   @override
   void initState() {
     super.initState();
-    _remarksCtrl.addListener(_onRemarksChanged);
-  }
-
-  void _onRemarksChanged() {
-    final List<String> parts = _remarksCtrl.text
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    final List<String> availableChips = [
-      "Only Diesel",
-      "With Carrier",
-      "All Inclusive",
-      "All Exclusive"
-    ];
-
-    bool changed = false;
-    for (var chip in availableChips) {
-      bool isInText = parts.contains(chip.toLowerCase());
-      bool isInList = _selectedRequirements.contains(chip);
-
-      if (isInText && !isInList) {
-        _selectedRequirements.add(chip);
-        changed = true;
-      } else if (!isInText && isInList) {
-        _selectedRequirements.remove(chip);
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      setState(() {});
-    }
   }
 
   @override
@@ -96,6 +62,10 @@ class _AddBookingOneWayScreenViewState
     return Scaffold(
       backgroundColor: Colors.white,
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
+        listenWhen: (previous, current) {
+          return previous.isSuccess != current.isSuccess ||
+              previous.hasError != current.hasError;
+        },
         listener: (context, state) {
           if (state.isSuccess) {
             Fluttertoast.showToast(
@@ -103,7 +73,10 @@ class _AddBookingOneWayScreenViewState
               backgroundColor: Colors.green,
               textColor: Colors.white,
             );
-            showAssignDriverBottomSheet(context);
+            final bookingId = state.bookingResponse!.bookingId!;
+            // Reset success state to prevent re-triggering
+            context.read<AddBookingBloc>().add(ResetBooking());
+            showAssignDriverBottomSheet(context, bookingId);
           }
         },
         builder: (context, state) {
@@ -117,61 +90,77 @@ class _AddBookingOneWayScreenViewState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text("Select Vehicle Category",
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  const SizedBox(height: 12),
 
                   state.isLoading
-                      ? const Center(child: SizedBox())
+                      ? const Center(child: CircularProgressIndicator())
                       : state.carCategories == null ||
                               state.carCategories!.data!.isEmpty
                           ? const Text("No categories available",
                               style: TextStyle(color: Colors.red))
-                          : containerShadow(
-                              child: DropdownButtonFormField<int>(
-                                initialValue: state.selectedCarCategoryId,
-                                isExpanded: true,
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 14),
-                                ),
-                                hint: const Text(
-                                  "Choose vehicle",
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                items: state.carCategories!.data!.map((car) {
-                                  return DropdownMenuItem<int>(
-                                    value: car.id,
-                                    child: Text(
-                                      car.name ?? "Unknown",
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w400),
+                          : SizedBox(
+                              height: 120,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: state.carCategories!.data!.length,
+                                itemBuilder: (context, index) {
+                                  final car = state.carCategories!.data![index];
+                                  final isSelected = state.selectedCarCategoryId == car.id;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      context.read<AddBookingBloc>().add(SelectCarCategory(car.id!));
+                                    },
+                                    child: Container(
+                                      width: 100,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? const Color(0xFFFFB300).withOpacity(0.1) : Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: isSelected ? const Color(0xFFFFB300) : Colors.grey.shade200,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            "assets/images/carMO.png",
+                                            height: 35,
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            car.name ?? "",
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              height: 1.1,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                              color: isSelected ? const Color(0xFFFFB300) : Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
-                                }).toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    context
-                                        .read<AddBookingBloc>()
-                                        .add(SelectCarCategory(value));
-                                  }
                                 },
                               ),
                             ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
                   LocationAutocompleteField(
                     controller: _pickupCtrl,
-                    hint: "Pickup Location",
+                    hint: "Enter Pickup Location",
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   LocationAutocompleteField(
                     controller: _dropCtrl,
-                    hint: "Drop Location",
+                    hint: "Enter Drop Location",
                   ),
 
                   const SizedBox(height: 24),
@@ -269,13 +258,13 @@ class _AddBookingOneWayScreenViewState
                   const SizedBox(height: 24),
 
                   containerShadow(
-                    height: 100,
+                    height: 50,
                     child: TextField(
                       controller: _remarksCtrl,
-                      maxLines: 3,
+                      maxLines: 1,
                       style: const TextStyle(fontSize: 13),
                       decoration: const InputDecoration(
-                        hintText: "Extra Requirements...",
+                        hintText: "Enter extra requirements...",
                         hintStyle: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
@@ -320,7 +309,7 @@ class _AddBookingOneWayScreenViewState
                             }
 
                             final booking = SubmitBooking(
-                              subType: "0",
+                              subType: "1",
                               noOfDay: "",
                               tripNotes: "",
                               carCategoryId: state.selectedCarCategoryId!,
@@ -333,7 +322,7 @@ class _AddBookingOneWayScreenViewState
                               driverCommission:
                                   double.tryParse(_driverCommCtrl.text) ?? 0.0,
                               showPhoneNumber: _showPhoneNumber,
-                              remarks: _remarksCtrl.text.trim(),
+                              remarks: [..._selectedRequirements, if (_remarksCtrl.text.trim().isNotEmpty) _remarksCtrl.text.trim()].join(', '),
                               context: context,
                             );
 
@@ -460,17 +449,17 @@ class _AddBookingOneWayScreenViewState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xffFCB117) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          color: isSelected ? const Color(0xFFFFB300) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xffFCB117) : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFFFFB300) : Colors.grey.shade300,
           ),
           boxShadow: [
             if (!isSelected)
-              const BoxShadow(
-                color: Color(0x19000000),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
                 blurRadius: 4,
-                offset: Offset(0, 0),
+                offset: const Offset(0, 2),
               )
           ],
         ),
@@ -487,31 +476,13 @@ class _AddBookingOneWayScreenViewState
   }
 
   void _updateTextField(String label, bool isAdding) {
-    String currentText = _remarksCtrl.text.trim();
-    List<String> parts = currentText
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    if (isAdding) {
-      bool exists = parts.any((e) => e.toLowerCase() == label.toLowerCase());
-      if (!exists) {
-        parts.insert(0, label);
-      }
-    } else {
-      parts.removeWhere((e) => e.toLowerCase() == label.toLowerCase());
-    }
-
-    _remarksCtrl.text = parts.join(", ");
-    _remarksCtrl.selection = TextSelection.fromPosition(
-      TextPosition(offset: _remarksCtrl.text.length),
-    );
+    // Chips are managed separately, no need to update text field
+    setState(() {});
   }
 
   @override
   void dispose() {
-    _remarksCtrl.removeListener(_onRemarksChanged);
+
     _startDateCtrl.dispose();
     _startTimeCtrl.dispose();
     _pickupCtrl.dispose();
@@ -522,111 +493,186 @@ class _AddBookingOneWayScreenViewState
     super.dispose();
   }
 
-  void showAssignDriverBottomSheet(BuildContext context) {
+  void showAssignDriverBottomSheet(BuildContext parentContext, int bookingId) {
     int selectedValue = 0;
 
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       isDismissible: false,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (context) {
+      builder: (modalContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.check_circle, size: 70, color: Colors.orange),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Booking posted Successfully",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        RadioListTile<int>(
-                          value: 0,
-                          groupValue: selectedValue,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value!;
-                            });
-                          },
-                          title: const Text(
-                            "Auto Assign Driver – The first driver who pays the commission will get the booking",
-                            style: TextStyle(fontSize: 13),
-                          ),
+          builder: (modalContext, setState) {
+            return BlocConsumer<AddBookingBloc, AddBookingState>(
+              listenWhen: (previous, current) {
+                return previous.updateAssignMethodModel != current.updateAssignMethodModel;
+              },
+              listener: (context, state) {
+                if (state.updateAssignMethodModel != null) {
+                  Fluttertoast.showToast(msg: "Booking assigned successfully!");
+                  // Clear the form
+                  _pickupCtrl.clear();
+                  _dropCtrl.clear();
+                  _startDateCtrl.clear();
+                  _startTimeCtrl.clear();
+                  _totalFareCtrl.clear();
+                  _driverCommCtrl.clear();
+                  _remarksCtrl.clear();
+                  _selectedRequirements.clear();
+                  _showPhoneNumber = false;
+                  // Reset bloc state
+                  context.read<AddBookingBloc>().add(ResetBooking());
+                  Navigator.pop(modalContext); // Close bottom sheet
+                  // Navigate to home page
+                  if (widget.onBack != null) {
+                    widget.onBack!();
+                  }
+                }
+              },
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        RadioListTile<int>(
-                          value: 1,
-                          groupValue: selectedValue,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedValue = value!;
-                            });
-                          },
-                          title: const Text(
-                            "Manual Selection – You will choose the driver yourself",
-                            style: TextStyle(fontSize: 13),
-                          ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Icon(Icons.check_circle_rounded, size: 80, color: Color(0xFFFFB300)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Booking Posted!",
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "How would you like to assign this booking?",
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                      if (state.hasError) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          state.errorMessage ?? "An error occurred",
+                          style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
                         ),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                      const SizedBox(height: 24),
+                      _buildAssignOption(
+                        title: "Direct Assign",
+                        subtitle: "Auto assign to the first available driver",
+                        icon: Icons.flash_on,
+                        isSelected: selectedValue == 0,
+                        onTap: () => setState(() => selectedValue = 0),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildAssignOption(
+                        title: "Manual Selection",
+                        subtitle: "Choose your favorite driver personally",
+                        icon: Icons.person_search,
+                        isSelected: selectedValue == 1,
+                        onTap: () => setState(() => selectedValue = 1),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 54,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFB300),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: state.isLoading
+                              ? null
+                              : () {
+                                  context.read<AddBookingBloc>().add(
+                                        UpdateAssignMethodEvent(
+                                          context: context,
+                                          assignType: selectedValue.toString(),
+                                          bookingId: bookingId,
+                                        ),
+                                      );
+
+                                  context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+                                },
+                          child: state.isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  "Confirm Selection",
+                                  style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                                ),
                         ),
                       ),
-                      onPressed: () {
-                        context.read<AddBookingBloc>().add(
-                              UpdateAssignMethodEvent(
-                                context: context,
-                                assignType: selectedValue.toString(),
-                              ),
-                            );
-
-                        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
-
-                        // 1. Close the bottom sheet
-                        Navigator.pop(context);
-
-                        // 2. Navigate back to Home tab
-                        if (widget.onBack != null) {
-                          widget.onBack!();
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text(
-                        "Done",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                    ),
+                      const SizedBox(height: 12),
+                      if (state.hasError)
+                        Center(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel & Close"),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 10)
-                ],
-              ),
+                );
+              },
             );
           },
         );
       },
     );
   }
+
+  Widget _buildAssignOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFB300).withOpacity(0.05) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? const Color(0xFFFFB300) : Colors.grey.shade200,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: isSelected ? const Color(0xFFFFB300) : Colors.grey),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(Icons.check_circle, color: Color(0xFFFFB300))
+            else
+              const Icon(Icons.circle_outlined, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
 }
+

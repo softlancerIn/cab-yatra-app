@@ -375,7 +375,7 @@ class EditBookingOneWayScreenState extends State<EditBookingOneWayScreen> {
 
                               final booking = EditSubmitBooking(
                                 id: widget.sId, // hardcoded as per requirement
-                                subType: "0",
+                                subType: "1",
                                 // hardcoded as per requirement
                                 carCategoryId: state.selectedCarCategoryId!,
                                 pickUpDate: _startDateCtrl.text,

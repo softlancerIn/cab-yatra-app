@@ -73,7 +73,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
       SubmitDriver event,
       Emitter<DriverState> emit,
       ) async {
-    emit(state.copyWith(loading: true));
+    emit(state.copyWith(loading: true, success: false));
 
     try {
       await repo.addDriver(
@@ -94,7 +94,7 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
       LoadDrivers event,
       Emitter<DriverState> emit,
       ) async {
-    emit(state.copyWith(loading: true));
+    emit(state.copyWith(loading: true, success: false));
 
     try {
       final result = await repo.getDrivers();

@@ -1,11 +1,21 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cab_taxi_app/Pages/Custom_Widgets/custom_app_bar.dart';
+import '../Profile/repo/profileRepo.dart';
 
 class ReviewPage extends StatefulWidget {
   final int? driverId;
   final String? bookingId;
+  final String? driverName;
+  final String? driverImage;
 
-  const ReviewPage({super.key, this.driverId, this.bookingId});
+  const ReviewPage({
+    super.key, 
+    this.driverId, 
+    this.bookingId,
+    this.driverName,
+    this.driverImage,
+  });
 
   @override
   State<ReviewPage> createState() => _ReviewPageState();
@@ -15,7 +25,9 @@ class _ReviewPageState extends State<ReviewPage> {
   int _selectedStars = 0;
   final List<bool> _checkBoxValues = [false, false, false, false];
   final TextEditingController _reviewController = TextEditingController();
-  final String _driverName = '';
+  final ProfileRepo _profileRepo = ProfileRepo();
+  bool _isLoading = false;
+
   Color _getStarColor(int index) {
     if (_selectedStars >= index) {
       switch (index) {
@@ -34,9 +46,54 @@ class _ReviewPageState extends State<ReviewPage> {
     return Colors.grey;
   }
 
+  Future<void> _submitReview() async {
+    if (_selectedStars == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one star rating')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final List<String> selectedLabels = [];
+      if (_checkBoxValues[0]) selectedLabels.add('Neat & clean Cab.');
+      if (_checkBoxValues[1]) selectedLabels.add('Good Behavior.');
+      if (_checkBoxValues[2]) selectedLabels.add('On Time.');
+      if (_checkBoxValues[3]) selectedLabels.add('Good Music System.');
+
+      final response = await _profileRepo.submitReview(
+        context: context,
+        bookingId: widget.bookingId ?? '',
+        rating: _selectedStars.toString(),
+        checkBoxReview: jsonEncode(selectedLabels),
+        textReview: _reviewController.text.trim(),
+      );
+
+      if (response['status'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Review submitted successfully')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Failed to submit review')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -58,21 +115,17 @@ class _ReviewPageState extends State<ReviewPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 40,
-                          backgroundImage:
-                              AssetImage('assets/images/profile_sample.png'),
-                          // child: Text(
-                          //   'N/A',
-                          //   style: TextStyle(color: Colors.white),
-                          // ),
+                          backgroundImage: widget.driverImage != null && widget.driverImage!.isNotEmpty
+                              ? NetworkImage(widget.driverImage!)
+                              : const AssetImage('assets/images/profile_sample.png') as ImageProvider,
                         ),
                         SizedBox(
                           width: screenWidth * 0.05,
                         ),
                         Text(
-                          // widget.driverId.toString(),
-                          _driverName.isNotEmpty ? _driverName : 'Loading...',
+                          widget.driverName ?? 'Unknown Driver',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             color: Colors.black,
@@ -222,27 +275,36 @@ class _ReviewPageState extends State<ReviewPage> {
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: _isLoading ? null : _submitReview,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Container(
                         width: double.infinity,
                         height: screenHeight * 0.06,
                         decoration: ShapeDecoration(
-                          color: const Color(0xFFFFB900),
+                          color: _isLoading ? Colors.grey : const Color(0xFFFFB900),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6)),
                         ),
-                        child: const Center(
-                          child: Text(
-                            'Submit Review',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                        child: Center(
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text(
+                                  'Submit Review',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

@@ -53,6 +53,27 @@ class UpdatePostedBookingSearchQueryEvent extends BookingEvent {
   List<Object?> get props => [searchQuery];
 }
 
+class UpdatePostedBookingFilterEvent extends BookingEvent {
+  final List<String>? vehicleTypes;
+  final List<String>? pickupLocations;
+  final String? dropLocation;
+  final String? bookingStatus;
+
+  const UpdatePostedBookingFilterEvent({
+    this.vehicleTypes,
+    this.pickupLocations,
+    this.dropLocation,
+    this.bookingStatus,
+  });
+
+  @override
+  List<Object?> get props => [vehicleTypes, pickupLocations, dropLocation, bookingStatus];
+}
+
+class ClearPostedBookingFilterEvent extends BookingEvent {
+  const ClearPostedBookingFilterEvent();
+}
+
 
 
 

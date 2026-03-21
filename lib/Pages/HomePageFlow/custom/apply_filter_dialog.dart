@@ -1,42 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
+import 'package:cab_taxi_app/Pages/Booking/bloc/booking_bloc.dart';
+import 'package:cab_taxi_app/Pages/Booking/bloc/booking_event.dart';
 
 class ApplyFilterDialog extends StatefulWidget {
-  const ApplyFilterDialog({super.key});
+  final bool isPostedBooking;
+  const ApplyFilterDialog({super.key, this.isPostedBooking = false});
 
   @override
   State<ApplyFilterDialog> createState() => _ApplyFilterDialogState();
 }
 
 class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
-  final TextEditingController _pickupController = TextEditingController();
-  final TextEditingController _dropController = TextEditingController();
+  String? _selectedPickup;
+  String? _selectedDrop;
   String? _selectedVehicle;
+  String? _selectedStatus;
 
-  final List<String> _vehicles = [
-    'hatchback',
-    'Sedan',
-    'SUV',
-    'Innova',
-    'Traveller'
-  ];
+  List<String> get _vehicles {
+    final state = context.read<DashboardBloc>().state;
+    return state.carCategoryModel?.data?.map((e) => e.name ?? "").toList() ?? [
+      'hatchback',
+      'Sedan',
+      'SUV',
+      'Innova',
+      'Traveller'
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
-    final state = context.read<DashboardBloc>().state;
-    _pickupController.text = state.pickupLocationFilter ?? '';
-    _dropController.text = state.dropLocationFilter ?? '';
-    _selectedVehicle = state.selectedVehicleType;
+    context.read<DashboardBloc>().add(GetCitiesEvent(context: context));
+    context.read<DashboardBloc>().add(GetCarCategoryEvent(context: context));
+
+    if (widget.isPostedBooking) {
+      final state = context.read<BookingBloc>().state;
+      _selectedPickup = (state.pickupLocationFilters != null &&
+              state.pickupLocationFilters!.isNotEmpty)
+          ? state.pickupLocationFilters!.first
+          : null;
+      _selectedDrop = state.dropLocationFilter;
+      _selectedVehicle = (state.selectedVehicleTypes != null &&
+              state.selectedVehicleTypes!.isNotEmpty)
+          ? state.selectedVehicleTypes!.first
+          : null;
+      _selectedStatus = state.bookingStatusFilter;
+    } else {
+      final state = context.read<DashboardBloc>().state;
+      _selectedPickup = (state.pickupLocationFilters != null &&
+              state.pickupLocationFilters!.isNotEmpty)
+          ? state.pickupLocationFilters!.first
+          : null;
+      _selectedDrop = state.dropLocationFilter;
+      _selectedVehicle = (state.selectedVehicleTypes != null &&
+              state.selectedVehicleTypes!.isNotEmpty)
+          ? state.selectedVehicleTypes!.first
+          : null;
+    }
   }
 
-  @override
-  void dispose() {
-    _pickupController.dispose();
-    _dropController.dispose();
-    super.dispose();
+  List<String> get _cities {
+    final state = context.read<DashboardBloc>().state;
+    return state.citiesResponseModel?.data?.map((e) => e.name ?? "").toList() ?? [];
   }
 
   @override
@@ -78,21 +105,36 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
 
               const SizedBox(height: 16),
 
-              /// Pickup Location
-              _label("Pickup Location"),
-              LocationAutocompleteField(
-                controller: _pickupController,
-                hint: "Add Pickup Location",
-              ),
+              if (widget.isPostedBooking) ...[
+                /// Booking Status
+                _label("Booking Status"),
+                _dropdownField(
+                  title: _selectedStatus ?? "Select Status",
+                  onTap: () {
+                    _showStatusPicker();
+                  },
+                ),
+              ] else ...[
+                /// Pickup Location
+                _label("Pickup Location"),
+                _dropdownField(
+                  title: _selectedPickup ?? "Add Pickup Location",
+                  onTap: () {
+                    _showCityPicker(true);
+                  },
+                ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              /// Drop Location
-              _label("Drop Location"),
-              LocationAutocompleteField(
-                controller: _dropController,
-                hint: "Add Drop Location",
-              ),
+                /// Drop Location
+                _label("Drop Location"),
+                _dropdownField(
+                  title: _selectedDrop ?? "Add Drop Location",
+                  onTap: () {
+                    _showCityPicker(false);
+                  },
+                ),
+              ],
 
               const SizedBox(height: 24),
 
@@ -111,9 +153,15 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
                           ),
                         ),
                         onPressed: () {
-                          context
-                              .read<DashboardBloc>()
-                              .add(const ClearFilterEvent());
+                          if (widget.isPostedBooking) {
+                            context
+                                .read<BookingBloc>()
+                                .add(const ClearPostedBookingFilterEvent());
+                          } else {
+                            context
+                                .read<DashboardBloc>()
+                                .add(const ClearFilterEvent());
+                          }
                           Navigator.pop(context);
                         },
                         child: const Text(
@@ -141,15 +189,30 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
                           ),
                         ),
                         onPressed: () {
-                          context.read<DashboardBloc>().add(UpdateFilterEvent(
-                                vehicleType: _selectedVehicle,
-                                pickupLocation: _pickupController.text.isEmpty
-                                    ? null
-                                    : _pickupController.text,
-                                dropLocation: _dropController.text.isEmpty
-                                    ? null
-                                    : _dropController.text,
-                              ));
+                          if (widget.isPostedBooking) {
+                            context.read<BookingBloc>().add(
+                                  UpdatePostedBookingFilterEvent(
+                                    vehicleTypes: _selectedVehicle != null
+                                        ? [_selectedVehicle!]
+                                        : null,
+                                    pickupLocations: _selectedPickup != null
+                                        ? [_selectedPickup!]
+                                        : null,
+                                    dropLocation: _selectedDrop,
+                                    bookingStatus: _selectedStatus,
+                                  ),
+                                );
+                          } else {
+                            context.read<DashboardBloc>().add(UpdateFilterEvent(
+                                  vehicleTypes: _selectedVehicle != null
+                                      ? [_selectedVehicle!]
+                                      : null,
+                                  pickupLocations: _selectedPickup != null
+                                      ? [_selectedPickup!]
+                                      : null,
+                                  dropLocation: _selectedDrop,
+                                ));
+                          }
                           Navigator.pop(context);
                         },
                         child: const Text(
@@ -174,11 +237,16 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
   void _showVehiclePicker() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
         return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -188,7 +256,10 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(),
-              ..._vehicles.map((v) => ListTile(
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: _vehicles.map((v) => ListTile(
                     title: Text(v),
                     onTap: () {
                       setState(() {
@@ -196,9 +267,111 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
                       });
                       Navigator.pop(context);
                     },
-                  )),
+                  )).toList(),
+                ),
+              ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  void _showCityPicker(bool isPickup) {
+    String searchQuery = "";
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.7,
+              minChildSize: 0.5,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  child: Column(
+                    children: [
+                      Text(
+                        isPickup ? "Select Pickup City" : "Select Drop City",
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        onChanged: (value) {
+                          setModalState(() {
+                            searchQuery = value.toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Search city...',
+                          prefixIcon: const Icon(Icons.search, color: Colors.orange),
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 32),
+                      Expanded(
+                        child: BlocBuilder<DashboardBloc, DashboardState>(
+                          builder: (context, state) {
+                            final allCities = state.citiesResponseModel?.data?.map((e) => e.name ?? "").toList() ?? [];
+                            final filteredCities = allCities
+                                .where((city) => city.toLowerCase().contains(searchQuery))
+                                .toList();
+
+                            if (state.isLoading && allCities.isEmpty) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            if (filteredCities.isEmpty) {
+                              return const Center(child: Text("No cities found"));
+                            }
+
+                            return ListView.builder(
+                              controller: scrollController,
+                              itemCount: filteredCities.length,
+                              itemBuilder: (context, index) {
+                                final city = filteredCities[index];
+                                return ListTile(
+                                  title: Text(city),
+                                  onTap: () {
+                                    setState(() {
+                                      if (isPickup) {
+                                        _selectedPickup = city;
+                                      } else {
+                                        _selectedDrop = city;
+                                      }
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
@@ -243,9 +416,12 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: const TextStyle(color: Colors.black54),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(color: Colors.black54),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
           ],
@@ -254,37 +430,48 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
     );
   }
 
-  /// Input field
-  Widget _inputField(
-      {required TextEditingController controller, required String hint}) {
-    return Container(
-      height: 45,
-      padding: const EdgeInsets.symmetric(horizontal: 14),
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Colors.black12),
-        ),
-        shadows: const [
-          BoxShadow(
-            color: Color(0x1F000000),
-            blurRadius: 4,
-            offset: Offset(0, 0),
-            spreadRadius: 0,
-          )
-        ],
+  void _showStatusPicker() {
+    final List<String> statuses = ['Open', 'Assigned', 'Completed', 'Cancelled'];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      alignment: Alignment.centerLeft,
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hint,
-          hintStyle: const TextStyle(color: Colors.black54, fontSize: 14),
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Select Booking Status",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const Divider(),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: statuses.map((status) => ListTile(
+                    title: Text(status),
+                    onTap: () {
+                      setState(() {
+                        _selectedStatus = status;
+                      });
+                      Navigator.pop(context);
+                    },
+                  )).toList(),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
+
 }

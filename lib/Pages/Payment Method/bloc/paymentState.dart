@@ -4,14 +4,16 @@ import '../model/getPaymentModel.dart';
 
 class PaymentState extends Equatable {
   final bool loading;
-  final bool success;
+  final bool loaded;
+  final bool updated;
   final GetPaymentModel? payment;
   final String? error;
   final File? qrImage;
 
   const PaymentState({
     this.loading = false,
-    this.success = false,
+    this.loaded = false,
+    this.updated = false,
     this.payment,
     this.error,
     this.qrImage,
@@ -19,14 +21,16 @@ class PaymentState extends Equatable {
 
   PaymentState copyWith({
     bool? loading,
-    bool? success,
+    bool? loaded,
+    bool? updated,
     GetPaymentModel? payment,
     String? error,
     File? qrImage,
   }) {
     return PaymentState(
       loading: loading ?? this.loading,
-      success: success ?? this.success,
+      loaded: loaded ?? this.loaded,
+      updated: updated ?? this.updated,
       payment: payment ?? this.payment,
       error: error,
       qrImage: qrImage ?? this.qrImage,
@@ -36,7 +40,8 @@ class PaymentState extends Equatable {
   @override
   List<Object?> get props => [
     loading,
-    success,
+    loaded,
+    updated,
     payment,
     error,
     qrImage,

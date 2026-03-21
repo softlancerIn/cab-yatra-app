@@ -2,12 +2,14 @@ class RegisterModel {
   bool? status;
   String? message;
   Data? data;
+  String? token;
 
-  RegisterModel({this.status, this.message, this.data});
+  RegisterModel({this.status, this.message, this.data, this.token});
 
   RegisterModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
+    token = json['token'];
     data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
 

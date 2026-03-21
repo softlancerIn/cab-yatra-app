@@ -88,10 +88,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: screenHeight * 0.03,
                   ),
                   const Text(
-                    'Welcome to Cab Yatra',
+                    'Welcome to CabbyCabs',
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
+                      color: Color(0xFF3E4959),
+                      fontSize: 22,
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600,
                     ),
@@ -102,15 +102,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       children: [
                         SizedBox(
-                          height: screenHeight * 0.03,
+                          height: screenHeight * 0.05,
                         ),
                         Container(
                           width: double.infinity,
-                          height: screenHeight * 0.07,
+                          height: 48,
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
-                              side: const BorderSide(width: 1.50),
-                              borderRadius: BorderRadius.circular(8),
+                              side: BorderSide(width: 1.0, color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: Row(
@@ -123,13 +123,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                     return DropdownMenuItem<String>(
                                       value: code,
                                       child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
+                                        padding: const EdgeInsets.only(left: 12.0),
                                         child: Text(
                                           code,
                                           style: const TextStyle(
                                             fontSize: 16,
-                                            fontWeight: FontWeight.bold,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black87,
                                           ),
                                         ),
                                       ),
@@ -142,16 +142,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                   icon: const Padding(
                                     padding: EdgeInsets.only(right: 8.0),
-                                    child: Icon(Icons.arrow_drop_down),
+                                    child: Icon(Icons.arrow_drop_down, color: Colors.black87),
                                   ),
                                 ),
                               ),
-                              // Vertical Divider
-                              Container(
-                                height: 40,
-                                width: 1.5,
-                                color: Colors.black,
-                              ),
+                              // Vertical Divider removed for cleaner look
                               // Phone Number Input Field
                               Expanded(
                                 child: Padding(
@@ -161,11 +156,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     keyboardType: TextInputType.phone,
                                     controller: numberController,
                                     maxLength: 10,
-                                    decoration: const InputDecoration(
+                                    decoration: InputDecoration(
                                       border: InputBorder.none,
                                       counterText: '',
+                                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
                                       hintText: 'Enter your Mobile number',
-                                      hintStyle: TextStyle(fontSize: 16),
+                                      hintStyle: TextStyle(fontSize: 16, color: Colors.grey.shade500),
                                     ),
                                   ),
                                 ),
@@ -174,11 +170,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         SizedBox(
-                          height: screenHeight * 0.06,
+                          height: screenHeight * 0.03,
                         ),
 
                         CommonAppButton(
-                          text: "Sent OTP",
+                          text: "Verify OTP  >",
+                          backgroundColor: const Color(0xFFFCB117),
+                          borderRadius: 12,
+                          height: 54,
                           isLoading: state.isLoading,
                           onPressed: state.isLoading
                               ? null
@@ -243,44 +242,38 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Text.rich(
                           TextSpan(
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontFamily: 'Poppins',
+                            ),
                             children: [
                               TextSpan(
                                 text: 'By signing up, you agree to our ',
                                 style: TextStyle(
-                                  color: Colors.black
-                                      .withOpacity(0.8999999761581421),
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
+                                  color: Colors.black.withValues(alpha: 0.8),
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
                               const TextSpan(
                                 text: 'Terms of Use',
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF3E4959),
+                                  fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),
                               TextSpan(
                                 text: ' and ',
                                 style: TextStyle(
-                                  color: Colors.black
-                                      .withOpacity(0.8999999761581421),
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
+                                  color: Colors.black.withValues(alpha: 0.8),
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
                               const TextSpan(
                                 text: 'Privacy Policy',
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF3E4959),
+                                  fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),

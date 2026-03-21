@@ -30,6 +30,8 @@ class BookingData {
   final double driverCommission;
   final String remark;
   final String subTypeLabel;
+  final String noOfDays;
+  final String tripNotes;
 
   BookingData({
     required this.id,
@@ -43,6 +45,8 @@ class BookingData {
     required this.driverCommission,
     required this.remark,
     required this.subTypeLabel,
+    required this.noOfDays,
+    required this.tripNotes,
   });
 
   factory BookingData.fromJson(Map<String, dynamic> json) {
@@ -58,6 +62,8 @@ class BookingData {
       driverCommission: double.tryParse(json['driverCommission']?.toString() ?? '0') ?? 0.0,
       remark: json['remark'] ?? '',
       subTypeLabel: json['sub_type_label'] ?? '',
+      noOfDays: json['no_of_days']?.toString() ?? '',
+      tripNotes: json['trip_notes']?.toString() ?? '',
     );
   }
 }

@@ -14,6 +14,16 @@ class BookingState extends Equatable {
 
   final PostedBookingModel? postedBookingModel;
   final DeletePostedBookingModel? deletePostedBookingModel;
+  final List<String>? selectedVehicleTypes;
+  final List<String>? pickupLocationFilters;
+  final String? dropLocationFilter;
+  final String? bookingStatusFilter;
+
+  bool get isFilterActive =>
+      (selectedVehicleTypes != null && selectedVehicleTypes!.isNotEmpty) ||
+      (pickupLocationFilters != null && pickupLocationFilters!.isNotEmpty) ||
+      (dropLocationFilter != null && dropLocationFilter!.isNotEmpty) ||
+      (bookingStatusFilter != null && bookingStatusFilter!.isNotEmpty);
 
 
   const BookingState({
@@ -24,8 +34,10 @@ class BookingState extends Equatable {
 
     this.postedBookingModel,
     this.deletePostedBookingModel,
-
-
+    this.selectedVehicleTypes,
+    this.pickupLocationFilters,
+    this.dropLocationFilter,
+    this.bookingStatusFilter,
   });
 
   BookingState copyWith({
@@ -36,18 +48,34 @@ class BookingState extends Equatable {
 
     PostedBookingModel? postedBookingModel,
     DeletePostedBookingModel? deletePostedBookingModel,
-
+    List<String>? selectedVehicleTypes,
+    List<String>? pickupLocationFilters,
+    String? dropLocationFilter,
+    String? bookingStatusFilter,
+    bool clearVehicleType = false,
+    bool clearPickupLocation = false,
+    bool clearDropLocation = false,
+    bool clearBookingStatus = false,
   }) {
     return BookingState(
-
-      isLoading: isLoading??this.isLoading,
+      isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage ?? this.errorMessage,
       searchQuery: searchQuery ?? this.searchQuery,
-
       postedBookingModel: postedBookingModel ?? this.postedBookingModel,
-      deletePostedBookingModel: deletePostedBookingModel ?? this.deletePostedBookingModel,
-
-
+      deletePostedBookingModel:
+          deletePostedBookingModel ?? this.deletePostedBookingModel,
+      selectedVehicleTypes: clearVehicleType
+          ? null
+          : (selectedVehicleTypes ?? this.selectedVehicleTypes),
+      pickupLocationFilters: clearPickupLocation
+          ? null
+          : (pickupLocationFilters ?? this.pickupLocationFilters),
+      dropLocationFilter: clearDropLocation
+          ? null
+          : (dropLocationFilter ?? this.dropLocationFilter),
+      bookingStatusFilter: clearBookingStatus
+          ? null
+          : (bookingStatusFilter ?? this.bookingStatusFilter),
     );
   }
 
@@ -59,8 +87,12 @@ class BookingState extends Equatable {
     errorMessage,
     searchQuery,
 
-    postedBookingModel,deletePostedBookingModel
-
+    postedBookingModel,
+    deletePostedBookingModel,
+    selectedVehicleTypes,
+    pickupLocationFilters,
+    dropLocationFilter,
+    bookingStatusFilter,
   ];
 }
 

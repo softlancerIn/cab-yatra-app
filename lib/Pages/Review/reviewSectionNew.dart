@@ -1,183 +1,213 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../Pages/Profile/model/review_model.dart';
+import '../../Pages/Review/bloc/review_bloc.dart';
+import '../../Pages/Review/bloc/review_event.dart';
+import '../../Pages/Review/bloc/review_state.dart';
 import '../Custom_Widgets/custom_app_bar.dart';
 
-class AgentReviewScreen extends StatelessWidget {
+class AgentReviewScreen extends StatefulWidget {
   const AgentReviewScreen({super.key});
+
+  @override
+  State<AgentReviewScreen> createState() => _AgentReviewScreenState();
+}
+
+class _AgentReviewScreenState extends State<AgentReviewScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ReviewBloc>().add(LoadReviews(context));
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const AppBAR(
-        title: "",
+        title: "Profile & Reviews",
         showLeading: true,
         showAction: false,
       ),
-      // appBar: AppBar(
-      //   backgroundColor: Colors.transparent,
-      //   elevation: 0,
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      // ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          children: [
-            //    const SizedBox(height: 10),
+      body: BlocBuilder<ReviewBloc, ReviewState>(
+        builder: (context, state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            /// Profile Image
-            const CircleAvatar(
-              radius: 45,
-              backgroundImage: AssetImage(
-                'assets/images/profile_image.png', // replace with your asset
-              ),
-            ),
+          if (state.errorMessage != null) {
+            return Center(child: Text("Error: ${state.errorMessage}"));
+          }
 
-            const SizedBox(height: 12),
+          final profile = state.profileModel?.data;
+          final reviews = state.reviewModel?.data ?? [];
 
-            /// Rating
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          return SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
               children: [
-                Icon(Icons.star, color: Colors.amber, size: 22),
-                SizedBox(width: 6),
-                Text(
-                  '4.9',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 20),
+
+                /// Profile Image
+                CircleAvatar(
+                  radius: 45,
+                  backgroundImage: (profile?.driverImageUrl != null &&
+                          profile!.driverImageUrl!.isNotEmpty)
+                      ? NetworkImage(profile.driverImageUrl!)
+                      : const AssetImage('assets/images/profile_image.png')
+                          as ImageProvider,
+                ),
+
+                const SizedBox(height: 12),
+
+                /// Rating
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 22),
+                    const SizedBox(width: 6),
+                    Text(
+                      profile?.rating ?? '0.0',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Based on ${reviews.length} rating\n& Reviews',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                /// Agent Info Card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: ShapeDecoration(
+                    color: const Color(0xFFEFEFEF),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            profile?.name ?? 'Unknown',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Text(
+                            '(Driver)',
+                            style: TextStyle(
+                              color: Color(0xFF787878),
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Text(
+                            'Company name: ',
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          Text(
+                            profile?.cInfo ?? 'N/A',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Text(
+                            'Booking Cancel Count: ',
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          Text(
+                            profile?.cancelBooking?.toString() ?? '0',
+                            style: const TextStyle(
+                              color: Color(0xFFF45858),
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: 6),
-                Text(
-                  'Based on 17 rating\n& Reviews',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+
+                const SizedBox(height: 24),
+
+                /// Reviews Title
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Reviews',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16.50,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+
+                const SizedBox(height: 12),
+
+                /// Reviews List
+                if (reviews.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Text("No reviews found."),
+                  )
+                else
+                  ListView.builder(
+                    itemCount: reviews.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return _reviewCard(reviews[index]);
+                    },
+                  ),
+
+                const SizedBox(height: 20),
               ],
             ),
-
-            const SizedBox(height: 20),
-
-            /// Agent Info Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              clipBehavior: Clip.antiAlias,
-              decoration: ShapeDecoration(
-                color: const Color(0xFFEFEFEF),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Nishu Tiwari',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        '(Agent)',
-                        style: TextStyle(
-                          color: Color(0xFF787878),
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        'Company name: ',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      Text(
-                        ' Mayank tour and travel',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Text(
-                        'Booking Cancelled Count: ',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                      Text(
-                        ' 610',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// Reviews Title
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Reviews',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16.50,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            /// Reviews List
-            ListView.builder(
-              itemCount: 6,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return _reviewCard();
-              },
-            ),
-
-            const SizedBox(height: 20),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
   /// Review Card Widget
-  Widget _reviewCard() {
+  Widget _reviewCard(ReviewData review) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
@@ -200,11 +230,13 @@ class AgentReviewScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           /// User Image
-          const CircleAvatar(
+          CircleAvatar(
             radius: 28,
-            backgroundImage: AssetImage(
-              'assets/images/profile_image.png', // replace with your asset
-            ),
+            backgroundImage: (review.ratingByImage != null &&
+                    review.ratingByImage!.isNotEmpty)
+                ? NetworkImage(review.ratingByImage!)
+                : const AssetImage('assets/images/profile_image.png')
+                    as ImageProvider,
           ),
 
           const SizedBox(width: 12),
@@ -214,19 +246,19 @@ class AgentReviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Raju Kumar',
-                      style: TextStyle(
+                      review.ratingByName ?? 'User',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
-                      'January 12, 2026',
-                      style: TextStyle(
+                      _formatDate(review.createdAt),
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
                       ),
@@ -236,9 +268,9 @@ class AgentReviewScreen extends StatelessWidget {
 
                 const SizedBox(height: 2),
 
-                const Text(
-                  'Jaipur tour and travels',
-                  style: TextStyle(
+                Text(
+                  review.ratingBy ?? '',
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Colors.grey,
                   ),
@@ -250,20 +282,21 @@ class AgentReviewScreen extends StatelessWidget {
                 Row(
                   children: List.generate(
                     5,
-                    (index) => const Icon(
+                    (index) => Icon(
                       Icons.star,
                       size: 16,
-                      color: Colors.amber,
+                      color: index < (int.tryParse(review.rating ?? '0') ?? 0)
+                          ? Colors.amber
+                          : Colors.grey.shade300,
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 6),
 
-                const Text(
-                  'It is a long established fact that a reader '
-                  'It is a long established fact that a reader',
-                  style: TextStyle(
+                Text(
+                  review.textReview ?? '',
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Colors.grey,
                   ),
@@ -274,5 +307,33 @@ class AgentReviewScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr);
+      return "${_getMonth(date.month)} ${date.day}, ${date.year}";
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  String _getMonth(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return months[month - 1];
   }
 }

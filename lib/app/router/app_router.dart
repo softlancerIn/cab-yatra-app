@@ -13,6 +13,12 @@ import '../../Pages/HomePageFlow/custom/alertFilterScreen.dart';
 import '../../Pages/HomePageFlow/custom/apply_filter_dialog.dart';
 import '../../Pages/HomePageFlow/home_controller.dart';
 import '../../Pages/chat/chat_listing.dart';
+import '../../Pages/chat/chat_screen.dart';
+import '../../Pages/Review/write_review.dart';
+import '../../Pages/chat/bloc/chat_bloc.dart';
+import '../../Pages/bookingDetails/ui/bookingDetailScreen.dart';
+import '../../Pages/bookingDetails/bloc/bookingDetailsBloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Pages/Payment Method/ui/payment_method.dart';
 import '../../Pages/Profile/ui/personalInfoScreen.dart';
 import '../../Pages/Review/reviewSectionNew.dart';
@@ -224,11 +230,51 @@ class AppRouter {
       ),
       GoRoute(
         path: Routes.chatListing,
-        builder: (_, __) => const ChatListingScreen(),
+        builder: (context, state) {
+          final bookingId = state.extra as String?;
+          return BlocProvider(
+            create: (context) => ChatListBloc(),
+            child: ChatListingScreen(bookingId: bookingId),
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.chatScreen,
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>?;
+          return ChatScreen(
+            userName: data?['userName'] ?? "User",
+            bookingId: data?['bookingId'] ?? "N/A",
+            creatorName: data?['creatorName'] ?? "Guddu",
+            receiverId: data?['receiverId'] ?? "0",
+          );
+        },
+      ),
+      GoRoute(
+        path: Routes.writeReview,
+        builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>?;
+          return ReviewPage(
+            driverId: data?['driverId'] as int?,
+            bookingId: data?['bookingId'] as String?,
+            driverName: data?['driverName'] as String?,
+            driverImage: data?['driverImage'] as String?,
+          );
+        },
       ),
       GoRoute(
         path: Routes.alertFilter,
         builder: (_, __) => const AlertFilterScreen(),
+      ),
+      GoRoute(
+        path: Routes.bookingDetails,
+        builder: (context, state) {
+          final bookingID = state.extra as String? ?? "0";
+          return BlocProvider(
+            create: (context) => BookingDetailBloc(),
+            child: BookingDetailScreen(bookingID: bookingID),
+          );
+        },
       ),
 
       /// Dashboard with Bottom Navigation

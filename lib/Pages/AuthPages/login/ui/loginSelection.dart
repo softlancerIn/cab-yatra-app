@@ -32,96 +32,87 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                 'Welcome to Cabyatra',
                 style: TextStyle(
                   color: Color(0xFF3E4959),
-                  fontSize: 20,
+                  fontSize: 26,
                   fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 0.40,
                 ),
               ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Nav.push(context, Routes.loginMobile);
-                    },
-                    child: Container(
-                      width: 150,
-                      height: 35,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFF3E4959),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Stack(
-                        children: [
-                          Positioned(
-                            left: 53,
-                            top: 7,
+              const SizedBox(height: 15),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Nav.push(context, Routes.loginMobile);
+                        },
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3E4959),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(
                             child: Text(
                               'Login',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Nav.push(context, Routes.loginRegister);
-                    },
-                    child: Container(
-                      width: 150,
-                      height: 38,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
-                        color: const Color(0xFFFCB117),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
-                      ),
-                      child: const Stack(
-                        children: [
-                          Positioned(
-                            left: 41,
-                            top: 7,
+                    const SizedBox(width: 15),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Nav.push(context, Routes.loginRegister);
+                        },
+                        child: Container(
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFCB117),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Center(
                             child: Text(
-                              'Register ',
+                              'Register',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  )
-                ],
+                  ],
+                ),
               ),
               const SizedBox(
-                height: 10,
+                height: 15,
               ),
               SizedBox(
-                width: 300,
+                width: 320,
                 child: Text.rich(
                   TextSpan(
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                    ),
                     children: [
                       TextSpan(
                         text: 'By signing up, you agree to our ',
                         style: TextStyle(
-                          color: Colors.black.withValues(alpha: 0.90),
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
+                          color: Colors.black.withValues(alpha: 0.80),
                           fontWeight: FontWeight.w400,
                           height: 1.50,
                         ),
@@ -130,19 +121,15 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                         text: 'Terms of Use',
                         style: TextStyle(
                           color: Color(0xFF3E4959),
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                          //    textDecoration: TextDecoration.underline,
+                          decoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),
                       TextSpan(
                         text: ' and ',
                         style: TextStyle(
-                          color: Colors.black.withValues(alpha: 0.90),
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
+                          color: Colors.black.withValues(alpha: 0.80),
                           fontWeight: FontWeight.w400,
                           height: 1.50,
                         ),
@@ -151,10 +138,8 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                         text: 'Privacy Policy',
                         style: TextStyle(
                           color: Color(0xFF3E4959),
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w700,
-                          //  textDecoration: TextDecoration.underline,
+                          decoration: TextDecoration.underline,
                           height: 1.50,
                         ),
                       ),

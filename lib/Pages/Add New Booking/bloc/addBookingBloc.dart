@@ -12,7 +12,7 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
     on<SelectCarCategory>(_onSelectCarCategory);
     on<SubmitBooking>(_onSubmitBooking);
     on<UpdateAssignMethodEvent>(_updateAssignMethodApi);
-    on<ResetBooking>((event, emit) => emit(const AddBookingState()));
+    on<ResetBooking>((event, emit) => emit(AddBookingState(carCategories: state.carCategories)));
   }
 
   Future<void> _onLoadCarCategories(
@@ -41,7 +41,11 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      final model = await repo.updateAssignMethodApi(context: event.context,assignType: event.assignType);
+      final model = await repo.updateAssignMethodApi(
+        context: event.context,
+        assignType: event.assignType,
+        bookingId: event.bookingId,
+      );
       emit(state.copyWith(
         isLoading: false,
         updateAssignMethodModel: model,
@@ -89,6 +93,7 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
         emit(state.copyWith(
           isSubmitting: false,
           isSuccess: true,
+          bookingResponse: response,
           errorMessage: response.message ?? "Booking created successfully",
         ));
       } else {

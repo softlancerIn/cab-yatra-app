@@ -53,69 +53,11 @@ class _AddBookingRoundTripScreenViewState
   @override
   void initState() {
     super.initState();
-    _remarksCtrl.addListener(_onRemarksChanged);
-  }
-
-  void _onRemarksChanged() {
-    final List<String> parts = _remarksCtrl.text
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    final List<String> availableChips = [
-      "Only Diesel",
-      "With Carrier",
-      "All Inclusive",
-      "All Exclusive"
-    ];
-
-    bool changed = false;
-    for (var chip in availableChips) {
-      bool isInText = parts.contains(chip.toLowerCase());
-      bool isInList = _selectedRequirements.contains(chip);
-
-      if (isInText && !isInList) {
-        _selectedRequirements.add(chip);
-        changed = true;
-      } else if (!isInText && isInList) {
-        _selectedRequirements.remove(chip);
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      setState(() {});
-    }
   }
 
   void _updateTextField(String label, bool isAdding) {
-    String currentText = _remarksCtrl.text.trim();
-
-    // Split by comma and clean whitespace
-    List<String> parts = currentText
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    if (isAdding) {
-      // Case-insensitive check to prevent duplicates if user typed it manually
-      bool exists = parts.any((e) => e.toLowerCase() == label.toLowerCase());
-      if (!exists) {
-        parts.insert(0, label);
-      }
-    } else {
-      // Remove all instances of the label (case-insensitive)
-      parts.removeWhere((e) => e.toLowerCase() == label.toLowerCase());
-    }
-
-    _remarksCtrl.text = parts.join(", ");
-
-    // Position cursor at the end to allow for continued manual typing
-    _remarksCtrl.selection = TextSelection.fromPosition(
-      TextPosition(offset: _remarksCtrl.text.length),
-    );
+    // Chips are managed separately, no need to update text field
+    setState(() {});
   }
 
   @override
@@ -126,6 +68,10 @@ class _AddBookingRoundTripScreenViewState
       backgroundColor: Colors.white,
       //  appBar: AppBAR(title: "Add New Booking"),
       body: BlocConsumer<AddBookingBloc, AddBookingState>(
+        listenWhen: (previous, current) {
+          return previous.isSuccess != current.isSuccess ||
+              previous.hasError != current.hasError;
+        },
         listener: (context, state) {
           if (state.isSuccess) {
             Fluttertoast.showToast(
@@ -136,7 +82,10 @@ class _AddBookingRoundTripScreenViewState
             context
                 .read<DashboardBloc>()
                 .add(GetHomeDataEvent(context: context));
-            showAssignDriverBottomSheet(context);
+            final bookingId = state.bookingResponse!.bookingId!;
+            // Reset success state to prevent re-triggering
+            context.read<AddBookingBloc>().add(ResetBooking());
+            showAssignDriverBottomSheet(context, bookingId);
           }
           if (state.hasError && state.errorMessage != null) {
             Fluttertoast.showToast(
@@ -157,47 +106,63 @@ class _AddBookingRoundTripScreenViewState
                 children: [
                   // ── Vehicle Category Dropdown ───────────────────────────────
                   const Text("Select Vehicle Category",
-                      style: TextStyle(fontWeight: FontWeight.w600)),
-                  const SizedBox(height: 8),
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                  const SizedBox(height: 12),
 
                   state.isLoading
-                      ? const Center(child: SizedBox())
+                      ? const Center(child: CircularProgressIndicator())
                       : state.carCategories == null ||
                               state.carCategories!.data!.isEmpty
                           ? const Text("No categories available",
                               style: TextStyle(color: Colors.red))
-                          : containerShadow(
-                              child: DropdownButtonFormField<int>(
-                                initialValue: state.selectedCarCategoryId,
-                                isExpanded: true,
-                                decoration: const InputDecoration(
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 14),
-                                ),
-                                hint: const Text(
-                                  "Choose vehicle",
-                                  style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                                items: state.carCategories!.data!.map((car) {
-                                  return DropdownMenuItem<int>(
-                                    value: car.id,
-                                    child: Text(
-                                      car.name ?? "Unknown",
-                                      style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w400),
+                          : SizedBox(
+                              height: 120,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: state.carCategories!.data!.length,
+                                itemBuilder: (context, index) {
+                                  final car = state.carCategories!.data![index];
+                                  final isSelected = state.selectedCarCategoryId == car.id;
+                                  return GestureDetector(
+                                    onTap: () {
+                                      context.read<AddBookingBloc>().add(SelectCarCategory(car.id!));
+                                    },
+                                    child: Container(
+                                      width: 100,
+                                      margin: const EdgeInsets.only(right: 12),
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? const Color(0xFFFFB300).withOpacity(0.1) : Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: isSelected ? const Color(0xFFFFB300) : Colors.grey.shade200,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            "assets/images/carMO.png",
+                                            height: 35,
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            car.name ?? "",
+                                            textAlign: TextAlign.center,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              height: 1.1,
+                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                              color: isSelected ? const Color(0xFFFFB300) : Colors.black87,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
-                                }).toList(),
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    context
-                                        .read<AddBookingBloc>()
-                                        .add(SelectCarCategory(value));
-                                  }
                                 },
                               ),
                             ),
@@ -222,35 +187,32 @@ class _AddBookingRoundTripScreenViewState
                   //     hint: "e.g. Ghaziabad",
                   //   ),
                   // ),
+                  const SizedBox(height: 32),
+
                   LocationAutocompleteField(
                     controller: _pickupCtrl,
-                    hint: "Pickup Location",
+                    hint: "Enter Pickup Location",
                   ),
-                  const SizedBox(height: 16),
-                  LocationAutocompleteField(
-                    controller: _dropCtrl,
-                    hint: "Drop Location",
-                  ),
-                  const SizedBox(height: 16),
+                  
+                  // LocationAutocompleteField(
+                  //   controller: _dropCtrl,
+                  //   hint: "Enter Drop Location",
+                  // ),
+
+                  const SizedBox(height: 20),
                   CommonTextFormField(
                     controller: noOfDays,
                     hintText: "No Of Days",
+                    keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   CommonTextFormField(
                     controller: tripNotes,
                     hintText: "Trip Notes",
+                    maxLines: 5,
+                    height: 100,
                   ),
-
-                  // containerShadow(
-                  //   child: _buildTextField(
-                  //     label: "Drop Location",
-                  //     controller: _dropCtrl,
-                  //     hint: "e.g. Noida",
-                  //   ),
-                  // ),
-
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // ── Date & Time ─────────────────────────────────────────────
                   Row(
@@ -292,6 +254,7 @@ class _AddBookingRoundTripScreenViewState
                           child: CommonTextFormField(
                         controller: _driverCommCtrl,
                         hintText: "Driver Commission",
+                        keyboardType: TextInputType.number,
                       )),
                       // Expanded(
                       //   child: containerShadow(
@@ -357,13 +320,13 @@ class _AddBookingRoundTripScreenViewState
 
                   // ── Remarks / Extra Requirements TextField ──────────────────
                   containerShadow(
-                    height: 100,
+                    height: 50,
                     child: TextField(
                       controller: _remarksCtrl,
-                      maxLines: 3,
+                      maxLines: 1,
                       style: const TextStyle(fontSize: 13),
                       decoration: const InputDecoration(
-                        hintText: "Extra Requirements...",
+                        hintText: "Enter extra requirements...",
                         hintStyle: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w400,
@@ -414,19 +377,19 @@ class _AddBookingRoundTripScreenViewState
 
                             final booking = SubmitBooking(
                               subType: "0",
-                              noOfDay: "",
-                              tripNotes: "",
+                              noOfDay: noOfDays.text.trim(),
+                              tripNotes: tripNotes.text.trim(),
                               carCategoryId: state.selectedCarCategoryId!,
                               pickUpDate: _startDateCtrl.text,
                               pickUpTime: _startTimeCtrl.text,
                               pickUpLocations: [_pickupCtrl.text.trim()],
-                              destinationLocations: [_dropCtrl.text.trim()],
+                              destinationLocations: [tripNotes.text.trim()],
                               totalFare:
                               double.tryParse(_totalFareCtrl.text) ?? 0.0,
                               driverCommission:
                               double.tryParse(_driverCommCtrl.text) ?? 0.0,
                               showPhoneNumber: _showPhoneNumber,
-                              remarks: _remarksCtrl.text.trim(),
+                              remarks: [..._selectedRequirements, if (_remarksCtrl.text.trim().isNotEmpty) _remarksCtrl.text.trim()].join(', '),
                               context: context,
                             );
 
@@ -684,112 +647,147 @@ class _AddBookingRoundTripScreenViewState
     );
   }
 
-  void showAssignDriverBottomSheet(BuildContext context) {
-    String? selectedValue = "1";
+  void showAssignDriverBottomSheet(BuildContext parentContext, int bookingId) {
+    String? selectedValue = "0";
 
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (modalContext) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: DiskIndicatorReplacement(),
+          builder: (modalContext, setModalState) {
+            return BlocConsumer<AddBookingBloc, AddBookingState>(
+              listenWhen: (previous, current) {
+                return previous.updateAssignMethodModel != current.updateAssignMethodModel;
+              },
+              listener: (context, state) {
+                if (state.updateAssignMethodModel != null) {
+                  Fluttertoast.showToast(msg: "Booking assigned successfully!");
+                  // Clear the form
+                  _pickupCtrl.clear();
+                  _dropCtrl.clear();
+                  _startDateCtrl.clear();
+                  _startTimeCtrl.clear();
+                  _totalFareCtrl.clear();
+                  _driverCommCtrl.clear();
+                  _remarksCtrl.clear();
+                  noOfDays.clear();
+                  tripNotes.clear();
+                  _selectedRequirements.clear();
+                  _showPhoneNumber = false;
+                  // Reset bloc state
+                  context.read<AddBookingBloc>().add(ResetBooking());
+                  Navigator.pop(modalContext); // Close bottom sheet
+                  // Navigate to home page
+                  if (widget.onBack != null) {
+                    widget.onBack!();
+                  }
+                }
+              },
+              builder: (context, state) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Booking posted Successfully",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Choose how you want to assign this booking",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildOption(
-                    title: "Assign to All Drivers",
-                    subtitle: "Broadcasting to all nearby available drivers",
-                    value: "1",
-                    selectedValue: selectedValue,
-                    onChanged: (val) =>
-                        setModalState(() => selectedValue = val),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOption(
-                    title: "Personal Booking",
-                    subtitle: "Keep this booking for yourself",
-                    value: "2",
-                    selectedValue: selectedValue,
-                    onChanged: (val) =>
-                        setModalState(() => selectedValue = val),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFCB117),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () {
-                        context.read<AddBookingBloc>().add(
-                              UpdateAssignMethodEvent(
-                                context: context,
-                                assignType: selectedValue.toString(),
-                              ),
-                            );
-
-                        // Trigger refresh of dashboard data
-                        context
-                            .read<DashboardBloc>()
-                            .add(GetHomeDataEvent(context: context));
-
-                        // 1. Close the bottom sheet
-                        Navigator.pop(context);
-
-                        // 2. Navigate back to Home tab
-                        if (widget.onBack != null) {
-                          widget.onBack!();
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                      child: const Text(
-                        "Done",
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Center(child: DiskIndicatorReplacement()),
+                      const SizedBox(height: 24),
+                      const Text(
+                        "Booking posted Successfully",
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Choose how you want to assign this booking",
+                        style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                      ),
+                      if (state.hasError) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          state.errorMessage ?? "An error occurred",
+                          style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                      const SizedBox(height: 24),
+                      _buildOption(
+                        title: "Direct Assign",
+                        subtitle: "Auto assign to the first available driver",
+                        value: "0",
+                        selectedValue: selectedValue,
+                        onChanged: (val) => setModalState(() => selectedValue = val),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildOption(
+                        title: "Manual Selection",
+                        subtitle: "Choose your preferred driver manually",
+                        value: "1",
+                        selectedValue: selectedValue,
+                        onChanged: (val) => setModalState(() => selectedValue = val),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFCB117),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: state.isLoading
+                              ? null
+                              : () {
+                                  context.read<AddBookingBloc>().add(
+                                        UpdateAssignMethodEvent(
+                                          context: context,
+                                          assignType: selectedValue.toString(),
+                                          bookingId: bookingId,
+                                        ),
+                                      );
+
+                                  // Trigger refresh of dashboard data
+                                  context
+                                      .read<DashboardBloc>()
+                                  .add(GetHomeDataEvent(context: context));
+                                },
+                          child: state.isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text(
+                                  "Done",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (state.hasError)
+                        Center(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel & Close"),
+                          ),
+                        ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -873,7 +871,7 @@ class _AddBookingRoundTripScreenViewState
 
   @override
   void dispose() {
-    _remarksCtrl.removeListener(_onRemarksChanged);
+
     _startDateCtrl.dispose();
     _startTimeCtrl.dispose();
     _pickupCtrl.dispose();
@@ -884,6 +882,7 @@ class _AddBookingRoundTripScreenViewState
     super.dispose();
   }
 }
+
 
 class DiskIndicatorReplacement extends StatelessWidget {
   const DiskIndicatorReplacement({super.key});

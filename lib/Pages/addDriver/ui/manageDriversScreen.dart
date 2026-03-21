@@ -34,7 +34,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          "Mange Drivers",
+          "Manage Drivers",
           style: TextStyle(
             color: Colors.black,
             fontSize: 18,

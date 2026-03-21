@@ -11,6 +11,7 @@ import '../../../../cores/network/network_utils.dart';
 import '../../../../cores/services/secure_storage_service.dart';
 import '../model/getProfileModel.dart';
 import '../model/updateProfileModel.dart';
+import '../model/review_model.dart';
 
 
 
@@ -120,6 +121,99 @@ print("👌👌👌👌Profile Get success 👌👌👌👌👌 ${response["data
             context: context,
 
 
+          ),
+        );
+        throw ServerException();
+      } else if (e.error is UnauthorizedException) {
+        await SecureStorageService.logout(context);
+        throw UnauthorizedException();
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      throw ApiException(0, e.toString());
+    }
+  }
+
+  Future<ReviewModel> getReviews({
+    required BuildContext context,
+  }) async {
+    try {
+      final response = await _api.get(
+        ApiConstants.reviews,
+        requiresAuth: true,
+      );
+      return ReviewModel.fromJson(response);
+    } on DioException catch (e) {
+      if (e.error is NoInternetException) {
+        showNoInternetScreen(
+          context,
+          onRetry: () => getReviews(context: context),
+        );
+        throw NoInternetException();
+      } else if (e.error is ServerException) {
+        showServerErrorScreen(
+          context,
+          onRetry: () => getReviews(context: context),
+        );
+        throw ServerException();
+      } else if (e.error is UnauthorizedException) {
+        await SecureStorageService.logout(context);
+        throw UnauthorizedException();
+      } else {
+        rethrow;
+      }
+    } catch (e) {
+      throw ApiException(0, e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> submitReview({
+    required BuildContext context,
+    required String bookingId,
+    required String rating,
+    required String checkBoxReview,
+    required String textReview,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        "booking_id": bookingId,
+        "rating": rating,
+        "checkBox_review": checkBoxReview,
+        "text_review": textReview,
+      });
+
+      final response = await _api.post(
+        ApiConstants.reviews,
+        requiresAuth: true,
+        data: formData,
+      );
+      
+      print("👌👌👌👌Submit Review success 👌👌👌👌👌");
+      print("RESPONSE: $response");
+      return response;
+    } on DioException catch (e) {
+      if (e.error is NoInternetException) {
+        showNoInternetScreen(
+          context,
+          onRetry: () => submitReview(
+            context: context,
+            bookingId: bookingId,
+            rating: rating,
+            checkBoxReview: checkBoxReview,
+            textReview: textReview,
+          ),
+        );
+        throw NoInternetException();
+      } else if (e.error is ServerException) {
+        showServerErrorScreen(
+          context,
+          onRetry: () => submitReview(
+            context: context,
+            bookingId: bookingId,
+            rating: rating,
+            checkBoxReview: checkBoxReview,
+            textReview: textReview,
           ),
         );
         throw ServerException();

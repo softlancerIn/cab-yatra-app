@@ -7,6 +7,7 @@ import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
 import '../bloc/bookingDetailsBloc.dart';
 import '../bloc/bookingDetailsState.dart';
 import 'driverInfoCard.dart';
@@ -43,9 +44,31 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const AppBAR(
+      appBar: AppBAR(
         title: "Booking Details",
         showLeading: true,
+        actionWidget: IconButton(
+          onPressed: () {
+            final state = context.read<BookingDetailBloc>().state;
+            final data = state.bookingDetailModel?.data;
+            if (data != null) {
+              HelperFunctions.shareBookingDetail(
+                orderId: data.orderId,
+                subTypeLabel: data.subTypeLabel,
+                pickupLocation: data.pickupLocation,
+                dropLocation: data.dropLocation,
+                vehicleType: data.vehicleType,
+                driverEarning: data.totalAmount - data.driverCommission,
+                pickupDate: data.pickupDate,
+                pickupTime: data.pickupTime,
+                remark: data.remark,
+                tripNotes: data.tripNotes,
+                noOfDays: data.noOfDays,
+              );
+            }
+          },
+          icon: const Icon(Icons.share, color: Colors.black, size: 22),
+        ),
       ),
       body: BlocBuilder<BookingDetailBloc, BookingDetailState>(
         builder: (context, state) {
@@ -67,6 +90,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           }
 
           final data = state.bookingDetailModel?.data;
+
           if (data == null) {
             return const Center(child: Text("No booking details found."));
           }
@@ -93,9 +117,8 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        /// ID Header
                         Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           child: RichText(
                             text: TextSpan(
                               style: const TextStyle(
@@ -108,9 +131,21 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                       fontWeight: FontWeight.normal),
                                 ),
                                 TextSpan(
-                                  text: data.orderId,
+                                  text: '${data.orderId} ',
                                   style: const TextStyle(
-                                      color: Colors.orange,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const TextSpan(
+                                  text: 'Assigned to ',
+                                  style: TextStyle(
+                                      color: Color(0xFF4CAF50),
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                TextSpan(
+                                  text: 'Mukesh Kushwaha', // Placeholder or from data
+                                  style: const TextStyle(
+                                      color: Color(0xFF4CAF50),
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -118,33 +153,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                         ),
 
-                        const Divider(
-                            height: 1, thickness: 0.5, color: Colors.grey),
-
-                        /// Date, Time and Trip Type
                         Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.only(left: 12, right: 12,bottom: 10,top: 0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              RichText(
-                                text: TextSpan(
-                                  style: const TextStyle(
-                                      fontSize: 13,
-                                      fontFamily: 'Poppins',
-                                      color: Colors.black),
-                                  children: [
-                                    TextSpan(text: '${data.pickupDate} '),
-                                    const TextSpan(
-                                        text: '@',
-                                        style: TextStyle(color: Colors.black)),
-                                    TextSpan(
-                                      text: data.pickupTime,
-                                      style: const TextStyle(
-                                          color: Color(0xFFF45858),
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
+                              Text(
+                                '${HelperFunctions.formatDate(data.pickupDate)} @${HelperFunctions.formatTo12Hour(data.pickupTime)}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                               Text(
@@ -159,24 +179,31 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                           ),
                         ),
 
+                        const Divider(
+                            height: 1, thickness: 1, color: Color(0xFF2196F3)),
+
                         /// Route: Pickup & Drop
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                              horizontal: 12, vertical: 12),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Column(
                                 children: [
-                                  const Icon(Icons.circle,
-                                      size: 14, color: Colors.orange),
-                                  Container(
+                                  const Icon(Icons.location_on,
+                                      size: 18, color: Colors.orange),
+                                  SizedBox(
                                     width: 1,
                                     height: 30,
-                                    color: Colors.grey.shade300,
+                                    child: CustomPaint(
+                                        painter: DashLinePainter()),
                                   ),
-                                  const Icon(Icons.circle,
-                                      size: 14, color: Color(0xFFC51C1C)),
+                                  data.subTypeLabel == 'Round Trip'
+                                      ? const Icon(Icons.sticky_note_2,
+                                          size: 18, color: Color(0xFF4CAF50))
+                                      : const Icon(Icons.location_on,
+                                          size: 18, color: Color(0xFFC51C1C)),
                                 ],
                               ),
                               const SizedBox(width: 12),
@@ -184,20 +211,47 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      data.pickupLocation,
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    const SizedBox(height: 28),
-                                    Text(
-                                      data.dropLocation,
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600),
-                                    ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              data.pickupLocation,
+                                              style: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                HelperFunctions.navigateToMap(
+                                                  data.pickupLocation,
+                                                  data.dropLocation,
+                                                );
+                                              },
+                                              child: const Icon(Icons.near_me,
+                                                  color: Color(0xFF2196F3),
+                                                  size: 20),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 28),
+                                      if (data.subTypeLabel == 'Round Trip') ...[
+                                        Text(
+                                          'Trip Notes: ${data.tripNotes.isNotEmpty ? data.tripNotes : "No notes"}',
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF4CAF50)),
+                                        ),
+                                      ] else ...[
+                                        Text(
+                                          data.dropLocation,
+                                          style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
                                   ],
                                 ),
                               ),
@@ -229,22 +283,22 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                         /// Remark
                         Padding(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 4),
+                              horizontal: 12, vertical: 8),
                           child: RichText(
                             text: TextSpan(
                               style: const TextStyle(
-                                  fontSize: 12, fontFamily: 'Poppins'),
+                                  fontSize: 14, fontFamily: 'Poppins'),
                               children: [
                                 const TextSpan(
-                                  text: 'Extra Requirement: ',
+                                  text: 'Trip Note : ',
                                   style: TextStyle(
                                       color: Colors.black,
-                                      fontWeight: FontWeight.w500),
+                                      fontWeight: FontWeight.w600),
                                 ),
                                 TextSpan(
-                                  text: data.remark.isNotEmpty
-                                      ? data.remark
-                                      : "No remarks provided",
+                                  text: data.tripNotes.isNotEmpty
+                                      ? data.tripNotes
+                                      : "No notes provided",
                                   style: const TextStyle(
                                       color: Color(0xFFF45858),
                                       fontWeight: FontWeight.w500),
@@ -276,16 +330,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  /// Driver Info (Safe Check)
-                  // The current API response doesn't include driver info for this specific booking,
-                  // so we show it only if available or a placeholder.
-                  const DriverInfoCard(
-                    imagePath:
-                        'https://img.freepik.com/premium-vector/blue-car-flat-style-illustration-isolated-white-background_108231-795.jpg?semt=ais_hybrid&w=740&q=80',
-                    name: 'Assigned Driver',
-                    subtitle: 'Verification in progress',
-                    rating: 5,
-                    reviewCount: 0,
+                  GestureDetector(
+                    onTap: () {
+                      Nav.push(context, Routes.reviewScreen, extra: {
+                        'bookingId': widget.bookingID,
+                      });
+                    },
+                    child: const DriverInfoCard(
+                      imagePath:
+                          'https://img.freepik.com/premium-vector/blue-car-flat-style-illustration-isolated-white-background_108231-795.jpg?semt=ais_hybrid&w=740&q=80',
+                      name: 'Assigned Driver',
+                      subtitle: 'Verification in progress',
+                      rating: 5,
+                      reviewCount: 0,
+                    ),
                   ),
                 ],
               ),
@@ -294,11 +352,18 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
         },
       ),
       bottomSheet: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.only(left: 15,right: 15,bottom: 40,top: 16),
         child: CommonAppButton(
           text: "Chat",
+          assetIcon: "assets/images/chatNew.png",
+          backgroundColor: const Color(0xffFCB117),
           onPressed: () {
-            Nav.push(context, Routes.chatListing);
+            Nav.push(context, Routes.chatScreen, extra: {
+              'bookingId': widget.bookingID,
+              'userName': 'Chat',
+              'creatorName': 'Guddu',
+              'receiverId': '0',
+            });
           },
         ),
       ),
@@ -318,8 +383,9 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             Text(
               amount,
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Poppins',
                 color: isEarning ? const Color(0xFFF45858) : Colors.black,
               ),
             ),
@@ -327,11 +393,33 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 8,
+                color: Colors.black87,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+class DashLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashHeight = 3, dashSpace = 3, startY = 0;
+    final paint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 1;
+    while (startY < size.height) {
+      canvas.drawLine(Offset(0, startY), Offset(0, startY + dashHeight), paint);
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

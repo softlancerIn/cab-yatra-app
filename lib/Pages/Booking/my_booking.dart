@@ -8,10 +8,15 @@ import '../bookingDetails/ui/bookingDetailScreen.dart';
 import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_state.dart';
 import '../HomePageFlow/custom/apply_filter_dialog.dart';
+import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
+import '../chat/chat_listing.dart';
 
 class BookingPage extends StatefulWidget {
-  const BookingPage({super.key});
+  final VoidCallback? onBack;
+  const BookingPage({super.key, this.onBack});
 
   @override
   State<BookingPage> createState() => _BookingPageState();
@@ -31,10 +36,10 @@ class _BookingPageState extends State<BookingPage> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const AppBAR(
+      appBar: AppBAR(
         title: "Posted Booking",
-        showLeading: false,
-        showAction: false,
+        showLeading: true,
+        onLeadingPressed: widget.onBack ?? () => Navigator.pop(context),
       ),
       body: BlocBuilder<BookingBloc, BookingState>(
         builder: (context, state) {
@@ -47,21 +52,57 @@ class _BookingPageState extends State<BookingPage> {
           }
           if (state.postedBookingModel == null) {
             return SizedBox(
-              height: size.height,
-              width: size.width,
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          }
+                  height: size.height,
+                  width: size.width,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
 
-          final allBookings = state.postedBookingModel!.data ?? [];
-          final newBooking = allBookings.where((booking) {
-            final query = state.searchQuery.toLowerCase().trim();
-            return query.isEmpty ||
-                (booking.orderId?.toLowerCase().contains(query) ?? false) ||
-                (booking.pickUpLoc?.toLowerCase().contains(query) ?? false) ||
-                (booking.destinationLoc?.toLowerCase().contains(query) ??
-                    false);
-          }).toList();
+              final allBookings = state.postedBookingModel!.data ?? [];
+              final newBooking = allBookings.where((booking) {
+                // Search Query Filter
+                final query = state.searchQuery.toLowerCase().trim();
+                bool matchesSearch = query.isEmpty ||
+                    (booking.orderId?.toLowerCase().contains(query) ?? false) ||
+                    (booking.id?.toString().toLowerCase().contains(query) ?? false);
+
+                // Drop Location Filter
+                bool matchesDrop = state.dropLocationFilter == null ||
+                    (booking.destinationLoc ?? "")
+                        .toLowerCase()
+                        .contains(state.dropLocationFilter!.toLowerCase());
+
+                // Pickup Location Filter
+                bool matchesPickup = state.pickupLocationFilters == null ||
+                    state.pickupLocationFilters!.any((loc) =>
+                        (booking.pickUpLoc ?? "")
+                            .toLowerCase()
+                            .contains(loc.toLowerCase()));
+
+                // Vehicle Type Filter
+                bool matchesVehicle = state.selectedVehicleTypes == null ||
+                    state.selectedVehicleTypes!.any((v) =>
+                        (booking.carCategory?.name ?? "")
+                            .toLowerCase()
+                            .contains(v.toLowerCase()));
+
+                // Booking Status Filter
+                bool matchesStatus = true;
+                if (state.bookingStatusFilter != null) {
+                  if (state.bookingStatusFilter == 'Open') {
+                    matchesStatus = booking.isAssigned == '0';
+                  } else if (state.bookingStatusFilter == 'Assigned') {
+                    matchesStatus = booking.isAssigned == '1';
+                  }
+                  // Note: Add logic here for Completed/Cancelled if API supports it
+                }
+
+                return matchesSearch &&
+                    matchesDrop &&
+                    matchesPickup &&
+                    matchesVehicle &&
+                    matchesStatus;
+              }).toList();
 
           return Column(
             children: [
@@ -80,6 +121,13 @@ class _BookingPageState extends State<BookingPage> {
                                 ),
                               );
                         },
+                        onChanged: (value) {
+                          context.read<BookingBloc>().add(
+                                UpdatePostedBookingSearchQueryEvent(
+                                  searchQuery: value,
+                                ),
+                              );
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -87,7 +135,8 @@ class _BookingPageState extends State<BookingPage> {
                       onTap: () {
                         showDialog(
                           context: context,
-                          builder: (context) => const ApplyFilterDialog(),
+                          builder: (context) =>
+                              const ApplyFilterDialog(isPostedBooking: true),
                         );
                       },
                       child: Container(
@@ -108,9 +157,9 @@ class _BookingPageState extends State<BookingPage> {
                             )
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.tune,
-                          color: Color(0xffF45858),
+                          color: state.isFilterActive ? const Color(0xffF45858) : Colors.black,
                           size: 28,
                         ),
                       ),
@@ -178,13 +227,13 @@ class _BookingPageState extends State<BookingPage> {
                                             color: Colors.black,
                                           ),
                                         ),
-                                        const TextSpan(
-                                          text: '(Open)',
+                                        TextSpan(
+                                          text: newBookingData.isAssigned == '1' ? '(Assigned)' : '(Open)',
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                             fontFamily: 'Poppins',
-                                            color: Color(0xff45B129),
+                                            color: newBookingData.isAssigned == '1' ? Colors.blue : const Color(0xff45B129),
                                           ),
                                         ),
                                       ],
@@ -203,7 +252,7 @@ class _BookingPageState extends State<BookingPage> {
                                       Row(
                                         children: [
                                           Text(
-                                            '${newBookingData.pickUpDate} ',
+                                            '${HelperFunctions.formatDate(newBookingData.pickUpDate)} ',
                                             style: const TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
@@ -215,8 +264,9 @@ class _BookingPageState extends State<BookingPage> {
                                                   fontWeight: FontWeight.w500,
                                                   fontFamily: 'Poppins')),
                                           Text(
-                                            newBookingData.pickUpTime
-                                                .toString(),
+                                            HelperFunctions.formatTo12Hour(
+                                                newBookingData.pickUpTime
+                                                    .toString()),
                                             style: const TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500,
@@ -228,9 +278,11 @@ class _BookingPageState extends State<BookingPage> {
                                       Text(
                                         newBookingData.subTypeLabel ?? "",
                                         style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'Poppins'),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF3E4959),
+                                          fontFamily: 'Poppins',
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -255,8 +307,8 @@ class _BookingPageState extends State<BookingPage> {
                                       Column(
                                         children: [
                                           const SizedBox(height: 2),
-                                          const Icon(Icons.circle,
-                                              size: 14,
+                                          const Icon(Icons.location_on,
+                                              size: 18,
                                               color: Color(0xffD47716)),
                                           SizedBox(
                                             width: 1,
@@ -264,8 +316,8 @@ class _BookingPageState extends State<BookingPage> {
                                             child: CustomPaint(
                                                 painter: DashLinePainter()),
                                           ),
-                                          const Icon(Icons.circle,
-                                              size: 14,
+                                          const Icon(Icons.location_on,
+                                              size: 18,
                                               color: Color(0xffC51C1C)),
                                         ],
                                       ),
@@ -286,16 +338,25 @@ class _BookingPageState extends State<BookingPage> {
                                                   fontFamily: 'Poppins'),
                                             ),
                                             const SizedBox(height: 18),
-                                            Text(
-                                              newBookingData.destinationLoc ??
-                                                  "",
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  fontFamily: 'Poppins'),
-                                            ),
+                                            if ((newBookingData.subTypeLabel ?? "").toLowerCase().contains('round'))
+                                              const Text(
+                                                'Round Trip',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFFF45858),
+                                                    fontFamily: 'Poppins'),
+                                              )
+                                            else
+                                              Text(
+                                                newBookingData.destinationLoc ?? "",
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'Poppins'),
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -451,7 +512,7 @@ class _BookingPageState extends State<BookingPage> {
                                           label: "Chat",
                                           color: const Color(0xffFCB117),
                                           onTap: () {
-                                            Nav.push(context, Routes.chatListing);
+                                            ChatListingScreen.show(context, bookingId: newBookingData.id.toString());
                                           },
                                         ),
                                       ),
@@ -495,7 +556,21 @@ class _BookingPageState extends State<BookingPage> {
                                       const EdgeInsets.fromLTRB(12, 10, 12, 15),
                                   child: GestureDetector(
                                     onTap: () {
-                                      Nav.push(context, Routes.home);
+                                      double total = double.tryParse(newBookingData.totalFaire ?? '0') ?? 0.0;
+                                      double comm = double.tryParse(newBookingData.driverCommission ?? '0') ?? 0.0;
+                                      HelperFunctions.shareBookingDetail(
+                                        orderId: newBookingData.orderId ?? "",
+                                        subTypeLabel: newBookingData.subTypeLabel ?? "",
+                                        pickupLocation: newBookingData.pickUpLoc ?? "",
+                                        dropLocation: newBookingData.destinationLoc ?? "",
+                                        vehicleType: newBookingData.carCategory?.name ?? "",
+                                        driverEarning: total - comm,
+                                        pickupDate: newBookingData.pickUpDate ?? "",
+                                        pickupTime: newBookingData.pickUpTime ?? "",
+                                        remark: newBookingData.remark ?? "",
+                                        tripNotes: newBookingData.tripNotes ?? "",
+                                        noOfDays: newBookingData.noOfDays ?? "",
+                                      );
                                     },
                                     child: Container(
                                       height: 44,

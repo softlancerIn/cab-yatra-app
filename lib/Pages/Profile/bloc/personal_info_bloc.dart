@@ -37,6 +37,8 @@ class PersonalInfoBloc
         phone: data?.phone ?? "00000000",
         type: data?.type?.toLowerCase() ?? "agent",
         networkImage: data?.driverImageUrl,
+        rating: data?.rating?.toString() ?? "0.0",
+        ratingCount: "1", // Placeholder or get from API if available
         licenseNumber2: data?.licenseNumber2,
         licenseNumber: data?.licenseNumber,
         isLoading: false,
@@ -71,6 +73,7 @@ class PersonalInfoBloc
         licenseNumber: updatedData?.licenseNumber ?? event.licenseNumber,
         licenseNumber2: updatedData?.licenseNumber2 ?? event.licenseNumber2,
         networkImage: updatedData?.driverImageUrl ?? state.networkImage,
+        rating: updatedData?.rating?.toString() ?? state.rating,
       ));
     } catch (e) {
       emit(state.copyWith(isSubmitting: false));

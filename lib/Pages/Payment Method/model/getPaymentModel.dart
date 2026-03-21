@@ -16,6 +16,8 @@ class GetPaymentModel {
         parsedData = List<PaymentData>.from(
           (json['data'] as List).map((x) => PaymentData.fromJson(x)),
         );
+      } else if (json['data'] is Map<String, dynamic>) {
+        parsedData = [PaymentData.fromJson(json['data'])];
       }
     }
 
@@ -70,20 +72,20 @@ class PaymentData {
 
   factory PaymentData.fromJson(Map<String, dynamic> json) {
     return PaymentData(
-      id: json['id'],
-      type: json['type'],
-      driverId: json['driver_id'],
-      bankName: json['bank_name'],
-      accountNumber: json['account_number'],
-      ifscCode: json['ifsc_code'],
-      accountHolderName: json['account_holderName'],
-      upiId: json['upi_id'],
-      paymentNumber: json['payment_number'],
-      qrImage: json['qr_image'],
-      status: json['status'],
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
-      qrImageUrl: json['qr_image_url'],
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ""),
+      type: json['type'] is int ? json['type'] : int.tryParse(json['type']?.toString() ?? ""),
+      driverId: json['driver_id'] is int ? json['driver_id'] : int.tryParse(json['driver_id']?.toString() ?? ""),
+      bankName: json['bank_name']?.toString(),
+      accountNumber: json['account_number']?.toString(),
+      ifscCode: json['ifsc_code']?.toString(),
+      accountHolderName: json['account_holderName']?.toString(),
+      upiId: json['upi_id']?.toString(),
+      paymentNumber: json['payment_number']?.toString(),
+      qrImage: json['qr_image']?.toString(),
+      status: json['status'] is int ? json['status'] : int.tryParse(json['status']?.toString() ?? ""),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
+      qrImageUrl: json['qr_image_url']?.toString(),
     );
   }
 

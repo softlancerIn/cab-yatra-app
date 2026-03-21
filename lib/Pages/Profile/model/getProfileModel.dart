@@ -38,6 +38,8 @@ class Data {
   var driverImageUrl;
   var createdAt;
   var updatedAt;
+  var totalBooking;
+  var cancelBooking;
 
   Data(
       {this.id,
@@ -54,7 +56,9 @@ class Data {
       this.rating,
       this.driverImageUrl,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.totalBooking,
+      this.cancelBooking});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -72,6 +76,8 @@ class Data {
     driverImageUrl = json['driver_image'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    totalBooking = json['total_booking'];
+    cancelBooking = json['cancel_booking'];
   }
 
   Map<String, dynamic> toJson() {
@@ -91,6 +97,8 @@ class Data {
     data['driver_image'] = driverImageUrl;
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
+    data['total_booking'] = totalBooking;
+    data['cancel_booking'] = cancelBooking;
     return data;
   }
 }

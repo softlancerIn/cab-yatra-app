@@ -20,7 +20,11 @@ class Nav {
       context.go(route, extra: extra);
 
   static pop(BuildContext context) {
-    if (Navigator.canPop(context)) Navigator.pop(context);
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      context.pop();
+    }
   }
 
   /// Material transitions

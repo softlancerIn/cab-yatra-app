@@ -50,27 +50,44 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      keyboardType: keyboardType,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade300),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+    return SizedBox(
+      height: 68, // Reduced from 75 to make it more compact (48 base height + validator space)
+      child: TextFormField(
+        controller: controller,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        validator: validator,
+        style: const TextStyle(fontSize: 16),
+        decoration: InputDecoration(
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 16),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade400, width: 1.0),
+          ),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300, width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFFFCB117), width: 1.5),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          ),
         ),
       ),
     );
@@ -143,8 +160,8 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                     const Text(
                       'Verify With OTP',
                       style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
+                        color: Color(0xFF3E4959),
+                        fontSize: 18,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.40,
@@ -160,7 +177,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                       enabled: false,
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // Full Name
                     _textField(
@@ -169,7 +186,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                       validator: (v) => v?.trim().isEmpty ?? true ? 'Name is required' : null,
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // City
                     _textField(
@@ -178,7 +195,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                       validator: (v) => v?.trim().isEmpty ?? true ? 'City is required' : null,
                     ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // OTP
                     _textField(
@@ -188,7 +205,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                       validator: (v) => (v?.length ?? 0) < 4 ? 'Enter valid 4-digit OTP' : null,
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 5),
 
                     // Resend OTP
                     Center(
@@ -203,39 +220,71 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                         },
                         child: const Text(
                           'Resend OTP',
-                          style: TextStyle(color: Colors.red),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 5),
 
                     // Terms Checkbox
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Checkbox(
-                          value: _termsAccepted,
-                          onChanged: state.isLoading
+                        GestureDetector(
+                          onTap: state.isLoading
                               ? null
-                              : (value) {
-                            setState(() => _termsAccepted = value ?? false);
-                          },
+                              : () {
+                                  setState(() => _termsAccepted = !_termsAccepted);
+                                },
+                          child: Container(
+                            height: 24,
+                            width: 24,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _termsAccepted ? const Color(0xFFFCB117) : Colors.grey.shade400,
+                                width: 2,
+                              ),
+                              color: _termsAccepted ? const Color(0xFFFCB117) : Colors.transparent,
+                            ),
+                            child: _termsAccepted
+                                ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                : null,
+                          ),
                         ),
+                        const SizedBox(width: 12),
                         Expanded(
                           child: RichText(
                             text: const TextSpan(
-                              style: TextStyle(color: Colors.black, fontSize: 13),
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 13,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.normal,
+                              ),
                               children: [
                                 TextSpan(text: 'By clicking here accept '),
                                 TextSpan(
                                   text: 'Terms of Use',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF3E4959),
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                                 TextSpan(text: ' and '),
                                 TextSpan(
                                   text: 'Privacy Policy',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF3E4959),
+                                    decoration: TextDecoration.underline,
+                                  ),
                                 ),
                               ],
                             ),
@@ -244,12 +293,12 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 15),
+                    const SizedBox(height: 24),
 
                     // Register Button
                     SizedBox(
                       width: double.infinity,
-                      height: 45,
+                      height: 54,
                       child: ElevatedButton(
                         onPressed: state.isLoading || !_termsAccepted
                             ? null
@@ -267,15 +316,16 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFFB300),
+                          backgroundColor: const Color(0xFFFCB117),
+                          elevation: 2,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
                         child: state.isLoading
                             ? const SizedBox(
-                          height: 20,
-                          width: 20,
+                          height: 24,
+                          width: 24,
                           child: CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 2.5,
@@ -287,6 +337,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                       ),

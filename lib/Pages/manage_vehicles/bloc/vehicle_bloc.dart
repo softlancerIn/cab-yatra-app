@@ -20,7 +20,7 @@ class VehicleBloc extends Bloc<VehicleEvent, VehicleState> {
   }
 
   Future<void> _onLoadVehicles(LoadVehicles event, Emitter<VehicleState> emit) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true, isSuccess: false));
     try {
       final result = await repo.getVehicles();
       emit(state.copyWith(isLoading: false, vehicles: result.vehicles));
@@ -41,7 +41,7 @@ class VehicleBloc extends Bloc<VehicleEvent, VehicleState> {
   }
 
   Future<void> _onAddVehicle(AddVehicle event, Emitter<VehicleState> emit) async {
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true, isSuccess: false));
     try {
       final success = await repo.addVehicle(fields: event.fields, files: event.files);
       if (success) {

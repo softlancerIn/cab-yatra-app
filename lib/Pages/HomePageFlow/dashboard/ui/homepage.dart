@@ -26,13 +26,15 @@ class _HomepageState extends State<Homepage>
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   TextEditingController searchController = TextEditingController();
-
   String numericPart = '0.0';
 
   @override
   void initState() {
     super.initState();
     context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+    context.read<DashboardBloc>().add(GetCitiesEvent(context: context));
+    context.read<DashboardBloc>().add(GetCarCategoryEvent(context: context));
+    context.read<DashboardBloc>().add(GetAlertsEvent(context: context));
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     // controller.getHomeData();
     _loadNumericPart();
@@ -113,10 +115,10 @@ class _HomepageState extends State<Homepage>
               children: [
                 /// Alert Button
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  height: 32, // Fixed height for a standardized pill shape
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: const Color(0xFFEFEFEF),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Row(
@@ -125,8 +127,8 @@ class _HomepageState extends State<Homepage>
                         'Alert',
                         style: TextStyle(
                             color: Colors.black,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 13, // Increased from 10
+                            fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins'),
                       ),
                       SizedBox(width: 8),
@@ -146,10 +148,10 @@ class _HomepageState extends State<Homepage>
                     );
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    height: 32, // Fixed height for a standardized pill shape
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: const Color(0xFFEFEFEF),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -158,12 +160,12 @@ class _HomepageState extends State<Homepage>
                           'Help',
                           style: TextStyle(
                               color: Colors.black,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 13, // Increased from 10
+                              fontWeight: FontWeight.w600,
                               fontFamily: 'Poppins'),
                         ),
                         const SizedBox(width: 6),
-                        Image.asset('assets/images/caall.png', height: 14),
+                        Image.asset('assets/images/caall.png', height: 18),
                       ],
                     ),
                   ),
@@ -188,13 +190,13 @@ class _HomepageState extends State<Homepage>
               ),
               labelColor: Colors.black,
               labelStyle: const TextStyle(
-                fontSize: 15,
+                fontSize: 17, // Increased from 15
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
               ),
               unselectedLabelColor: Colors.grey,
               unselectedLabelStyle: const TextStyle(
-                fontSize: 15,
+                fontSize: 17, // Increased from 15
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Poppins',
               ),
@@ -208,17 +210,38 @@ class _HomepageState extends State<Homepage>
       ),
       body:
           BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
-        if (state.isLoading) {
+        if (state.isLoading && state.homeDataResponseModel == null) {
           return SizedBox(
               height: size.height,
               width: size.width,
               child: const Center(child: CircularProgressIndicator()));
         }
+        
+        if (state.errorMessage != null && state.homeDataResponseModel == null) {
+          return SizedBox(
+              height: size.height,
+              width: size.width,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Error: ${state.errorMessage}"),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+                      },
+                      child: const Text("Retry"),
+                    )
+                  ],
+                ),
+              ));
+        }
+
         if (state.homeDataResponseModel == null) {
           return SizedBox(
               height: size.height,
               width: size.width,
-              child: const Center(child: CircularProgressIndicator()));
+              child: const Center(child: Text("No data available")));
         }
 
         final activeBookings = state.homeDataResponseModel!.activeBooking.data;
@@ -269,7 +292,7 @@ class _HomepageState extends State<Homepage>
                         child: Image.asset(
                           "assets/images/seetingFilter.png",
                           height: 24,
-                          color: Colors.black87,
+                          color: state.isFilterActive ? const Color(0xFFF45858) : Colors.black87,
                         ),
                       ),
                     ),
@@ -318,7 +341,7 @@ class DashedLinePainter extends CustomPainter {
 
 ///calculate
 class DistanceCalculator {
-  final String apiKey = 'AIzaSyDhTJHj8fT_dHJMkH0ndpW0guo4EQzXhHY';
+  final String apiKey = 'AIzaSyCyO9SWzEn8SWchaaqa6T_yCmCD8cLHPfg';
   final Dio dio = Dio();
 
   // Method to get latitude and longitude from a location name

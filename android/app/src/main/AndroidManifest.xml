@@ -15,7 +15,7 @@
         android:icon="@mipmap/ic_launcher">
         <meta-data
             android:name="com.google.android.geo.EY"
-            android:value="AIzaSyDhTJHj8fT_dHJMkH0ndpW0guo4EQzXhHY"/>
+            android:value="AIzaSyCyO9SWzEn8SWchaaqa6T_yCmCD8cLHPfg"/>
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

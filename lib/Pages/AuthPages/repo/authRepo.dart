@@ -77,7 +77,14 @@ class AuthRepo {
         },
         requiresAuth: false,
       );
-      //   await SecureStorageService.saveToken(response['token']);
+      final String? token = response['token'] ?? response['data']?['token'];
+      if (token != null) {
+        await SecureStorageService.saveToken(token);
+      }
+      if (response['data'] != null && response['data']["isAgent"] != null) {
+        await SecureStorageService.saveIsAgent(response['data']["isAgent"]);
+      }
+      
       return RegisterModel.fromJson(response);
       //  return LoginModel.fromJson(response['user']);
     } on DioException catch (e) {
@@ -160,10 +167,8 @@ class AuthRepo {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Nav.go(context,Routes.login);
-                    // Navigator.pop(context);
-
-                    /// state reset (optional but recommended)
+                    // Redirect new user to registration screen
+                    Nav.go(context, Routes.newRegister, extra: phone);
                    context.read<OTPBloc>().add(const ResetVerifyOtpEvent());
                   },
                   child: const Text("OK"),

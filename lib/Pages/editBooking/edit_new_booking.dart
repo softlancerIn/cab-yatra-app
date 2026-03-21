@@ -75,9 +75,9 @@ class _EditBookingScreenState extends State<EditBookingScreen>
               totalFare: widget.totalFare,
               vehicalType: widget.vehicalType,
             )
-          : EditBookingRoundTripScreen(
-              sId: widget.sId.toString(),
-              subType: "1",
+            : EditBookingRoundTripScreen(
+                sId: widget.sId.toString(),
+                subType: "0",
               driverCommission: widget.driverCommission,
               dropLocation: widget.dropLocation,
               pickUpDate: widget.pickUpDate,
@@ -93,7 +93,6 @@ class _EditBookingScreenState extends State<EditBookingScreen>
   }
 }
 
-///////////////////////////////////////drop dowan screen code
 
 class CustomDropdown<T> extends StatefulWidget {
   final T? selectedValue;

@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
+import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
+import '../../../../app/router/navigation/nav.dart';
+import '../../../../app/router/navigation/routes.dart';
+import '../../../chat/chat_listing.dart';
 import 'sliderWidget.dart';
 
 class ActiveBookingSection extends StatefulWidget {
@@ -22,57 +26,31 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
       },
       child:
           BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
-        if (state.isLoading) {
-          return const CircularProgressIndicator();
-        }
-        if (state.homeDataResponseModel == null) {
-          return const CircularProgressIndicator();
+        if (state.isLoading && state.homeDataResponseModel == null) {
+          return const Center(child: CircularProgressIndicator());
         }
 
         final allBookings = state.homeDataResponseModel!.activeBooking.data;
 
+        // Filter by status == 2 for active bookings
+        final query = state.searchQuery.trim().toLowerCase();
         final activeBooking = allBookings.where((booking) {
-          final query = state.searchQuery.trim().toLowerCase();
-          final queryWords =
-              query.split(' ').where((word) => word.isNotEmpty).toList();
-
-          bool matchesSearch = true;
-          if (queryWords.isNotEmpty) {
-            matchesSearch = queryWords.every((word) {
-              return booking.bookingId.toLowerCase().contains(word) ||
-                  booking.pickupLocation.toLowerCase().contains(word) ||
-                  booking.destinationLocation.toLowerCase().contains(word);
-            });
+          // Only show bookings with status 2
+          if (booking.status != 2) return false;
+          // Search by booking ID
+          if (query.isNotEmpty) {
+            return booking.bookingId.toLowerCase().contains(query) ||
+                booking.id.toLowerCase().contains(query);
           }
-
-          final matchesVehicle = state.selectedVehicleType == null ||
-              booking.carCategoryName.toLowerCase() ==
-                  state.selectedVehicleType!.toLowerCase();
-
-          final matchesPickup = state.pickupLocationFilter == null ||
-              booking.pickupLocation
-                  .toLowerCase()
-                  .contains(state.pickupLocationFilter!.toLowerCase());
-
-          final matchesDrop = state.dropLocationFilter == null ||
-              booking.destinationLocation
-                  .toLowerCase()
-                  .contains(state.dropLocationFilter!.toLowerCase());
-
-          return matchesSearch &&
-              matchesVehicle &&
-              matchesPickup &&
-              matchesDrop;
+          return true;
         }).toList();
 
         if (activeBooking.isEmpty) {
           return const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                  child: SliderWidget(),
-                ),
+                SizedBox(height: 20),
                 Center(
                     child: Padding(
                   padding: EdgeInsets.only(top: 50.0),
@@ -84,21 +62,19 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
         }
 
         return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4.0),
-                  child: SliderWidget(),
-                ),
+                const SizedBox(height: 0),
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: activeBooking.length,
                     itemBuilder: (context, index) {
-                      var bookingData = activeBooking[index];
+                      final bookingData = activeBooking[index];
                       return GestureDetector(
                         onTap: () async {
                           Navigator.push(
@@ -146,7 +122,7 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                           RichText(
                                             text: TextSpan(
                                               style: const TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 14,
                                                   fontFamily: 'Poppins'),
                                               children: [
                                                 const TextSpan(
@@ -157,8 +133,15 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                                           FontWeight.normal),
                                                 ),
                                                 TextSpan(
-                                                  text: bookingData.bookingId,
+                                                  text: '${bookingData.bookingId} ',
                                                   style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const TextSpan(
+                                                  text: 'Assigned',
+                                                  style: TextStyle(
                                                       color: Colors.orange,
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -180,19 +163,19 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                       RichText(
                                         text: TextSpan(
                                           style: const TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 13,
                                               fontFamily: 'Poppins',
                                               color: Colors.black),
                                           children: [
                                             TextSpan(
                                                 text:
-                                                    '${bookingData.pickupDate} '),
+                                                    '${HelperFunctions.formatDate(bookingData.pickupDate)} '),
                                             const TextSpan(
                                                 text: '@',
                                                 style: TextStyle(
                                                     color: Colors.black)),
                                             TextSpan(
-                                              text: bookingData.pickupTime,
+                                              text: HelperFunctions.formatTo12Hour(bookingData.pickupTime),
                                               style: const TextStyle(
                                                   color: Color(0xFFF45858),
                                                   fontWeight: FontWeight.w500),
@@ -219,17 +202,20 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                     children: [
                                       Column(
                                         children: [
-                                          const Icon(Icons.circle,
-                                              size: 14, color: Colors.orange),
+                                          const Icon(Icons.location_on,
+                                              size: 18, color: Colors.orange),
                                           SizedBox(
                                             width: 1,
                                             height: 30,
                                             child: CustomPaint(
                                                 painter: DashLinePainter()),
                                           ),
-                                          const Icon(Icons.circle,
-                                              size: 14,
-                                              color: Color(0xFFC51C1C)),
+                                          bookingData.bookingType.toLowerCase().contains('round')
+                                              ? const Icon(Icons.sticky_note_2,
+                                                  size: 18, color: Color(0xFF4CAF50))
+                                              : const Icon(Icons.location_on,
+                                                  size: 18,
+                                                  color: Color(0xFFC51C1C)),
                                         ],
                                       ),
                                       const SizedBox(width: 12),
@@ -239,19 +225,36 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             const SizedBox(height: 2),
-                                            Text(
-                                              bookingData.pickupLocation,
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    bookingData.pickupLocation,
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight: FontWeight.w600),
+                                                  ),
+                                                ),
+                                                _pillPriceBox(bookingData.totalFare, bookingData.driverCommission),
+                                              ],
                                             ),
-                                            const SizedBox(height: 28),
-                                            Text(
-                                              bookingData.destinationLocation,
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600),
-                                            ),
+                                            const SizedBox(height: 18),
+                                            if (bookingData.bookingType.toLowerCase().contains('round'))
+                                              Text(
+                                                'Trip Notes: ${bookingData.destinationLocation}',
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFF4CAF50)),
+                                              )
+                                            else
+                                              Text(
+                                                bookingData.destinationLocation,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
                                           ],
                                         ),
                                       ),
@@ -269,12 +272,13 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                 /// VEHICLE INFO
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                      horizontal: 12, vertical: 8),
                                   child: Row(
                                     children: [
                                       Image.network(
                                         bookingData.carImage,
-                                        height: 30,
+                                        height: 35,
+                                        width: 60,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
                                                 Image.asset(
@@ -287,9 +291,11 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                           bookingData.carCategoryName,
                                           style: const TextStyle(
                                               fontSize: 12,
+                                              color: Colors.grey,
                                               fontWeight: FontWeight.w600),
                                         ),
                                       ),
+                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black87),
                                     ],
                                   ),
                                 ),
@@ -297,17 +303,17 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                 /// EXTRA REQUIREMENTS / NOTES
                                 Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                                      const EdgeInsets.fromLTRB(12, 8, 12, 10),
                                   child: RichText(
                                     text: TextSpan(
                                       style: const TextStyle(
-                                          fontSize: 11, fontFamily: 'Poppins'),
+                                          fontSize: 13, fontFamily: 'Poppins'),
                                       children: [
                                         const TextSpan(
                                           text: 'Extra Requirement: ',
                                           style: TextStyle(
                                               color: Colors.black,
-                                              fontWeight: FontWeight.w500),
+                                              fontWeight: FontWeight.w600),
                                         ),
                                         TextSpan(
                                           text: bookingData.remark ?? "N/A",
@@ -320,16 +326,18 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                   ),
                                 ),
 
-                                /// PRICE BOXES (Mini version for Active Bookings if preferred, but keeping consistent)
+                                /// PRICE BOXES
                                 Padding(
-                                  padding: const EdgeInsets.all(12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   child: Row(
                                     children: [
-                                      _priceBox("₹${bookingData.totalFare}",
+                                      _priceBox(
+                                          "₹${bookingData.totalFare}",
                                           "Total Amount"),
                                       const SizedBox(width: 8),
                                       _priceBox(
-                                          "₹${bookingData.driverCommission}",
+                                          "₹${((double.tryParse(bookingData.totalFare.replaceAll(',', '')) ?? 0) - (double.tryParse(bookingData.driverCommission.replaceAll(',', '')) ?? 0)).toStringAsFixed(0)}",
                                           "Driver's Earning",
                                           isEarning: true),
                                       const SizedBox(width: 8),
@@ -340,69 +348,30 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                   ),
                                 ),
 
-                                /// CHAT / CANCEL ACTIONS
+                                /// BUTTONS
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  child: Row(
+                                      horizontal: 12, vertical: 10),
+                                  child: Column(
                                     children: [
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            // Chat Logic
-                                          },
-                                          child: Container(
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xffFCB117)
-                                                  .withOpacity(0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Image.asset(
-                                                    "assets/images/chatNew.png",
-                                                    height: 16),
-                                                const SizedBox(width: 8),
-                                                const Text(
-                                                  "Chat",
-                                                  style: TextStyle(
-                                                      color: Color(0xffFCB117),
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      fontSize: 13),
-                                                ),
-                                              ],
-                                            ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          ChatListingScreen.show(context, bookingId: bookingData.id);
+                                        },
+                                        child: Container(
+                                          height: 48,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEFEFEF),
+                                            borderRadius: BorderRadius.circular(8),
                                           ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            // Cancel Logic
-                                          },
-                                          child: Container(
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFF45858)
-                                                  .withOpacity(0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: const Center(
-                                              child: Text(
-                                                "Cancel",
-                                                style: TextStyle(
-                                                    color: Color(0xFFF45858),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 13),
-                                              ),
-                                            ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Image.asset("assets/images/chatNew.png", height: 20, color: const Color(0xffFCB117)),
+                                              const SizedBox(width: 10),
+                                              const Text("Chat", style: TextStyle(color: Color(0xffFCB117), fontWeight: FontWeight.bold, fontSize: 16)),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -424,6 +393,53 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
     );
   }
 
+  Widget _pillPriceBox(String total, String commission) {
+    return Container(
+      height: 32,
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFEFEF),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('₹$total',
+                    style: const TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.bold)),
+                const Text('Total Amount',
+                    style: TextStyle(fontSize: 6, color: Colors.grey)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xffFCB117),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('₹$commission',
+                    style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+                const Text('Commission',
+                    style: TextStyle(fontSize: 6, color: Colors.white)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _priceBox(String amount, String label, {bool isEarning = false}) {
     return Expanded(
       child: Container(
@@ -437,16 +453,22 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
             Text(
               amount,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Poppins',
                 color: isEarning ? const Color(0xFFF45858) : Colors.black,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 9, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 8,
+                color: Colors.black87,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'alert_response_model.dart';
 
 // Top-level Homepage Response Model
 class HomePageResponse {
@@ -7,6 +8,7 @@ class HomePageResponse {
   final List<BannerItem> banners;
   final BookingSection newBooking;
   final BookingSection activeBooking;
+  final AlertData? alertData; // 👈 ADDED
 
   HomePageResponse({
     required this.status,
@@ -14,6 +16,7 @@ class HomePageResponse {
     required this.banners,
     required this.newBooking,
     required this.activeBooking,
+    this.alertData,
   });
 
   factory HomePageResponse.fromJson(Map<String, dynamic> json) {
@@ -25,6 +28,7 @@ class HomePageResponse {
           .toList(),
       newBooking: BookingSection.fromJson(json['new_booking'] as Map<String, dynamic>),
       activeBooking: BookingSection.fromJson(json['active_booking'] as Map<String, dynamic>),
+      alertData: json['data'] != null ? AlertData.fromJson(json['data']) : null, // 👈 ADDED
     );
   }
 
@@ -35,6 +39,7 @@ class HomePageResponse {
       'banners': banners.map((e) => e.toJson()).toList(),
       'new_booking': newBooking.toJson(),
       'active_booking': activeBooking.toJson(),
+      'data': alertData?.toJson(),
     };
   }
 }
@@ -119,6 +124,7 @@ class BookingItem {
   final String driverCommission;
   final String? isShowPhoneNumber;
   final String? driverNumber;
+  final int status;
 
   BookingItem({
     required this.bookingId,
@@ -135,6 +141,7 @@ class BookingItem {
     required this.driverCommission,
     this.isShowPhoneNumber,
     this.driverNumber,
+    this.status = 0,
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> json) {
@@ -153,6 +160,7 @@ class BookingItem {
       driverCommission: json['driver_commission']?.toString() ?? '0',
       isShowPhoneNumber: json['is_show_phone_number']?.toString(),
       driverNumber: json['driver_number']?.toString(),
+      status: int.tryParse(json['status']?.toString() ?? '0') ?? 0,
     );
   }
 
@@ -172,6 +180,7 @@ class BookingItem {
       'driver_commission': driverCommission,
       'is_show_phone_number': isShowPhoneNumber,
       'driver_number': driverNumber,
+      'status': status,
     };
   }
 }

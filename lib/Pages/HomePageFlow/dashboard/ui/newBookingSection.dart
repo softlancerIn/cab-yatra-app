@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bookingDetails/ui/bookingDetailScreen.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
+import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
 import 'sliderWidget.dart';
 
 class NewBookingSection extends StatefulWidget {
@@ -21,13 +22,7 @@ class _NewBookingSectionState extends State<NewBookingSection> {
       },
       child:
           BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
-        if (state.isLoading) {
-          return SizedBox(
-              height: size.height,
-              width: size.width,
-              child: const Center(child: CircularProgressIndicator()));
-        }
-        if (state.homeDataResponseModel == null) {
+        if (state.isLoading && state.homeDataResponseModel == null) {
           return SizedBox(
               height: size.height,
               width: size.width,
@@ -38,36 +33,36 @@ class _NewBookingSectionState extends State<NewBookingSection> {
 
         final newBooking = allBookings.where((booking) {
           final query = state.searchQuery.trim().toLowerCase();
-          final queryWords =
-              query.split(' ').where((word) => word.isNotEmpty).toList();
 
           bool matchesSearch = true;
-          if (queryWords.isNotEmpty) {
-            matchesSearch = queryWords.every((word) {
-              return booking.bookingId.toLowerCase().contains(word) ||
-                  booking.pickupLocation.toLowerCase().contains(word) ||
-                  booking.destinationLocation.toLowerCase().contains(word);
-            });
+          if (query.isNotEmpty) {
+            matchesSearch = booking.bookingId.toLowerCase().contains(query) ||
+                booking.id.toLowerCase().contains(query);
           }
 
-          final matchesVehicle = state.selectedVehicleType == null ||
-              booking.carCategoryName.toLowerCase() ==
-                  state.selectedVehicleType!.toLowerCase();
-
-          final matchesPickup = state.pickupLocationFilter == null ||
-              booking.pickupLocation
-                  .toLowerCase()
-                  .contains(state.pickupLocationFilter!.toLowerCase());
-
-          final matchesDrop = state.dropLocationFilter == null ||
+          // Drop Location Filter
+          bool matchesDrop = state.dropLocationFilter == null ||
               booking.destinationLocation
                   .toLowerCase()
                   .contains(state.dropLocationFilter!.toLowerCase());
 
-          return matchesSearch &&
-              matchesVehicle &&
-              matchesPickup &&
-              matchesDrop;
+          // Pickup Location Filter
+          bool matchesPickup =
+              state.pickupLocationFilters == null ||
+              state.pickupLocationFilters!.isEmpty ||
+              state.pickupLocationFilters!.any((loc) => booking.pickupLocation
+                  .toLowerCase()
+                  .contains(loc.toLowerCase()));
+
+          // Vehicle Type Filter
+          bool matchesVehicle =
+              state.selectedVehicleTypes == null ||
+              state.selectedVehicleTypes!.isEmpty ||
+              state.selectedVehicleTypes!.any((v) => booking.carCategoryName
+                  .toLowerCase()
+                  .contains(v.toLowerCase()));
+
+          return matchesSearch && matchesDrop && matchesPickup && matchesVehicle;
         }).toList();
 
         return SingleChildScrollView(
@@ -78,7 +73,7 @@ class _NewBookingSectionState extends State<NewBookingSection> {
           child: Column(
             children: [
               const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12.0),
+                padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
                 child: SliderWidget(),
               ),
               if (newBooking.isEmpty)
@@ -193,14 +188,13 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                           children: [
                                             TextSpan(
                                                 text:
-                                                    '${newBooking[index].pickupDate} '),
+                                                    '${HelperFunctions.formatDate(newBooking[index].pickupDate)} '),
                                             const TextSpan(
                                                 text: '@',
                                                 style: TextStyle(
                                                     color: Colors.black)),
                                             TextSpan(
-                                              text:
-                                                  newBooking[index].pickupTime,
+                                              text: HelperFunctions.formatTo12Hour(newBooking[index].pickupTime),
                                               style: const TextStyle(
                                                   color: Color(0xFFF45858),
                                                   fontWeight: FontWeight.w500),
@@ -225,45 +219,91 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Column(
-                                        children: [
-                                          const Icon(Icons.circle,
-                                              size: 14, color: Colors.orange),
-                                          SizedBox(
-                                            width: 1,
-                                            height: 30,
-                                            child: CustomPaint(
-                                                painter: DashLinePainter()),
-                                          ),
-                                          const Icon(Icons.circle,
-                                              size: 14,
-                                              color: Color(0xFFC51C1C)),
-                                        ],
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                      if (newBooking[index].bookingType
+                                              .toLowerCase()
+                                              .contains('round')) ...[
+                                        // Round Trip: both icons + dashed line, "Round Trip" label at bottom
+                                        Column(
                                           children: [
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              newBooking[index].pickupLocation,
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600),
+                                            const Icon(Icons.location_on,
+                                                size: 18, color: Colors.orange),
+                                            SizedBox(
+                                              width: 1,
+                                              height: 30,
+                                              child: CustomPaint(
+                                                  painter: DashLinePainter()),
                                             ),
-                                            const SizedBox(height: 28),
-                                            Text(
-                                              newBooking[index]
-                                                  .destinationLocation,
-                                              style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600),
-                                            ),
+                                            const Icon(Icons.location_on,
+                                                size: 18,
+                                                color: Color(0xFFC51C1C)),
                                           ],
                                         ),
-                                      ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                newBooking[index].pickupLocation,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 28),
+                                              const Text(
+                                                'Round Trip',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFFF45858)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ] else ...[
+                                        // One Way: show pickup + destination
+                                        Column(
+                                          children: [
+                                            const Icon(Icons.location_on,
+                                                size: 18, color: Colors.orange),
+                                            SizedBox(
+                                              width: 1,
+                                              height: 30,
+                                              child: CustomPaint(
+                                                  painter: DashLinePainter()),
+                                            ),
+                                            const Icon(Icons.location_on,
+                                                size: 18,
+                                                color: Color(0xFFC51C1C)),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                newBooking[index].pickupLocation,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                              const SizedBox(height: 28),
+                                              Text(
+                                                newBooking[index]
+                                                    .destinationLocation,
+                                                style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                       const Center(
                                         child: Padding(
                                           padding: EdgeInsets.only(top: 20),
@@ -340,7 +380,7 @@ class _NewBookingSectionState extends State<NewBookingSection> {
                                           "Total Amount"),
                                       const SizedBox(width: 8),
                                       _priceBox(
-                                          "₹${newBooking[index].driverCommission}",
+                                          "₹${((double.tryParse(newBooking[index].totalFare.replaceAll(',', '')) ?? 0) - (double.tryParse(newBooking[index].driverCommission.replaceAll(',', '')) ?? 0)).toStringAsFixed(0)}",
                                           "Driver's Earning",
                                           isEarning: true),
                                       const SizedBox(width: 8),
@@ -376,16 +416,22 @@ class _NewBookingSectionState extends State<NewBookingSection> {
             Text(
               amount,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                fontFamily: 'Poppins',
                 color: isEarning ? const Color(0xFFF45858) : Colors.black,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             Text(
               label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 9, color: Colors.grey),
+              style: const TextStyle(
+                fontSize: 8,
+                color: Colors.black87,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
