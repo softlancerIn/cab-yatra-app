@@ -1,5 +1,6 @@
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,6 +35,7 @@ void main()async  {
   );
 
   await NotificationService.initialize();
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FCMService.init();
   runApp(const MyApp());
 }
@@ -75,6 +77,37 @@ class MyApp extends StatelessWidget {
 
         // 🔥 System theme detect automatically
         themeMode: ThemeMode.system,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFFFFB300),
+            primary: const Color(0xFFFFB300),
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            iconTheme: IconThemeData(color: Colors.black),
+            titleTextStyle: TextStyle(
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          datePickerTheme: DatePickerThemeData(
+            headerBackgroundColor: const Color(0xFFFFB300),
+            headerForegroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          timePickerTheme: TimePickerThemeData(
+            backgroundColor: Colors.white,
+            hourMinuteColor: const Color(0xFFFFB300).withOpacity(0.1),
+            hourMinuteTextColor: const Color(0xFFFFB300),
+            dayPeriodColor: const Color(0xFFFFB300).withOpacity(0.1),
+            dayPeriodTextColor: const Color(0xFFFFB300),
+            dialHandColor: const Color(0xFFFFB300),
+          ),
+        ),
 
         routerConfig: AppRouter.router,
 

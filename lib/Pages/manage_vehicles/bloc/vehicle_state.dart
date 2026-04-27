@@ -15,9 +15,12 @@ class VehicleState {
   final File? carImage2;
   final EditCarCategoryModel? carCategories;
   final int? selectedCarCategoryId;
+  final dynamic selectedVehicle;
+  final bool isFetching;
 
   VehicleState({
     this.isLoading = false,
+    this.isFetching = false,
     this.isSuccess = false,
     this.vehicles = const [],
     this.error,
@@ -29,10 +32,12 @@ class VehicleState {
     this.carImage2,
     this.carCategories,
     this.selectedCarCategoryId,
+    this.selectedVehicle,
   });
 
   VehicleState copyWith({
     bool? isLoading,
+    bool? isFetching,
     bool? isSuccess,
     List<VehicleItem>? vehicles,
     String? error,
@@ -44,20 +49,25 @@ class VehicleState {
     File? carImage2,
     EditCarCategoryModel? carCategories,
     int? selectedCarCategoryId,
+    dynamic selectedVehicle,
+    bool clearSelectedVehicle = false,
+    bool clearFiles = false,
   }) {
     return VehicleState(
       isLoading: isLoading ?? this.isLoading,
+      isFetching: isFetching ?? this.isFetching,
       isSuccess: isSuccess ?? this.isSuccess,
       vehicles: vehicles ?? this.vehicles,
       error: error,
-      vehicleImage: vehicleImage ?? this.vehicleImage,
-      insuranceImage: insuranceImage ?? this.insuranceImage,
-      rcFrontImage: rcFrontImage ?? this.rcFrontImage,
-      rcBackImage: rcBackImage ?? this.rcBackImage,
-      carImage1: carImage1 ?? this.carImage1,
-      carImage2: carImage2 ?? this.carImage2,
+      vehicleImage: clearFiles ? null : (vehicleImage ?? this.vehicleImage),
+      insuranceImage: clearFiles ? null : (insuranceImage ?? this.insuranceImage),
+      rcFrontImage: clearFiles ? null : (rcFrontImage ?? this.rcFrontImage),
+      rcBackImage: clearFiles ? null : (rcBackImage ?? this.rcBackImage),
+      carImage1: clearFiles ? null : (carImage1 ?? this.carImage1),
+      carImage2: clearFiles ? null : (carImage2 ?? this.carImage2),
       carCategories: carCategories ?? this.carCategories,
-      selectedCarCategoryId: selectedCarCategoryId ?? this.selectedCarCategoryId,
+      selectedCarCategoryId: clearFiles ? null : (selectedCarCategoryId ?? this.selectedCarCategoryId),
+      selectedVehicle: (clearSelectedVehicle || clearFiles) ? null : (selectedVehicle ?? this.selectedVehicle),
     );
   }
 }

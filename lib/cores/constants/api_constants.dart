@@ -19,6 +19,8 @@ class ApiConstants {
   static const String booking = 'api/driver/V2/booking';
   static const String bookingDetail = 'api/driver/V2/booking';
   static const String profile = 'api/driver/V2/profile/';
+  static const String vehicles = 'api/driver/V2/profile/vehicles';
+  static const String subDrivers = 'api/driver/V2/profile/sub-drivers';
   static const String transactions = 'api/driver/V2/profile/transactions';
   static const String reviews = 'api/driver/V2/profile/reviews';
   static const String paymentMethods = 'api/driver/V2/profile/payment-methods';
@@ -38,5 +40,9 @@ class ApiConstants {
   static const String userID = 'userId';
   static const String isAgentKey = 'isAgent';
   static const String isdriverKey = 'isdriver';
-  static const String authEndpoint = 'api/driver/V2/broadcasting/auth';
+  static const String authEndpoint = 'broadcasting/auth';
+  static const String razorpayCreateOrder = 'api/driver/V2/razorpay/create-order';
+  static const String razorpayVerifyPayment = 'api/driver/V2/razorpay/verify-payment';
+  static const String submitRating = 'api/driver/V2/profile/reviews';
+  static const String razorpayKey = 'rzp_test_SWioTKPjCX3Z95';
 }

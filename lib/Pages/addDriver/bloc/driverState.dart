@@ -3,6 +3,7 @@ import '../model/driverListModel.dart';
 
 class DriverState {
   final bool loading;
+  final bool isFetching;
   final bool success;
   final List<SubDriver> drivers;
   final String? error;
@@ -12,9 +13,11 @@ class DriverState {
   final File? aadharFront;
   final File? aadharBack;
   final File? profileImage;
+  final dynamic selectedDriver;
 
   DriverState({
     this.loading = false,
+    this.isFetching = false,
     this.success = false,
     this.drivers = const [],
     this.error,
@@ -23,10 +26,12 @@ class DriverState {
     this.aadharFront,
     this.aadharBack,
     this.profileImage,
+    this.selectedDriver,
   });
 
   DriverState copyWith({
     bool? loading,
+    bool? isFetching,
     bool? success,
     List<SubDriver>? drivers,
     String? error,
@@ -35,17 +40,22 @@ class DriverState {
     File? aadharFront,
     File? aadharBack,
     File? profileImage,
+    dynamic selectedDriver,
+    bool clearSelectedDriver = false,
+    bool clearFiles = false,
   }) {
     return DriverState(
       loading: loading ?? this.loading,
+      isFetching: isFetching ?? this.isFetching,
       success: success ?? this.success,
       drivers: drivers ?? this.drivers,
       error: error,
-      dlFront: dlFront ?? this.dlFront,
-      dlBack: dlBack ?? this.dlBack,
-      aadharFront: aadharFront ?? this.aadharFront,
-      aadharBack: aadharBack ?? this.aadharBack,
-      profileImage: profileImage ?? this.profileImage,
+      dlFront: clearFiles ? null : (dlFront ?? this.dlFront),
+      dlBack: clearFiles ? null : (dlBack ?? this.dlBack),
+      aadharFront: clearFiles ? null : (aadharFront ?? this.aadharFront),
+      aadharBack: clearFiles ? null : (aadharBack ?? this.aadharBack),
+      profileImage: clearFiles ? null : (profileImage ?? this.profileImage),
+      selectedDriver: (clearSelectedDriver || clearFiles) ? null : (selectedDriver ?? this.selectedDriver),
     );
   }
 }

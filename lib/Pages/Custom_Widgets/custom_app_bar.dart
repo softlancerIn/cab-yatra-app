@@ -7,6 +7,7 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
   final bool showAction;
   final Widget? actionWidget;
   final VoidCallback? onLeadingPressed;
+  final VoidCallback? onTitleTap;
 
   const AppBAR({
     super.key,
@@ -15,6 +16,7 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
     this.showAction = false, // default false
     this.actionWidget,
     this.onLeadingPressed,
+    this.onTitleTap,
   });
 
   @override
@@ -41,45 +43,54 @@ class AppBAR extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               /// 🔙 Leading Icon
-              showLeading
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: onLeadingPressed ??
-                          () {
-                            Nav.pop(context);
-                          },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
+              SizedBox(
+                width: 50,
+                child: showLeading
+                    ? GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onLeadingPressed ??
+                            () {
+                              Nav.pop(context);
+                            },
                         child: const Icon(Icons.arrow_back_ios, size: 20),
-                      ),
-                    )
-                  : const SizedBox(width: 40),
-
-              const SizedBox(width: 12),
+                      )
+                    : const SizedBox.shrink(),
+              ),
 
               /// 📌 Title
               Expanded(
-                child: Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
+                child: GestureDetector(
+                  onTap: onTitleTap,
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
 
               /// 🚗 Action Icon
-              actionWidget ??
-                  (showAction
-                      ? Image.asset(
-                          "assets/images/appbar_car.png",
-                          width: 50,
-                          fit: BoxFit.fitWidth,
-                        )
-                      : const SizedBox(width: 50)),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 50),
+                child: actionWidget ??
+                    (showAction
+                        ? SizedBox(
+                            width: 50,
+                            child: Image.asset(
+                              "assets/images/appbar_car.png",
+                              width: 50,
+                              fit: BoxFit.fitWidth,
+                            ),
+                          )
+                        : const SizedBox.shrink()),
+              ),
             ],
           ),
         ),

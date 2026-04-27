@@ -31,35 +31,38 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
 
 
   int resentTime = 60;
-  late Timer countdownTimer;
+  Timer? countdownTimer;
 
   startTimer() {
+    countdownTimer?.cancel(); // Cancel any existing timer
     if (resentTime > 0) {
       countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        setState(() {
-          resentTime = resentTime - 1;
-        });
+        if (mounted) {
+          setState(() {
+            resentTime = resentTime - 1;
+          });
+        }
         if (resentTime < 1) {
-          countdownTimer.cancel();
+          timer.cancel();
         }
       });
     }
   }
 
   stopTimer() {
-    if (countdownTimer.isActive) {
-      countdownTimer.cancel();
-    }
+    countdownTimer?.cancel();
   }
 
   @override
   void initState() {
     startTimer();
+    context.read<OTPBloc>().add(const ResetVerifyOtpEvent());
     super.initState();
   }
 
   @override
   void dispose() {
+    stopTimer(); // Ensure timer is cancelled
     focusNode1.dispose();
     focusNode2.dispose();
     focusNode3.dispose();
@@ -104,10 +107,10 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
             //   Nav.go(context, Routes.home);
             // }
             /// ❌ Error → Dialog Box
-            if (state.hasError && state.errorMessage != null) {
+            if (state.hasError) {
               showDialog(
                 context: context,
-                builder: (_) => AlertDialog(
+                builder: (dialogContext) => AlertDialog(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -116,16 +119,13 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                   content: Text(
-                    state.errorMessage!,
+                    state.errorMessage ?? "An unknown error occurred",
                     style: const TextStyle(fontSize: 14),
                   ),
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Nav.go(context,Routes.login);
-                        // Navigator.pop(context);
-
-                        /// state reset (optional but recommended)
+                        Navigator.pop(dialogContext); // Close the dialog
                         context.read<OTPBloc>().add(const ResetVerifyOtpEvent());
                       },
                       child: const Text("OK"),

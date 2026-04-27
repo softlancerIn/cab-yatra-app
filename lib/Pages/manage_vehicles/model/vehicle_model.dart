@@ -35,6 +35,9 @@ class VehicleItem {
   final String vehicleNumber;
   final String vehicleYear;
   final String? image;
+  final List<String> allImages;
+  final String? driverNumber;
+  final int? isApprove;
 
   VehicleItem({
     required this.id,
@@ -42,28 +45,52 @@ class VehicleItem {
     required this.vehicleNumber,
     required this.vehicleYear,
     this.image,
+    this.allImages = const [],
+    this.driverNumber,
+    this.isApprove = 0,
   });
 
   factory VehicleItem.fromJson(Map<String, dynamic> json) {
+    final List<String> imgs = [];
+    if (json['car_image1_url'] != null) imgs.add(json['car_image1_url'].toString());
+    if (json['car_image2_url'] != null) imgs.add(json['car_image2_url'].toString());
+    if (json['car_image3_url'] != null) imgs.add(json['car_image3_url'].toString());
+    if (json['car_image4_url'] != null) imgs.add(json['car_image4_url'].toString());
+    if (imgs.isEmpty && json['vehicle_image_url'] != null) imgs.add(json['vehicle_image_url'].toString());
+
+    // Fix vehicle type mapping
+    String type = '';
+    if (json['car_category'] != null) {
+      if (json['car_category'] is Map) {
+        type = json['car_category']['name']?.toString() ?? '';
+      } else {
+        type = json['car_category'].toString();
+      }
+    }
+    if (type.isEmpty) {
+      type = (json['car_name'] ?? json['car_brand'] ?? json['name'] ?? '').toString();
+    }
+
     return VehicleItem(
       id: json['id'] ?? 0,
-
-      vehicleType: json['car_name'] ??
-          json['car_brand'] ??
-          "Category ID: ${json['car_category_id'] ?? ''}",
-
+      vehicleType: type.isNotEmpty ? type : "Category ID: ${json['car_category_id'] ?? ''}",
       vehicleNumber: (json['car_registration_number'] ??
+              json['car_no'] ??
               json['vehicle_number'])
           ?.toString() ??
           '',
-
       vehicleYear: (json['manifacturer_of_year'] ??
               json['registration_year'])
           ?.toString() ??
           '',
-
-      image: json['car_image1_url'] ??
-          json['vehicle_image_url'],
+      image: imgs.isNotEmpty ? imgs.first : null,
+      allImages: imgs,
+      driverNumber: (json['driver_number'] ?? json['driver_contact_number'])?.toString(),
+      isApprove: (json['is_approve'] == 1 ||
+              json['is_approve'] == '1' ||
+              json['is_approve'] == true)
+          ? 1
+          : 0,
     );
   }
 }

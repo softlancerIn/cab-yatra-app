@@ -9,6 +9,21 @@ class SubmitDriver extends DriverEvent {
   SubmitDriver(this.fields, this.files);
 }
 
+class UpdateDriver extends DriverEvent {
+  final int id;
+  final Map<String, dynamic> fields;
+  final Map<String, File> files;
+
+  UpdateDriver(this.id, this.fields, this.files);
+}
+
+class FetchDriverById extends DriverEvent {
+  final int id;
+  FetchDriverById(this.id);
+}
+
+class ResetDriverForm extends DriverEvent {}
+
 class LoadDrivers extends DriverEvent {}
 
 class PickProfileImage extends DriverEvent {}

@@ -11,7 +11,7 @@ class Routes {
   static const manageVehicles = '/manageVehicles';
   static const editBooking = '/editBooking';
   static const chatListing = '/chatListing';
-  static const chatScreen = '/chatScreen';
+  static const  chatScreen = '/chatScreen';
   static const writeReview = '/writeReview';
   static const success = '/success';
   static const support = '/support';

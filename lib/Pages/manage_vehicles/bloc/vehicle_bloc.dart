@@ -17,6 +17,40 @@ class VehicleBloc extends Bloc<VehicleEvent, VehicleState> {
     on<PickSpecificDocument>(_onPickSpecificDocument);
     on<LoadCarCategories>(_onLoadCarCategories);
     on<SelectCarCategory>(_onSelectCarCategory);
+    on<UpdateVehicle>(_onUpdateVehicle);
+    on<FetchVehicleById>(_onFetchVehicleById);
+    on<ResetVehicleForm>((event, emit) {
+      emit(state.copyWith(clearFiles: true));
+    });
+  }
+
+  Future<void> _onFetchVehicleById(FetchVehicleById event, Emitter<VehicleState> emit) async {
+    emit(state.copyWith(isFetching: true));
+    try {
+      final result = await repo.getVehicleById(event.id);
+      emit(state.copyWith(isFetching: false, selectedVehicle: result["data"]));
+    } catch (e) {
+      emit(state.copyWith(isFetching: false, error: e.toString()));
+    }
+  }
+
+  Future<void> _onUpdateVehicle(UpdateVehicle event, Emitter<VehicleState> emit) async {
+    emit(state.copyWith(isLoading: true, isSuccess: false));
+    try {
+      final success = await repo.updateVehicle(id: event.id, fields: event.fields, files: event.files);
+      if (success) {
+        emit(state.copyWith(isLoading: false, isSuccess: true));
+        add(LoadVehicles());
+        await Future.delayed(const Duration(milliseconds: 300));
+        emit(state.copyWith(isSuccess: false));
+      } else {
+        emit(state.copyWith(isLoading: false, error: "Failed to update vehicle"));
+      }
+    } catch (e) {
+      emit(state.copyWith(isLoading: false, error: e.toString()));
+      await Future.delayed(const Duration(milliseconds: 300));
+      emit(state.copyWith(isSuccess: false));
+    }
   }
 
   Future<void> _onLoadVehicles(LoadVehicles event, Emitter<VehicleState> emit) async {

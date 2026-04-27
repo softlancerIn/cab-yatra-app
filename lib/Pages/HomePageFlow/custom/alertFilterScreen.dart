@@ -125,7 +125,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                     spacing: 12,
                     runSpacing: 12,
                     children: carModels.map((car) {
-                      return vehicleCard(car.name ?? "");
+                      return vehicleCard(car.name ?? "", car.image);
                     }).toList(),
                   );
                 },
@@ -295,24 +295,11 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
                     }
                   }
 
-                  // Map selected city names to IDs (List<int> as required by API)
-                  final cityModels = state.citiesResponseModel?.data ?? [];
-                  List<int> cityIds = [];
-                  for (var city in pickupCities) {
-                    final match = cityModels.firstWhere(
-                      (c) => c.name?.toLowerCase().trim() == city.toLowerCase().trim(),
-                      orElse: () => CityData(id: -1),
-                    );
-                    if (match.id != null && match.id != -1) {
-                      cityIds.add(match.id!);
-                    }
-                  }
-
                   context.read<DashboardBloc>().add(UpdateAlertsEvent(
                         context: context,
                         alertType: "location_based",
                         carIds: carIds,
-                        locations: cityIds,
+                        locations: pickupCities,
                         manualPickup: manualPickup ? "yes" : "no",
                         status: "1", // Saving settings always activates the alert
                       ));
@@ -478,7 +465,7 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
   }
 
   /// VEHICLE CARD WIDGET
-  Widget vehicleCard(String title) {
+  Widget vehicleCard(String title, String? imageUrl) {
     final isSelected = selectedVehicles.contains(title);
 
     return GestureDetector(
@@ -498,10 +485,21 @@ class _AlertFilterScreenState extends State<AlertFilterScreen> {
             ),
             child: Column(
               children: [
-                Image.asset(
-                  'assets/images/carMO.png', // replace with your image
-                  height: 40,
-                ),
+                imageUrl != null && imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        height: 40,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.asset(
+                          'assets/images/carMO.png',
+                          height: 40,
+                        ),
+                      )
+                    : Image.asset(
+                        'assets/images/carMO.png',
+                        height: 40,
+                      ),
                 const SizedBox(height: 3),
                 Text(
                   title,

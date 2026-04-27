@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/router/navigation/nav.dart';
@@ -32,9 +33,9 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                 'Welcome to Cabyatra',
                 style: TextStyle(
                   color: Color(0xFF3E4959),
-                  fontSize: 26,
+                  fontSize: 20,
                   fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.40,
                 ),
               ),
@@ -61,7 +62,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -87,7 +88,7 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w700,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -117,9 +118,10 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      const TextSpan(
+                      TextSpan(
                         text: 'Terms of Use',
-                        style: TextStyle(
+                        recognizer: TapGestureRecognizer()..onTap = () => Nav.push(context, Routes.termsCondition),
+                        style: const TextStyle(
                           color: Color(0xFF3E4959),
                           fontWeight: FontWeight.w700,
                           decoration: TextDecoration.underline,
@@ -134,9 +136,10 @@ class _LoginSelectionScreenState extends State<LoginSelectionScreen> {
                           height: 1.50,
                         ),
                       ),
-                      const TextSpan(
+                      TextSpan(
                         text: 'Privacy Policy',
-                        style: TextStyle(
+                        recognizer: TapGestureRecognizer()..onTap = () => Nav.push(context, Routes.privacyPolicy),
+                        style: const TextStyle(
                           color: Color(0xFF3E4959),
                           fontWeight: FontWeight.w700,
                           decoration: TextDecoration.underline,

@@ -93,14 +93,8 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
           }
         }
 
-        for (var id in locationIdList) {
-          final match = state.citiesResponseModel?.data?.firstWhere(
-            (c) => c.id == id,
-            orElse: () => CityData(id: -1),
-          );
-          if (match != null && match.id != -1 && match.name != null) {
-            locationNames.add(match.name!);
-          }
+        for (var name in locationIdList) {
+          locationNames.add(name);
         }
 
         emit(state.copyWith(

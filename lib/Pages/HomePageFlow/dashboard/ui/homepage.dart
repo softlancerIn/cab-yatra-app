@@ -31,6 +31,7 @@ class _HomepageState extends State<Homepage>
   @override
   void initState() {
     super.initState();
+    context.read<DashboardBloc>().add(ResetDashboardEvent());
     context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
     context.read<DashboardBloc>().add(GetCitiesEvent(context: context));
     context.read<DashboardBloc>().add(GetCarCategoryEvent(context: context));
@@ -67,6 +68,7 @@ class _HomepageState extends State<Homepage>
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
+        titleSpacing: 0, // Reduced from default
         flexibleSpace: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -81,12 +83,13 @@ class _HomepageState extends State<Homepage>
         ),
         centerTitle: false,
         title: const Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'Cab',
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 20,
+                fontSize: 18, // Slightly reduced from 20
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w800,
               ),
@@ -95,28 +98,22 @@ class _HomepageState extends State<Homepage>
               'Yatra',
               style: TextStyle(
                 color: Color(0xFFFFB300),
-                fontSize: 22,
+                fontSize: 20, // Slightly reduced from 22
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w800,
               ),
             ),
           ],
         ),
-        // leading: Builder(
-        //   builder: (context) => IconButton(
-        //     icon: const Icon(Icons.menu, color: Colors.black, size: 27),
-        //     onPressed: () => Scaffold.of(context).openDrawer(),
-        //   ),
-        // ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 14),
+            padding: const EdgeInsets.only(right: 10),
             child: Row(
               children: [
                 /// Alert Button
                 Container(
-                  height: 32, // Fixed height for a standardized pill shape
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  height: 32,
+                  padding: const EdgeInsets.symmetric(horizontal: 8), // Reduced from 12
                   decoration: BoxDecoration(
                     color: const Color(0xFFEFEFEF),
                     borderRadius: BorderRadius.circular(20),
@@ -127,16 +124,16 @@ class _HomepageState extends State<Homepage>
                         'Alert',
                         style: TextStyle(
                             color: Colors.black,
-                            fontSize: 13, // Increased from 10
+                            fontSize: 12, // Reduced from 13
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins'),
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4), // Reduced from 8
                       CustomToggleSwitch(),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 4), // Reduced from 8
 
                 /// Help Button
                 GestureDetector(
@@ -148,8 +145,8 @@ class _HomepageState extends State<Homepage>
                     );
                   },
                   child: Container(
-                    height: 32, // Fixed height for a standardized pill shape
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    height: 32,
+                    padding: const EdgeInsets.symmetric(horizontal: 8), // Reduced from 12
                     decoration: BoxDecoration(
                       color: const Color(0xFFEFEFEF),
                       borderRadius: BorderRadius.circular(20),
@@ -160,12 +157,12 @@ class _HomepageState extends State<Homepage>
                           'Help',
                           style: TextStyle(
                               color: Colors.black,
-                              fontSize: 13, // Increased from 10
+                              fontSize: 12, // Reduced from 13
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Poppins'),
                         ),
-                        const SizedBox(width: 6),
-                        Image.asset('assets/images/caall.png', height: 18),
+                        const SizedBox(width: 4), // Reduced from 6
+                        Image.asset('assets/images/caall.png', height: 16), // Reduced height from 18
                       ],
                     ),
                   ),
@@ -209,7 +206,14 @@ class _HomepageState extends State<Homepage>
         ),
       ),
       body:
-          BlocBuilder<DashboardBloc, DashboardState>(builder: (context, state) {
+          BlocConsumer<DashboardBloc, DashboardState>(
+        listener: (context, state) {
+          // Sync search controller when state is cleared (on pull-to-refresh or filter clear)
+          if (state.searchQuery.isEmpty && searchController.text.isNotEmpty) {
+            searchController.clear();
+          }
+        },
+        builder: (context, state) {
         if (state.isLoading && state.homeDataResponseModel == null) {
           return SizedBox(
               height: size.height,
@@ -247,12 +251,6 @@ class _HomepageState extends State<Homepage>
         final activeBookings = state.homeDataResponseModel!.activeBooking.data;
         final newBooking = state.homeDataResponseModel!.newBooking.data;
 
-        // Watch for search query changes to keep controller in sync (e.g. on clear)
-        if (state.searchQuery != searchController.text &&
-            state.searchQuery.isEmpty) {
-          searchController.text = state.searchQuery;
-        }
-
         return Column(
           children: [
             /// Search and Filter Section
@@ -269,8 +267,7 @@ class _HomepageState extends State<Homepage>
                                 searchQuery: searchController.text.trim()));
                       },
                       onChanged: (value) {
-                        context.read<DashboardBloc>().add(
-                            UpdateSearchQueryEvent(searchQuery: value.trim()));
+                        context.read<DashboardBloc>().add(UpdateSearchQueryEvent(searchQuery: value.trim()));
                       },
                     ),
                   ),

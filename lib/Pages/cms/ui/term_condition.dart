@@ -27,6 +27,7 @@ class _TermsConditionPageState extends State<TermsConditionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: const AppBAR(
         title: "Terms Condition",
         showLeading: true,
@@ -52,7 +53,7 @@ class _TermsConditionPageState extends State<TermsConditionPage> {
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
             children: [
               /// TERMS
-              _cmsCard(
+              _cmsContent(
                 "Terms & Conditions",
                 cms.termCondition ?? "",
               ),
@@ -63,42 +64,32 @@ class _TermsConditionPageState extends State<TermsConditionPage> {
     );
   }
 
-  Widget _cmsCard(String title, String htmlContent) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF333333),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Html(
-              data: htmlContent,
-              style: {
-                "body": Style(
-                  fontSize: FontSize(14),
-                  lineHeight: const LineHeight(1.5),
-                  color: Colors.black87,
-                  margin: Margins.zero,
-                  padding: HtmlPaddings.zero,
-                ),
-              },
-            ),
-          ],
+  Widget _cmsContent(String title, String htmlContent) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF333333),
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        Html(
+          data: htmlContent,
+          style: {
+            "body": Style(
+              fontSize: FontSize(14),
+              lineHeight: const LineHeight(1.5),
+              color: Colors.black87,
+              margin: Margins.zero,
+              padding: HtmlPaddings.zero,
+            ),
+          },
+        ),
+      ],
     );
   }
 }

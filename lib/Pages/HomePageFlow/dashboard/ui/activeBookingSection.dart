@@ -6,8 +6,9 @@ import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.da
 import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
-import '../../../chat/chat_listing.dart';
 import 'sliderWidget.dart';
+import '../../../chat/repo/chat_repo.dart';
+import 'package:cab_taxi_app/cores/services/secure_storage_service.dart';
 
 class ActiveBookingSection extends StatefulWidget {
   const ActiveBookingSection({super.key});
@@ -22,6 +23,7 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
     final size = MediaQuery.of(context).size;
     return RefreshIndicator(
       onRefresh: () async {
+        context.read<DashboardBloc>().add(ClearFilterEvent());
         context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
       },
       child:
@@ -35,8 +37,6 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
         // Filter by status == 2 for active bookings
         final query = state.searchQuery.trim().toLowerCase();
         final activeBooking = allBookings.where((booking) {
-          // Only show bookings with status 2
-          if (booking.status != 2) return false;
           // Search by booking ID
           if (query.isNotEmpty) {
             return booking.bookingId.toLowerCase().contains(query) ||
@@ -46,12 +46,15 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
         }).toList();
 
         if (activeBooking.isEmpty) {
-          return const SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                SizedBox(height: 20),
-                Center(
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                  child: SliderWidget(banners: state.homeDataResponseModel!.banners),
+                ),
+                const Center(
                     child: Padding(
                   padding: EdgeInsets.only(top: 50.0),
                   child: Text("No active bookings found"),
@@ -68,7 +71,10 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+                  child: SliderWidget(banners: state.homeDataResponseModel!.banners),
+                ),
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -82,6 +88,8 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                               MaterialPageRoute(
                                 builder: (context) => BookingDetailScreen(
                                   bookingID: bookingData.id,
+                                  isFromHome: true,
+                                  showShareIcon: false,
                                 ),
                               ));
                         },
@@ -133,16 +141,19 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                                           FontWeight.normal),
                                                 ),
                                                 TextSpan(
-                                                  text: '${bookingData.bookingId} ',
+                                                  text:
+                                                      '${bookingData.bookingId} ',
                                                   style: const TextStyle(
                                                       color: Colors.black,
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
-                                                const TextSpan(
-                                                  text: 'Assigned',
+                                                TextSpan(
+                                                  text: _getStatusText(
+                                                      bookingData.status),
                                                   style: TextStyle(
-                                                      color: Colors.orange,
+                                                      color: _getStatusColor(
+                                                          bookingData.status),
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),
@@ -160,27 +171,15 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                         ],
                                       ),
                                       const SizedBox(height: 4),
-                                      RichText(
-                                        text: TextSpan(
-                                          style: const TextStyle(
-                                              fontSize: 13,
-                                              fontFamily: 'Poppins',
-                                              color: Colors.black),
-                                          children: [
-                                            TextSpan(
-                                                text:
-                                                    '${HelperFunctions.formatDate(bookingData.pickupDate)} '),
-                                            const TextSpan(
-                                                text: '@',
-                                                style: TextStyle(
-                                                    color: Colors.black)),
-                                            TextSpan(
-                                              text: HelperFunctions.formatTo12Hour(bookingData.pickupTime),
-                                              style: const TextStyle(
-                                                  color: Color(0xFFF45858),
-                                                  fontWeight: FontWeight.w500),
-                                            ),
-                                          ],
+                                      Text(
+                                        HelperFunctions.formatBookingDate(
+                                            bookingData.pickupDate,
+                                            bookingData.pickupTime),
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontFamily: 'Poppins',
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
@@ -210,9 +209,12 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                             child: CustomPaint(
                                                 painter: DashLinePainter()),
                                           ),
-                                          bookingData.bookingType.toLowerCase().contains('round')
+                                          bookingData.bookingType
+                                                  .toLowerCase()
+                                                  .contains('round')
                                               ? const Icon(Icons.sticky_note_2,
-                                                  size: 18, color: Color(0xFF4CAF50))
+                                                  size: 18,
+                                                  color: Color(0xFF4CAF50))
                                               : const Icon(Icons.location_on,
                                                   size: 18,
                                                   color: Color(0xFFC51C1C)),
@@ -226,21 +228,31 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                           children: [
                                             const SizedBox(height: 2),
                                             Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    bookingData.pickupLocation,
+                                                    (bookingData.pickUpCity ??
+                                                                "")
+                                                            .isNotEmpty
+                                                        ? bookingData
+                                                            .pickUpCity!
+                                                        : bookingData
+                                                            .pickupLocation,
                                                     style: const TextStyle(
                                                         fontSize: 14,
-                                                        fontWeight: FontWeight.w600),
+                                                        fontWeight:
+                                                            FontWeight.w600),
                                                   ),
                                                 ),
-                                                _pillPriceBox(bookingData.totalFare, bookingData.driverCommission),
                                               ],
                                             ),
                                             const SizedBox(height: 18),
-                                            if (bookingData.bookingType.toLowerCase().contains('round'))
+                                            if (bookingData.bookingType
+                                                .toLowerCase()
+                                                .contains('round'))
                                               Text(
                                                 'Trip Notes: ${bookingData.destinationLocation}',
                                                 style: const TextStyle(
@@ -250,21 +262,28 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                               )
                                             else
                                               Text(
-                                                bookingData.destinationLocation,
+                                                (bookingData.destinationCity ??
+                                                            "")
+                                                        .isNotEmpty
+                                                    ? bookingData
+                                                        .destinationCity!
+                                                    : bookingData
+                                                        .destinationLocation,
                                                 style: const TextStyle(
                                                     fontSize: 14,
-                                                    fontWeight: FontWeight.w600),
+                                                    fontWeight:
+                                                        FontWeight.w600),
                                               ),
                                           ],
                                         ),
                                       ),
-                                      const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(top: 20),
-                                          child: Icon(Icons.arrow_forward_ios,
-                                              size: 16, color: Colors.grey),
-                                        ),
-                                      ),
+                                      // const Center(
+                                      //   child: Padding(
+                                      //     padding: EdgeInsets.only(top: 20),
+                                      //     child: Icon(Icons.arrow_forward_ios,
+                                      //         size: 16, color: Colors.grey),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 ),
@@ -295,7 +314,8 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                               fontWeight: FontWeight.w600),
                                         ),
                                       ),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black87),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 16, color: Colors.black87),
                                     ],
                                   ),
                                 ),
@@ -316,7 +336,21 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                               fontWeight: FontWeight.w600),
                                         ),
                                         TextSpan(
-                                          text: bookingData.remark ?? "N/A",
+                                          text: () {
+                                            final r = bookingData.remark;
+                                            final e = bookingData.extra;
+                                            if (r != null &&
+                                                r.isNotEmpty &&
+                                                e != null &&
+                                                e.isNotEmpty) {
+                                              return "$r / $e";
+                                            }
+                                            return (r == null || r.isEmpty)
+                                                ? (e == null || e.isEmpty
+                                                    ? "N/A"
+                                                    : e)
+                                                : r;
+                                          }(),
                                           style: const TextStyle(
                                               color: Color(0xFFF45858),
                                               fontWeight: FontWeight.w500),
@@ -332,8 +366,7 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                       horizontal: 12, vertical: 8),
                                   child: Row(
                                     children: [
-                                      _priceBox(
-                                          "₹${bookingData.totalFare}",
+                                      _priceBox("₹${bookingData.totalFare}",
                                           "Total Amount"),
                                       const SizedBox(width: 8),
                                       _priceBox(
@@ -354,27 +387,123 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                                       horizontal: 12, vertical: 10),
                                   child: Column(
                                     children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          ChatListingScreen.show(context, bookingId: bookingData.id);
-                                        },
-                                        child: Container(
-                                          height: 48,
-                                          width: double.infinity,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFEFEFEF),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Image.asset("assets/images/chatNew.png", height: 20, color: const Color(0xffFCB117)),
-                                              const SizedBox(width: 10),
-                                              const Text("Chat", style: TextStyle(color: Color(0xffFCB117), fontWeight: FontWeight.bold, fontSize: 16)),
-                                            ],
-                                          ),
+                                      if (bookingData.status == 1) ...[
+                                        // Status: Assigned
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _buildChatButton(
+                                                  context, bookingData),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: _buildActionButton(
+                                                text: "Pickup Booking",
+                                                color: const Color(0xffFCB117),
+                                                onTap: () async {
+                                                  final chatRepo = ChatRepo();
+                                                  final success = await chatRepo
+                                                      .updateBookingStatus(
+                                                    context: context,
+                                                    bookingId: bookingData.id,
+                                                    status: "4", // Picked Up
+                                                  );
+                                                  if (success) {
+                                                    await chatRepo
+                                                        .sendNewMessage(
+                                                      context: context,
+                                                      bookingId: bookingData.id,
+                                                      receiverId: bookingData
+                                                              .driverId ??
+                                                          '0',
+                                                      message:
+                                                          "This booking is picked by agent",
+                                                      type: 3,
+                                                    );
+                                                    if (context.mounted) {
+                                                      context
+                                                          .read<DashboardBloc>()
+                                                          .add(GetHomeDataEvent(
+                                                              context:
+                                                                  context));
+                                                    }
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ),
+                                        const SizedBox(height: 12),
+                                          _buildActionButton(
+                                            text: "Cancel Booking",
+                                            color: const Color(0xffF45858),
+                                            onTap: () async {
+                                            final chatRepo = ChatRepo();
+                                            final success = await chatRepo
+                                                .updateBookingStatus(
+                                              context: context,
+                                              bookingId: bookingData.id,
+                                              status: "3", // Cancelled
+                                            );
+                                            if (success) {
+                                              if (context.mounted) {
+                                                context
+                                                    .read<DashboardBloc>()
+                                                    .add(GetHomeDataEvent(
+                                                        context: context));
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ] else if (bookingData.status == 4) ...[
+                                        // Status: Picked Up
+                                        _buildChatButton(context, bookingData),
+
+                                        // Show End Booking ONLY after 2 hours from pickup time
+                                        if (() {
+                                          final pdt =
+                                              bookingData.pickupDateTime;
+                                          if (pdt == null)
+                                            return true; // Fallback if parsing fails
+                                          return DateTime.now().isAfter(pdt
+                                              .add(const Duration(hours: 2)));
+                                        }()) ...[
+                                          const SizedBox(height: 12),
+                                            _buildActionButton(
+                                              text: "End Booking",
+                                              color: const Color(0xFF2C3E50),
+                                              onTap: () async {
+                                              final chatRepo = ChatRepo();
+                                              final success = await chatRepo
+                                                  .updateBookingStatus(
+                                                context: context,
+                                                bookingId: bookingData.id,
+                                                status: "2", // Completed
+                                              );
+                                              if (success) {
+                                                await chatRepo.sendNewMessage(
+                                                  context: context,
+                                                  bookingId: bookingData.id,
+                                                  receiverId:
+                                                      bookingData.driverId ??
+                                                          '0',
+                                                  message:
+                                                      "This booking is completed",
+                                                  type: 3,
+                                                );
+                                                if (context.mounted) {
+                                                  context
+                                                      .read<DashboardBloc>()
+                                                      .add(GetHomeDataEvent(
+                                                          context: context));
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ] else ...[
+                                        _buildChatButton(context, bookingData),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -393,49 +522,112 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
     );
   }
 
-  Widget _pillPriceBox(String total, String commission) {
-    return Container(
-      height: 32,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFEFEF),
-        borderRadius: BorderRadius.circular(20),
+  Widget _buildChatButton(BuildContext context, dynamic bookingData) {
+    return GestureDetector(
+      onTap: () async {
+        // Check availability
+        final bool isVehicleAvailable =
+            bookingData.carCategoryName.toString().isNotEmpty;
+
+        final String assignDriverId =
+            bookingData.assignDriver?.id?.toString() ?? '0';
+
+        final bool isDriverAvailable = (bookingData.status == 0)
+            ? true
+            : (assignDriverId != '0' ||
+                (bookingData.driverId != null &&
+                    bookingData.driverId.toString() != '0' &&
+                    bookingData.driverId.toString().isNotEmpty));
+
+        if (!isVehicleAvailable || !isDriverAvailable) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(!isVehicleAvailable
+                  ? 'Vehicle details not available'
+                  : 'Driver details not available'),
+              backgroundColor: const Color(0xFFF45858),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+
+        final myId = await SecureStorageService.getUserId();
+        final isMeCreator = myId == bookingData.driverId?.toString() ||
+            myId == bookingData.creatorId?.toString();
+
+        final String finalReceiverId = isMeCreator
+            ? (assignDriverId != '0'
+                ? assignDriverId
+                : (bookingData.driverId?.toString() ?? "0"))
+            : (bookingData.driverId?.toString() ?? "0");
+
+        final String assignDriverName = bookingData.assignDriver?.name ?? "";
+        final String carCat = bookingData.carCategoryName?.toString() ?? "";
+        final String finalUserName = isMeCreator
+            ? (assignDriverName.isNotEmpty
+                ? assignDriverName
+                : (carCat.isNotEmpty ? carCat : "Driver"))
+            : "Agent";
+
+        Nav.push(context, Routes.chatScreen, extra: {
+          'userName': finalUserName,
+          'bookingId': bookingData.id,
+          'creatorName': bookingData.creatorName ?? "Guddu",
+          'receiverId': finalReceiverId,
+        });
+      },
+      child: Container(
+        height: 40,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset("assets/images/chatNew.png",
+                height: 18, color: const Color(0xffFCB117)),
+            const SizedBox(width: 8),
+            const Text("Chat",
+                style: TextStyle(
+                  color: Color(0xffFCB117),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  fontFamily: 'Poppins',
+                )),
+          ],
+        ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('₹$total',
-                    style: const TextStyle(
-                        fontSize: 10, fontWeight: FontWeight.bold)),
-                const Text('Total Amount',
-                    style: TextStyle(fontSize: 6, color: Colors.grey)),
-              ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String text,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 40,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              fontFamily: 'Poppins',
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xffFCB117),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('₹$commission',
-                    style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const Text('Commission',
-                    style: TextStyle(fontSize: 6, color: Colors.white)),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -474,6 +666,40 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
         ),
       ),
     );
+  }
+
+  String _getStatusText(int status) {
+    switch (status) {
+      case 0:
+        return 'Open';
+      case 1:
+        return 'Assigned';
+      case 2:
+        return 'Completed';
+      case 3:
+        return 'Cancelled';
+      case 4:
+        return 'Picked Up';
+      default:
+        return 'Unknown ($status)';
+    }
+  }
+
+  Color _getStatusColor(int status) {
+    switch (status) {
+      case 0:
+        return const Color(0xff45B129);
+      case 1:
+        return Colors.orange;
+      case 2:
+        return const Color(0xff45B129);
+      case 3:
+        return const Color(0xffF45858);
+      case 4:
+        return Colors.blue;
+      default:
+        return Colors.black;
+    }
   }
 }
 

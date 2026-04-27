@@ -13,9 +13,11 @@
         android:label="Cab Yatra"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+
         <meta-data
-            android:name="com.google.android.geo.EY"
-            android:value="AIzaSyCyO9SWzEn8SWchaaqa6T_yCmCD8cLHPfg"/>
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAj3PI49OjhovFnlGZZ6veCZrKwyp7jZP0"/>
+
         <provider
                 android:name="androidx.core.content.FileProvider"
                 android:authorities="${applicationId}.fileprovider"

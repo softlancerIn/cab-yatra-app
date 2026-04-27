@@ -69,7 +69,7 @@ class CommonAppButton extends StatelessWidget {
     this.disabledColor,
     this.textColor,
     this.width,
-    this.height = 48.0,
+    this.height = 50.0,
     this.borderRadius = 12.0,
     this.fontWeight = FontWeight.bold,
     this.fontSize = 16.0,
@@ -89,7 +89,7 @@ class CommonAppButton extends StatelessWidget {
 
         child:Container(
           width: MediaQuery.of(context).size.width,
-          height: 45,
+          height: height,
           alignment: Alignment.center,
           decoration: ShapeDecoration(
             color: backgroundColor??ColorResource.primaryColor,

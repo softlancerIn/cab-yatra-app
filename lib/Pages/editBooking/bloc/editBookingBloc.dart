@@ -63,6 +63,7 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
         driverCommission: event.driverCommission,
         is_show_phoneNumber: event.showPhoneNumber ? 1 : 0,
         remarks: event.remarks,
+        extra: event.extra,
         noOfDays: event.noOfDays,
         tripNotes: event.tripNotes,
         context: event.context,
@@ -98,7 +99,10 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
 
     try {
       final model = await repo.updateAssignMethodApi(
-          context: event.context, assignType: event.assignType);
+        context: event.context,
+        assignType: event.assignType,
+        bookingId: event.bookingId,
+      );
       emit(state.copyWith(
         isLoading: false,
         updateAssignMethodModel: model,

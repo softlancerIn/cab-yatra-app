@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/router/navigation/nav.dart';
@@ -50,7 +51,17 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         );
       }
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      String message = "Something went wrong";
+      if (e is DioException) {
+        if (e.response?.data != null && e.response?.data is Map) {
+          message = e.response?.data['message']?.toString() ?? message;
+        } else {
+          message = e.message ?? message;
+        }
+      } else {
+        message = e.toString();
+      }
+      emit(state.copyWith(isLoading: false, errorMessage: message, hasError: true));
     }
   }
 }

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../Add New Booking/add_new_booking.dart';
-import '../Booking/my_booking.dart';
-import '../Custom_Widgets/bottom_nav_bar.dart';
-import '../chat/chat_listing.dart';
 import 'package:flutter/services.dart';
-import '../Profile/profile.dart';
-import 'dashboard/ui/homepage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../chat/bloc/chat_bloc.dart';
+
+import 'package:cab_taxi_app/Pages/Add%20New%20Booking/add_new_booking.dart';
+import 'package:cab_taxi_app/Pages/Booking/my_booking.dart';
+import 'package:cab_taxi_app/Pages/Custom_Widgets/bottom_nav_bar.dart';
+import 'package:cab_taxi_app/Pages/chat/chat_listing.dart';
+import 'package:cab_taxi_app/Pages/Profile/profile.dart';
+import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/ui/homepage.dart';
+import 'package:cab_taxi_app/Pages/chat/bloc/chat_bloc.dart';
+import 'package:cab_taxi_app/Pages/Booking/bloc/booking_bloc.dart';
+import 'package:cab_taxi_app/Pages/Booking/bloc/booking_event.dart';
 
 class MainHomeController extends StatefulWidget {
   const MainHomeController({super.key});
@@ -20,21 +23,12 @@ class MainHomeController extends StatefulWidget {
 class _MainHomeControllerState extends State<MainHomeController> {
   int _currentIndex = 0;
 
-  late final List<Widget> _pages;
+  // Key generator for each tab to force complete state reset on tap
+  final List<int> _tabKeys = List.generate(5, (_) => 0);
 
   @override
   void initState() {
     super.initState();
-    _pages = [
-      const Homepage(),
-      BookingPage(onBack: () => _onItemTapped(0)),
-      AddBookingScreen(onBack: () => _onItemTapped(0)),
-      BlocProvider(
-        create: (context) => ChatListBloc(),
-        child: ChatListingScreen(onBack: () => _onItemTapped(0)),
-      ),
-      const EditProfilePage(),
-    ];
     final args = Get.arguments;
     if (args != null && args['initialIndex'] != null) {
       _currentIndex = args['initialIndex'];
@@ -44,7 +38,41 @@ class _MainHomeControllerState extends State<MainHomeController> {
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
+      // Incrementing the key forces Flutter to dispose the old state and create a new one,
+      // which fulfills the requirement of "never hold the data" and "refresh page everytime".
+      _tabKeys[index]++;
     });
+
+    // Manually trigger data refresh to be extra sure
+    if (index == 1) {
+      context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+    }
+  }
+
+  Widget _buildPage(int index) {
+    final key = ValueKey("${index}_${_tabKeys[index]}");
+    switch (index) {
+      case 0:
+        return Homepage(key: key);
+      case 1:
+        return BookingPage(key: key, onBack: () => _onItemTapped(0));
+      case 2:
+        return AddBookingScreen(
+          key: key,
+          onBack: () => _onItemTapped(0),
+          onSuccess: () => _onItemTapped(1),
+        );
+      case 3:
+        return BlocProvider(
+          key: key,
+          create: (context) => ChatListBloc(),
+          child: ChatListingScreen(onBack: () => _onItemTapped(0)),
+        );
+      case 4:
+        return EditProfilePage(key: key);
+      default:
+        return const Homepage();
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -68,8 +96,7 @@ class _MainHomeControllerState extends State<MainHomeController> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Exit App',
-            style:
-                TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
+            style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold)),
         content: const Text('Do you really want to exit the app?',
             style: TextStyle(fontFamily: 'Poppins')),
         actions: [
@@ -99,12 +126,10 @@ class _MainHomeControllerState extends State<MainHomeController> {
         if (didPop) return;
 
         if (_currentIndex != 0) {
-          // If not on Home tab, redirect to Home tab
           setState(() {
             _currentIndex = 0;
           });
         } else {
-          // If already on Home tab, show exit confirmation
           final bool? exit = await _showExitDialog(context);
           if (exit == true) {
             SystemNavigator.pop();
@@ -114,7 +139,7 @@ class _MainHomeControllerState extends State<MainHomeController> {
       child: Scaffold(
         body: IndexedStack(
           index: _currentIndex,
-          children: _pages,
+          children: List.generate(5, (index) => _buildPage(index)),
         ),
         bottomNavigationBar: _currentIndex == 2
             ? null

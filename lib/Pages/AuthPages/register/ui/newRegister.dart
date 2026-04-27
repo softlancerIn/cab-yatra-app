@@ -1,10 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../app/router/navigation/nav.dart';
+import '../../../../app/router/navigation/routes.dart';
 import '../bloc/registerBloc.dart';
 import '../bloc/registerEvent.dart';
 import '../bloc/registerState.dart';
-// import 'register_bloc.dart'; // adjust path
-// import your models if needed: VerifyOtpResponse, etc.
 
 class NewRegisterScreen extends StatefulWidget {
   final String mobile;
@@ -51,7 +52,7 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
     String? Function(String?)? validator,
   }) {
     return SizedBox(
-      height: 68, // Reduced from 75 to make it more compact (48 base height + validator space)
+      height: 68,
       child: TextFormField(
         controller: controller,
         enabled: enabled,
@@ -117,27 +118,26 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          // Navigate to home / main screen
-          // Navigator.pushReplacementNamed(context, '/home');
-          // or: Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => HomeScreen()));
         }
       },
       builder: (context, state) {
-        return SafeArea(
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            body: SingleChildScrollView(
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Back Button (optional)
+                    // Back Button
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF3E4959)),
+                      onPressed: () => Nav.pop(context),
                     ),
+
+                    const SizedBox(height: 60),
 
                     // Logo
                     Row(
@@ -213,11 +213,11 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                         onPressed: state.isLoading
                             ? null
                             : () {
-                          // TODO: call resend OTP API
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Resend OTP clicked')),
-                          );
-                        },
+                                // TODO: call resend OTP API
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Resend OTP clicked')),
+                                );
+                              },
                         child: const Text(
                           'Resend OTP',
                           style: TextStyle(
@@ -260,27 +260,31 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: RichText(
-                            text: const TextSpan(
-                              style: TextStyle(
+                            text: TextSpan(
+                              style: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 13,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.normal,
                               ),
                               children: [
-                                TextSpan(text: 'By clicking here accept '),
+                                const TextSpan(text: 'By clicking here accept '),
                                 TextSpan(
                                   text: 'Terms of Use',
-                                  style: TextStyle(
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => Nav.push(context, Routes.termsCondition),
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF3E4959),
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
-                                TextSpan(text: ' and '),
+                                const TextSpan(text: ' and '),
                                 TextSpan(
                                   text: 'Privacy Policy',
-                                  style: TextStyle(
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => Nav.push(context, Routes.privacyPolicy),
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF3E4959),
                                     decoration: TextDecoration.underline,
@@ -303,18 +307,18 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                         onPressed: state.isLoading || !_termsAccepted
                             ? null
                             : () {
-                          if (_formKey.currentState!.validate()) {
-                            context.read<RegisterBloc>().add(
-                              RegisterSummitedEvent(
-                                mobile: _mobileController.text.trim(),
-                                otp: _otpController.text.trim(),
-                                name: _nameController.text.trim(),
-                                city: _cityController.text.trim(),
-                                context: context,
-                              ),
-                            );
-                          }
-                        },
+                                if (_formKey.currentState!.validate()) {
+                                  context.read<RegisterBloc>().add(
+                                        RegisterSummitedEvent(
+                                          mobile: _mobileController.text.trim(),
+                                          otp: _otpController.text.trim(),
+                                          name: _nameController.text.trim(),
+                                          city: _cityController.text.trim(),
+                                          context: context,
+                                        ),
+                                      );
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFFCB117),
                           elevation: 2,
@@ -324,22 +328,22 @@ class _NewRegisterScreenState extends State<NewRegisterScreen> {
                         ),
                         child: state.isLoading
                             ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        )
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
                             : const Text(
-                          'Register',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
+                                'Register',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
                       ),
                     ),
 

@@ -127,7 +127,10 @@ class _TransectionScreenState extends State<TransectionScreen> {
           itemCount: state.getTransectionModel!.data!.length,
           itemBuilder: (context, index) {
             final transection = state.getTransectionModel!.data![index];
-            final status = statusList[index % statusList.length];
+            final rawStatus = transection.status?.toString() ?? "Processing";
+            final status = rawStatus.isEmpty 
+                ? "Processing" 
+                : "${rawStatus[0].toUpperCase()}${rawStatus.substring(1).toLowerCase()}";
 
             return Container(
               margin: const EdgeInsets.only(bottom: 16),
@@ -238,7 +241,7 @@ class _TransectionScreenState extends State<TransectionScreen> {
                         _rowText("Commission Paid by Driver:",
                             "₹${transection.commission}"),
                         _rowText("Platform Charges:",
-                            "₹${transection.plateformCharge}"),
+                            "₹${transection.platformCharge}"),
 
                         const SizedBox(height: 4),
                         const Divider(height: 1, thickness: 0.5),

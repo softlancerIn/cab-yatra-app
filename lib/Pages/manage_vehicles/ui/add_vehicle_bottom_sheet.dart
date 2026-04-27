@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../widget/primary_button.dart';
 import '../bloc/vehicle_bloc.dart';
@@ -7,7 +8,8 @@ import '../bloc/vehicle_event.dart';
 import '../bloc/vehicle_state.dart';
 
 class AddVehicleBottomSheet extends StatefulWidget {
-  const AddVehicleBottomSheet({super.key});
+  final int? vehicleId;
+  const AddVehicleBottomSheet({super.key, this.vehicleId});
 
   @override
   State<AddVehicleBottomSheet> createState() => _AddVehicleBottomSheetState();
@@ -22,6 +24,9 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
   void initState() {
     super.initState();
     context.read<VehicleBloc>().add(LoadCarCategories(context));
+    if (widget.vehicleId != null) {
+      context.read<VehicleBloc>().add(FetchVehicleById(widget.vehicleId!));
+    }
   }
 
   @override
@@ -38,12 +43,14 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
         listener: (context, state) {
           if (state.isSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Vehicle Added Successfully"),
+              SnackBar(
+                content: Text(widget.vehicleId == null 
+                  ? "Vehicle Added Successfully" 
+                  : "Vehicle Updated Successfully"),
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context);
+            Navigator.pop(context, true); // Return true for success
           } else if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -51,6 +58,27 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                 backgroundColor: Colors.red,
               ),
             );
+          }
+
+          if (state.selectedVehicle != null && widget.vehicleId != null) {
+            final vehicle = state.selectedVehicle;
+            if (vehicleNumberCtrl.text.isEmpty) {
+              vehicleNumberCtrl.text = (vehicle['registration_number'] ?? vehicle['car_registration_number'] ?? '').toString();
+            }
+            if (registrationYearCtrl.text.isEmpty) {
+              registrationYearCtrl.text = (vehicle['year_of_mfg'] ?? vehicle['registration_year'] ?? vehicle['manifacturer_of_year'] ?? '').toString();
+            }
+            if (insuranceExpiryCtrl.text.isEmpty) {
+              final exp = (vehicle['insurence_expiry'] ?? vehicle['insurance_exp'] ?? vehicle['insurance_expiry'] ?? vehicle['insurance_expire_date'] ?? '').toString();
+              if (exp.length > 10) {
+                 insuranceExpiryCtrl.text = exp.substring(0, 10);
+              } else {
+                 insuranceExpiryCtrl.text = exp;
+              }
+            }
+            if (state.selectedCarCategoryId == null && vehicle['car_category_id'] != null) {
+              context.read<VehicleBloc>().add(SelectCarCategory(int.parse(vehicle['car_category_id'].toString())));
+            }
           }
         },
         child: Column(
@@ -62,8 +90,8 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Add Car",
-                      style: TextStyle(
+                  Text(widget.vehicleId == null ? "Add Car" : "Update Car",
+                      style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
                           color: Colors.black87)),
@@ -134,7 +162,12 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                         /// Year of Manufacture
                         _buildTextField(
                           controller: registrationYearCtrl,
-                          hintText: "year Of Manufacture",
+                          hintText: "Year of Manufacture",
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(4),
+                          ],
                         ),
                         const SizedBox(height: 15),
 
@@ -143,7 +176,9 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                           controller: vehicleNumberCtrl,
                           hintText: "Car Registration Number",
                         ),
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 15),
+
+                        const SizedBox(height: 15),
 
                         /// Upload Insurance Section
                         const Text(
@@ -179,6 +214,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                           context,
                           title: "+ Upload Insurance",
                           imageFile: state.insuranceImage,
+                          imageUrl: state.selectedVehicle?['insurence_image_url'] ?? state.selectedVehicle?['insurance_document_url'] ?? state.selectedVehicle?['insurance_url'],
                           onTap: () {
                             context
                                 .read<VehicleBloc>()
@@ -203,6 +239,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                                 context,
                                 title: "+ RC Front",
                                 imageFile: state.rcFrontImage,
+                                imageUrl: state.selectedVehicle?['car_rc_frontImage_url'] ?? state.selectedVehicle?['rc_front_image_url'] ?? state.selectedVehicle?['rc_front_url'],
                                 onTap: () {
                                   context
                                       .read<VehicleBloc>()
@@ -216,6 +253,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                                 context,
                                 title: "+ RC Back",
                                 imageFile: state.rcBackImage,
+                                imageUrl: state.selectedVehicle?['car_rc_backImage_url'] ?? state.selectedVehicle?['rc_back_image_url'] ?? state.selectedVehicle?['rc_back_url'],
                                 onTap: () {
                                   context
                                       .read<VehicleBloc>()
@@ -243,6 +281,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                                 context,
                                 title: "+ Car image",
                                 imageFile: state.carImage1,
+                                imageUrl: state.selectedVehicle?['car_image1_url'],
                                 onTap: () {
                                   context
                                       .read<VehicleBloc>()
@@ -256,6 +295,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                                 context,
                                 title: "+ Car Image",
                                 imageFile: state.carImage2,
+                                imageUrl: state.selectedVehicle?['car_image2_url'],
                                 onTap: () {
                                   context
                                       .read<VehicleBloc>()
@@ -279,9 +319,15 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                               return;
                             }
 
+                            final selectedCategory = state.carCategories?.data?.firstWhere(
+                                (element) => element.id == state.selectedCarCategoryId,
+                                orElse: () => null as dynamic);
+                            final String categoryName = selectedCategory?.name ?? "";
+
                             final fields = {
                               "car_category_id":
                                   state.selectedCarCategoryId.toString(),
+                              "car_name": categoryName,
                               "registration_number": vehicleNumberCtrl.text,
                               "year_of_mfg": registrationYearCtrl.text,
                               "insurance_exp": insuranceExpiryCtrl.text,
@@ -289,8 +335,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
 
                             final Map<String, File> files = {};
                             if (state.insuranceImage != null)
-                              files["insurance_document"] =
-                                  state.insuranceImage!;
+                              files["insurance_document"] = state.insuranceImage!;
                             if (state.rcFrontImage != null)
                               files["rc_front_image"] = state.rcFrontImage!;
                             if (state.rcBackImage != null)
@@ -300,11 +345,17 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                             if (state.carImage2 != null)
                               files["car_image2"] = state.carImage2!;
 
-                            context
-                                .read<VehicleBloc>()
-                                .add(AddVehicle(fields, files));
+                            if (widget.vehicleId != null) {
+                              context
+                                  .read<VehicleBloc>()
+                                  .add(UpdateVehicle(widget.vehicleId!, fields, files));
+                            } else {
+                              context
+                                  .read<VehicleBloc>()
+                                  .add(AddVehicle(fields, files));
+                            }
                           },
-                          text: "Add +",
+                          text: widget.vehicleId == null ? "Add +" : "Update",
                         ),
                         const SizedBox(height: 30),
                       ],
@@ -319,8 +370,12 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller, required String hintText}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+  }) {
     return Container(
       height: 50,
       decoration: BoxDecoration(
@@ -329,6 +384,8 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
       ),
       child: TextField(
         controller: controller,
+        keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
@@ -341,7 +398,7 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
   }
 
   Widget _buildImagePickerBox(BuildContext context,
-      {required String title, File? imageFile, required VoidCallback onTap}) {
+      {required String title, File? imageFile, String? imageUrl, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -356,12 +413,26 @@ class _AddVehicleBottomSheetState extends State<AddVehicleBottomSheet> {
                 borderRadius: BorderRadius.circular(10),
                 child: Image.file(imageFile, fit: BoxFit.cover),
               )
-            : Center(
-                child: Text(
-                  title,
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
-                ),
-              ),
+            : (imageUrl != null && imageUrl.isNotEmpty)
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Text(
+                          title,
+                          style: const TextStyle(color: Colors.grey, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      title,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ),
       ),
     );
   }

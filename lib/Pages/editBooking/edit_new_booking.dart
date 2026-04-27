@@ -16,8 +16,10 @@ class EditBookingScreen extends StatefulWidget {
   final String totalFare;
   final String driverCommission;
   final String remark;
+  final String? extra;
   final String? noOfDays;
   final String? tripNotes;
+  final String? isShowPhoneNumber;
   const EditBookingScreen({
     super.key,
     required this.bookingType,
@@ -30,8 +32,10 @@ class EditBookingScreen extends StatefulWidget {
     required this.dropLocation,
     required this.pickUpLocation,
     required this.vehicalType,
+    this.extra,
     this.noOfDays,
     this.tripNotes,
+    this.isShowPhoneNumber,
   });
 
   @override
@@ -74,20 +78,25 @@ class _EditBookingScreenState extends State<EditBookingScreen>
               remark: widget.remark,
               totalFare: widget.totalFare,
               vehicalType: widget.vehicalType,
+              extra: widget.extra,
+              isShowPhoneNumber: widget.isShowPhoneNumber,
             )
             : EditBookingRoundTripScreen(
                 sId: widget.sId.toString(),
                 subType: "0",
-              driverCommission: widget.driverCommission,
-              dropLocation: widget.dropLocation,
-              pickUpDate: widget.pickUpDate,
-              pickUpLocation: widget.pickUpLocation,
-              pickUpTime: widget.pickUpTime,
-              remark: widget.remark,
-              noOfDays: widget.noOfDays,
-              tripNotes: widget.tripNotes,
-              totalFare: widget.totalFare,
-              vehicalType: widget.vehicalType),
+                driverCommission: widget.driverCommission,
+                dropLocation: widget.dropLocation,
+                pickUpDate: widget.pickUpDate,
+                pickUpLocation: widget.pickUpLocation,
+                pickUpTime: widget.pickUpTime,
+                remark: widget.remark,
+                extra: widget.extra,
+                noOfDays: widget.noOfDays,
+                tripNotes: widget.tripNotes,
+                totalFare: widget.totalFare,
+                vehicalType: widget.vehicalType,
+                isShowPhoneNumber: widget.isShowPhoneNumber,
+              ),
       drawerEnableOpenDragGesture: true,
     );
   }

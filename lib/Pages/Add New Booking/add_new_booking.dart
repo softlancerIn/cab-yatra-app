@@ -6,7 +6,8 @@ import 'ui/addBookingOneWayScreen.dart';
 
 class AddBookingScreen extends StatefulWidget {
   final VoidCallback? onBack;
-  const AddBookingScreen({super.key, this.onBack});
+  final VoidCallback? onSuccess;
+  const AddBookingScreen({super.key, this.onBack, this.onSuccess});
 
   @override
   State<AddBookingScreen> createState() => _AddBookingScreenState();
@@ -102,8 +103,8 @@ class _AddBookingScreenState extends State<AddBookingScreen>
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
                 children: [
-                  AddBookingOneWayScreen(onBack: widget.onBack),
-                  AddBookingRoundTripScreen(onBack: widget.onBack),
+                  AddBookingOneWayScreen(onBack: widget.onBack, onSuccess: widget.onSuccess),
+                  AddBookingRoundTripScreen(onBack: widget.onBack, onSuccess: widget.onSuccess),
                 ],
               ),
             ),

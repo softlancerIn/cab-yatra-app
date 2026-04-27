@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'alert_response_model.dart';
 
 // Top-level Homepage Response Model
@@ -26,9 +27,13 @@ class HomePageResponse {
       banners: (json['banners'] as List<dynamic>)
           .map((e) => BannerItem.fromJson(e as Map<String, dynamic>))
           .toList(),
-      newBooking: BookingSection.fromJson(json['new_booking'] as Map<String, dynamic>),
-      activeBooking: BookingSection.fromJson(json['active_booking'] as Map<String, dynamic>),
-      alertData: json['data'] != null ? AlertData.fromJson(json['data']) : null, // 👈 ADDED
+      newBooking:
+          BookingSection.fromJson(json['new_booking'] as Map<String, dynamic>),
+      activeBooking: BookingSection.fromJson(
+          json['active_booking'] as Map<String, dynamic>),
+      alertData: json['data'] != null
+          ? AlertData.fromJson(json['data'])
+          : null, // 👈 ADDED
     );
   }
 
@@ -120,11 +125,20 @@ class BookingItem {
   final String carImage;
   final String carCategoryName;
   final String? remark;
+  final String? extra;
   final String totalFare;
   final String driverCommission;
   final String? isShowPhoneNumber;
   final String? driverNumber;
   final int status;
+  final String? noOfDays;
+  final String? driverId;
+  final String? creatorId;
+  final String? creatorName;
+  final String? pickUpCity;
+  final String? destinationCity;
+  final String? assignType;
+  final AssignDriver? assignDriver;
 
   BookingItem({
     required this.bookingId,
@@ -137,11 +151,20 @@ class BookingItem {
     required this.carImage,
     required this.carCategoryName,
     this.remark,
+    this.extra,
     required this.totalFare,
     required this.driverCommission,
     this.isShowPhoneNumber,
     this.driverNumber,
     this.status = 0,
+    this.noOfDays,
+    this.driverId,
+    this.creatorId,
+    this.creatorName,
+    this.pickUpCity,
+    this.destinationCity,
+    this.assignType,
+    this.assignDriver,
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> json) {
@@ -156,11 +179,22 @@ class BookingItem {
       carImage: json['car_image'] as String? ?? '',
       carCategoryName: json['car_category_name'] as String? ?? '',
       remark: json['remark']?.toString(),
+      extra: json['extra']?.toString(),
       totalFare: json['total_fare']?.toString() ?? '0',
       driverCommission: json['driver_commission']?.toString() ?? '0',
       isShowPhoneNumber: json['is_show_phone_number']?.toString(),
       driverNumber: json['driver_number']?.toString(),
       status: int.tryParse(json['status']?.toString() ?? '0') ?? 0,
+      noOfDays: json['no_of_days']?.toString(),
+      driverId: json['driver_id']?.toString(),
+      creatorId: json['user_id']?.toString(),
+      creatorName: json['creator_name']?.toString(),
+      pickUpCity: json['pickUpCity']?.toString(),
+      destinationCity: json['destinationCity']?.toString(),
+      assignType: json['assignType']?.toString(),
+      assignDriver: json['assignDriver'] != null
+          ? AssignDriver.fromJson(json['assignDriver'])
+          : null,
     );
   }
 
@@ -181,6 +215,66 @@ class BookingItem {
       'is_show_phone_number': isShowPhoneNumber,
       'driver_number': driverNumber,
       'status': status,
+      'no_of_days': noOfDays,
+      'pickUpCity': pickUpCity,
+      'destinationCity': destinationCity,
+      'assignType': assignType,
+      'assignDriver': assignDriver?.toJson(),
+    };
+  }
+
+  DateTime? get pickupDateTime {
+    try {
+      if (pickupDate.isEmpty) return null;
+      final DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm');
+      // Common formats
+      String cleanDate = pickupDate;
+      if (pickupDate.contains('/')) cleanDate = pickupDate.replaceAll('/', '-');
+      // If time is missing or in 12h, we might need more robust parsing
+      // For now, let's try a simpler approach if intl fails:
+      try {
+        return DateFormat("yyyy-MM-dd HH:mm").parse("$pickupDate $pickupTime");
+      } catch (_) {
+        try {
+          return DateFormat("dd-MM-yyyy HH:mm").parse("$pickupDate $pickupTime");
+        } catch (_) {
+           return null;
+        }
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+class AssignDriver {
+  final int id;
+  final String name;
+  final String? driverImage;
+  final String? driverImageUrl;
+
+  AssignDriver({
+    required this.id,
+    required this.name,
+    this.driverImage,
+    this.driverImageUrl,
+  });
+
+  factory AssignDriver.fromJson(Map<String, dynamic> json) {
+    return AssignDriver(
+      id: int.tryParse(json['id']?.toString() ?? '0') ?? 0,
+      name: json['name'] as String? ?? '',
+      driverImage: json['driver_image']?.toString(),
+      driverImageUrl: json['driver_image_url']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'driver_image': driverImage,
+      'driver_image_url': driverImageUrl,
     };
   }
 }

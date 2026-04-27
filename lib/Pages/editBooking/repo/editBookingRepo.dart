@@ -27,6 +27,7 @@ class EditBookingRepo {
     required double driverCommission,
     required int is_show_phoneNumber,
     required String remarks,
+    required List<String>? extra,
     required String? noOfDays,
     required String? tripNotes,
     required BuildContext context,
@@ -45,6 +46,7 @@ class EditBookingRepo {
           "driverCommission": driverCommission,
           "is_show_phoneNumber": is_show_phoneNumber,
           "remarks": remarks,
+          "extra": extra,
           "no_of_days": noOfDays,
           "trip_notes": tripNotes,
         },
@@ -66,6 +68,7 @@ class EditBookingRepo {
             pickUp_time: pickUp_time,
             pickUpLoc: pickUpLoc,
             remarks: remarks,
+            extra: extra,
             subType: subType,
             total_faire: total_faire,
             noOfDays: noOfDays,
@@ -87,6 +90,7 @@ class EditBookingRepo {
             pickUp_time: pickUp_time,
             pickUpLoc: pickUpLoc,
             remarks: remarks,
+            extra: extra,
             subType: subType,
             total_faire: total_faire,
             noOfDays: noOfDays,
@@ -143,10 +147,11 @@ class EditBookingRepo {
   Future<UpdateAssignMethodModel> updateAssignMethodApi({
     required BuildContext context,
     required String assignType,
+    required String bookingId,
   }) async {
     try {
       final response = await _api.put(
-        ApiConstants.updateAssignMethod,
+        "${ApiConstants.updateAssignMethod}/$bookingId",
         data: {
           "assignType": assignType,
         },
@@ -157,15 +162,15 @@ class EditBookingRepo {
       if (e.error is NoInternetException) {
         showNoInternetScreen(
           context,
-          onRetry: () =>
-              updateAssignMethodApi(context: context, assignType: assignType),
+          onRetry: () => updateAssignMethodApi(
+              context: context, assignType: assignType, bookingId: bookingId),
         );
         throw NoInternetException();
       } else if (e.error is ServerException) {
         showServerErrorScreen(
           context,
-          onRetry: () =>
-              updateAssignMethodApi(context: context, assignType: assignType),
+          onRetry: () => updateAssignMethodApi(
+              context: context, assignType: assignType, bookingId: bookingId),
         );
         throw ServerException();
       } else if (e.error is UnauthorizedException) {

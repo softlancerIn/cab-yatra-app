@@ -35,9 +35,12 @@ class SubmitBooking extends AddBookingEvent {
   final String pickUpTime;
   final List<String> pickUpLocations;
   final List<String> destinationLocations;
+  final List<String> pickupCity;
+  final List<String> destinationCity;
   final double totalFare;
   final double driverCommission;
   final bool showPhoneNumber;
+  final List<String> extra;
   final String remarks;
   final String noOfDay;
   final String tripNotes;
@@ -52,9 +55,12 @@ class SubmitBooking extends AddBookingEvent {
     required this.pickUpTime,
     required this.pickUpLocations,
     required this.destinationLocations,
+    required this.pickupCity,
+    required this.destinationCity,
     required this.totalFare,
     required this.driverCommission,
     required this.showPhoneNumber,
+    required this.extra,
     required this.remarks,
     required this.context,
   });
@@ -67,11 +73,15 @@ class SubmitBooking extends AddBookingEvent {
     pickUpTime,
     pickUpLocations,
     destinationLocations,
+    pickupCity,
+    destinationCity,
     totalFare,
     driverCommission,
     showPhoneNumber,
+    extra,
     remarks,
-    noOfDay,tripNotes
+    noOfDay,
+    tripNotes
   ];
 }
 

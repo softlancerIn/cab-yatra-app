@@ -27,11 +27,9 @@ class BookingState extends Equatable {
 
 
   const BookingState({
-
     this.errorMessage,
     this.isLoading = false,
     this.searchQuery = '',
-
     this.postedBookingModel,
     this.deletePostedBookingModel,
     this.selectedVehicleTypes,

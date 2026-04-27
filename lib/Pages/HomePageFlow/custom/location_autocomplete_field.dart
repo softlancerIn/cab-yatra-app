@@ -34,14 +34,19 @@ class _LocationAutocompleteFieldState extends State<LocationAutocompleteField> {
 
   void _onFocusChange() {
     if (!_focusNode.hasFocus) {
-      _hideOverlay();
+      // Small delay to allow onTap to execute before hiding
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (mounted && !_focusNode.hasFocus) {
+          _hideOverlay();
+        }
+      });
     }
   }
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
-      if (query.length > 1) {
+      if (query.length > 0) {
         setState(() => _isLoading = true);
         final results = await _placesService.getSuggestions(query);
         if (mounted && _focusNode.hasFocus) {
@@ -138,19 +143,11 @@ class _LocationAutocompleteFieldState extends State<LocationAutocompleteField> {
     return CompositedTransformTarget(
       link: _layerLink,
       child: Container(
-        height: 45,
+        height: 50,
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: const Color(0xffDBDBDB)),
           borderRadius: BorderRadius.circular(10),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x3F000000),
-              blurRadius: 4,
-              offset: Offset(0, 0),
-              spreadRadius: 0,
-            )
-          ],
         ),
         alignment: Alignment.centerLeft,
         child: TextField(

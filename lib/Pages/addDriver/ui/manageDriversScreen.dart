@@ -52,6 +52,7 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
         backgroundColor: Colors.orange,
         shape: const CircleBorder(),
         onPressed: () {
+          context.read<DriverBloc>().add(ResetDriverForm());
           _openAddDriverBottomSheet(context);
         },
         child: const Icon(Icons.add, color: Colors.white, size: 35),
@@ -123,6 +124,25 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
                             ],
                           ),
                         ),
+                        if ((driver.isApprove ?? 0) == 0)
+                          GestureDetector(
+                            onTap: () {
+                              _openAddDriverBottomSheet(context,
+                                  driverId: driver.id);
+                            },
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.all(5),
+                                child: Icon(Icons.edit,
+                                    color: Colors.white, size: 14),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () {
                             _showDeleteConfirmation(
@@ -181,8 +201,8 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
     );
   }
 
-  void _openAddDriverBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  Future<void> _openAddDriverBottomSheet(BuildContext context, {int? driverId}) async {
+    final result = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -193,9 +213,39 @@ class _ManageDriversScreenState extends State<ManageDriversScreen> {
             maxChildSize: 0.95,
             expand: false,
             builder: (context, scrollController) {
-              return const AddDriverBottomSheet();
+              return AddDriverBottomSheet(driverId: driverId);
             });
       },
     );
+
+    if (result == true && driverId == null && mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text("Driver Added",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontFamily: 'Poppins')),
+          content: const Text(
+              "Driver details have been submitted. Please wait for admin approval.",
+              style: TextStyle(fontFamily: 'Poppins')),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+              },
+              child: const Text("OK",
+                  style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins')),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

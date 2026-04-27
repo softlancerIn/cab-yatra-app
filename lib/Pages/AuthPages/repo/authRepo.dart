@@ -1,5 +1,6 @@
 // 1. Auth Repository
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,6 +67,18 @@ class AuthRepo {
     required BuildContext context,
   }) async {
     try {
+      String? fcmToken = await SecureStorageService.getFcmToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await SecureStorageService.saveFcmToken(fcmToken);
+          }
+        } catch (e) {
+          debugPrint("Error fetching FCM token in register: $e");
+        }
+      }
+
       final response = await _api.post(
         ApiConstants.registration,
         data: {
@@ -73,7 +86,7 @@ class AuthRepo {
           "otp": otp,
           "name": name,
           "city": city,
-
+          "fcm_token": (fcmToken == null || fcmToken.isEmpty) ? "no_token_available" : fcmToken,
         },
         requiresAuth: false,
       );
@@ -132,9 +145,25 @@ class AuthRepo {
     required BuildContext context,
   }) async {
     try {
+      String? fcmToken = await SecureStorageService.getFcmToken();
+      if (fcmToken == null || fcmToken.isEmpty) {
+        try {
+          fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await SecureStorageService.saveFcmToken(fcmToken);
+          }
+        } catch (e) {
+          debugPrint("Error fetching FCM token in verifyOtp: $e");
+        }
+      }
+
       final response = await _api.post(
         ApiConstants.verifyOtp,
-        data: {'mobile': phone, "otp": otp},
+        data: {
+          'mobile': phone,
+          "otp": otp,
+          "fcm_token": (fcmToken == null || fcmToken.isEmpty) ? "no_token_available" : fcmToken
+        },
         requiresAuth: false,
       );
       // Nav.go(
@@ -167,9 +196,9 @@ class AuthRepo {
               actions: [
                 TextButton(
                   onPressed: () {
-                    // Redirect new user to registration screen
-                    Nav.go(context, Routes.newRegister, extra: phone);
-                   context.read<OTPBloc>().add(const ResetVerifyOtpEvent());
+                    Navigator.pop(context); // Close the dialog
+                    Nav.pushReplace(context, Routes.newRegister, extra: phone);
+                    context.read<OTPBloc>().add(const ResetVerifyOtpEvent());
                   },
                   child: const Text("OK"),
                 ),

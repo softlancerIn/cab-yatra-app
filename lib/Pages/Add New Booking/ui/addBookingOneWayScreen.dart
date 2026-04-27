@@ -13,7 +13,8 @@ import '../../HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
 
 class AddBookingOneWayScreen extends StatefulWidget {
   final VoidCallback? onBack;
-  const AddBookingOneWayScreen({super.key, this.onBack});
+  final VoidCallback? onSuccess;
+  const AddBookingOneWayScreen({super.key, this.onBack, this.onSuccess});
 
   @override
   State<AddBookingOneWayScreen> createState() => _AddBookingOneWayScreenState();
@@ -24,14 +25,15 @@ class _AddBookingOneWayScreenState extends State<AddBookingOneWayScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AddBookingBloc()..add(LoadCarCategories(context)),
-      child: _AddBookingOneWayScreenView(onBack: widget.onBack),
+      child: _AddBookingOneWayScreenView(onBack: widget.onBack, onSuccess: widget.onSuccess),
     );
   }
 }
 
 class _AddBookingOneWayScreenView extends StatefulWidget {
   final VoidCallback? onBack;
-  const _AddBookingOneWayScreenView({this.onBack});
+  final VoidCallback? onSuccess;
+  const _AddBookingOneWayScreenView({this.onBack, this.onSuccess});
 
   @override
   State<_AddBookingOneWayScreenView> createState() =>
@@ -50,11 +52,40 @@ class _AddBookingOneWayScreenViewState
   final _remarksCtrl = TextEditingController();
 
   bool _showPhoneNumber = false;
-  final List<String> _selectedRequirements = [];
+  final Set<String> _selectedRequirements = {}; // chip selections (independent)
 
   @override
   void initState() {
     super.initState();
+    _clearForm();
+  }
+
+  void _clearForm() {
+    _startDateCtrl.clear();
+    _startTimeCtrl.clear();
+    _pickupCtrl.clear();
+    _dropCtrl.clear();
+    _totalFareCtrl.clear();
+    _driverCommCtrl.clear();
+    _remarksCtrl.clear();
+    _selectedRequirements.clear();
+    _showPhoneNumber = false;
+    if (mounted) setState(() {});
+  }
+
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0, top: 8.0), // Reduced from 12/8
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF3E4959),
+          fontFamily: 'Poppins',
+        ),
+      ),
+    );
   }
 
   @override
@@ -82,6 +113,7 @@ class _AddBookingOneWayScreenViewState
         builder: (context, state) {
           return RefreshIndicator(
             onRefresh: () async {
+              _clearForm();
               context.read<AddBookingBloc>().add(LoadCarCategories(context));
             },
             child: SingleChildScrollView(
@@ -89,121 +121,109 @@ class _AddBookingOneWayScreenViewState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Select Vehicle Category",
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                  const SizedBox(height: 12),
-
+                  _label("Select vehical"), // Figma spelling
                   state.isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : state.carCategories == null ||
                               state.carCategories!.data!.isEmpty
                           ? const Text("No categories available",
                               style: TextStyle(color: Colors.red))
-                          : SizedBox(
-                              height: 120,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: state.carCategories!.data!.length,
-                                itemBuilder: (context, index) {
-                                  final car = state.carCategories!.data![index];
-                                  final isSelected = state.selectedCarCategoryId == car.id;
-                                  return GestureDetector(
-                                    onTap: () {
-                                      context.read<AddBookingBloc>().add(SelectCarCategory(car.id!));
-                                    },
-                                    child: Container(
-                                      width: 100,
-                                      margin: const EdgeInsets.only(right: 12),
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: isSelected ? const Color(0xFFFFB300).withOpacity(0.1) : Colors.grey.shade50,
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: isSelected ? const Color(0xFFFFB300) : Colors.grey.shade200,
-                                          width: 1.5,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Image.asset(
-                                            "assets/images/carMO.png",
-                                            height: 35,
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            car.name ?? "",
-                                            textAlign: TextAlign.center,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              height: 1.1,
-                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                              color: isSelected ? const Color(0xFFFFB300) : Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
+                          : Container(
+                              height: 50,
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: const Color(0xffDBDBDB)),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<int>(
+                                  dropdownColor: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  value: state.selectedCarCategoryId,
+                                  hint: const Text("Select vehicle...", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                                  items: state.carCategories!.data!.map((car) {
+                                    return DropdownMenuItem<int>(
+                                      value: car.id,
+                                      child: Text(car.name ?? "", style: const TextStyle(fontSize: 13, color: Colors.black87)),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    if (val != null) {
+                                      context.read<AddBookingBloc>().add(SelectCarCategory(val));
+                                    }
+                                  },
+                                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.orange),
+                                ),
                               ),
                             ),
 
-                  const SizedBox(height: 32),
+                   const SizedBox(height: 8),
 
+                  _label("Pickup Location"),
                   LocationAutocompleteField(
                     controller: _pickupCtrl,
                     hint: "Enter Pickup Location",
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 8),
+                  
+                  _label("Drop-off Location"),
                   LocationAutocompleteField(
                     controller: _dropCtrl,
                     hint: "Enter Drop Location",
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
 
+                  _label("Date / Time"),
                   Row(
                     children: [
                       Expanded(
-                        child: containerShadow(
-                          child: _buildDateField(
-                            label: "Pickup Date",
-                            controller: _startDateCtrl,
-                          ),
+                        child: _buildDateField(
+                          label: "Nov 01, 2025",
+                          controller: _startDateCtrl,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: containerShadow(
-                          child: _buildTimeField(
-                            label: "Pickup Time",
-                            controller: _startTimeCtrl,
-                          ),
+                        child: _buildTimeField(
+                          label: "10:51 PM",
+                          controller: _startTimeCtrl,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
 
                   Row(
                     children: [
                       Expanded(
-                        child: CommonTextFormField(
-                          hintText: "Total Fare",
-                          controller: _totalFareCtrl,
-                          keyboardType: TextInputType.number,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _label("Total amount"),
+                            CommonTextFormField(
+                              hintText: "0",
+                              controller: _totalFareCtrl,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: CommonTextFormField(
-                          hintText: "Driver Commission",
-                          controller: _driverCommCtrl,
-                          keyboardType: TextInputType.number,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _label("commision amount"),
+                            CommonTextFormField(
+                              hintText: "0",
+                              controller: _driverCommCtrl,
+                              keyboardType: TextInputType.number,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -212,55 +232,89 @@ class _AddBookingOneWayScreenViewState
                   const SizedBox(height: 24),
 
                   Container(
-                    height: 60,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: ShapeDecoration(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      shadows: const [
-                        BoxShadow(
-                          color: Color(0x3F000000),
-                          blurRadius: 4,
-                          offset: Offset(0, 0),
-                          spreadRadius: 0,
-                        )
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xffDBDBDB)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Show your contact to drivers",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF3E4959),
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                "this will help you to make direct deal.",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            value: _showPhoneNumber,
+                            activeColor: Colors.white,
+                            activeTrackColor: const Color(0xFFFFB300),
+                            onChanged: (val) => setState(() => _showPhoneNumber = val),
+                          ),
+                        ),
                       ],
                     ),
-                    child: SwitchListTile(
-                      title: const Text(
-                        "Show my phone number to driver",
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      value: _showPhoneNumber,
-                      onChanged: (val) =>
-                          setState(() => _showPhoneNumber = val),
-                    ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  const Text("Extra Requirements",
-                      style:
-                          TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _buildRequirementChip("Only Diesel"),
-                      _buildRequirementChip("With Carrier"),
-                      _buildRequirementChip("All Inclusive"),
-                      _buildRequirementChip("All Exclusive"),
-                    ],
+                  _label("Extra Requirements"),
+                  StatefulBuilder(
+                    builder: (context, setChipState) {
+                      final requirements = ["Only Diesel", "With Carrier", "All Inclusive", "All Exclusive"];
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 3.5,
+                        ),
+                        itemCount: requirements.length,
+                        itemBuilder: (context, index) {
+                          return _buildRequirementChip(requirements[index], setChipState);
+                        },
+                      );
+                    },
                   ),
-                  const SizedBox(height: 24),
-
-                  containerShadow(
+                  const SizedBox(height: 16),
+                  Container(
                     height: 50,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xffDBDBDB)),
+                    ),
                     child: TextField(
                       controller: _remarksCtrl,
+                      onChanged: (val) => setState(() {}),
                       maxLines: 1,
                       style: const TextStyle(fontSize: 13),
                       decoration: const InputDecoration(
@@ -308,23 +362,43 @@ class _AddBookingOneWayScreenViewState
                               return;
                             }
 
-                            final booking = SubmitBooking(
-                              subType: "1",
-                              noOfDay: "",
-                              tripNotes: "",
-                              carCategoryId: state.selectedCarCategoryId!,
-                              pickUpDate: _startDateCtrl.text,
-                              pickUpTime: _startTimeCtrl.text,
-                              pickUpLocations: [_pickupCtrl.text.trim()],
-                              destinationLocations: [_dropCtrl.text.trim()],
-                              totalFare:
-                                  double.tryParse(_totalFareCtrl.text) ?? 0.0,
-                              driverCommission:
-                                  double.tryParse(_driverCommCtrl.text) ?? 0.0,
-                              showPhoneNumber: _showPhoneNumber,
-                              remarks: [..._selectedRequirements, if (_remarksCtrl.text.trim().isNotEmpty) _remarksCtrl.text.trim()].join(', '),
-                              context: context,
-                            );
+                             double totalAmountValue = double.tryParse(_totalFareCtrl.text) ?? 0.0;
+                             double commissionValue = double.tryParse(_driverCommCtrl.text) ?? 0.0;
+                             if (commissionValue >= totalAmountValue && totalAmountValue > 0) {
+                               Fluttertoast.showToast(
+                                   msg: "Commission must be less than Total amount");
+                               return;
+                             }
+
+                             String _getCityName(String address) {
+                               if (address.isEmpty) return "";
+                               List<String> parts = address.split(',');
+                               if (parts.length >= 3) {
+                                 return parts[parts.length - 3].trim();
+                               } else if (parts.isNotEmpty) {
+                                 return parts[0].trim();
+                               }
+                               return "";
+                             }
+
+                             final booking = SubmitBooking(
+                               subType: "1",
+                               noOfDay: "",
+                               tripNotes: "",
+                               carCategoryId: state.selectedCarCategoryId!,
+                               pickUpDate: _startDateCtrl.text,
+                               pickUpTime: _startTimeCtrl.text,
+                               pickUpLocations: [_pickupCtrl.text.trim()],
+                               destinationLocations: [_dropCtrl.text.trim()],
+                               pickupCity: [_getCityName(_pickupCtrl.text.trim())],
+                               destinationCity: [_getCityName(_dropCtrl.text.trim())],
+                               totalFare: double.tryParse(_totalFareCtrl.text) ?? 0.0,
+                               driverCommission: double.tryParse(_driverCommCtrl.text) ?? 0.0,
+                               showPhoneNumber: _showPhoneNumber,
+                               extra: _selectedRequirements.toList(),
+                               remarks: _remarksCtrl.text.trim(),
+                               context: context,
+                             );
 
                             context.read<AddBookingBloc>().add(booking);
                           },
@@ -353,22 +427,31 @@ class _AddBookingOneWayScreenViewState
           lastDate: DateTime(2100),
         );
         if (picked != null) {
-          controller.text = DateFormat('yyyy-MM-dd').format(picked);
+          controller.text = DateFormat('MMM dd, yyyy').format(picked);
+          if (mounted) setState(() {});
         }
       },
-      child: AbsorbPointer(
-        child: TextField(
-          controller: controller,
-          readOnly: true,
-          decoration: InputDecoration(
-            labelText: label,
-            hintStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            suffixIcon: const Icon(Icons.calendar_month),
-            border: InputBorder.none,
-          ),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xffDBDBDB)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? label : controller.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
+                ),
+              ),
+            ),
+            const Icon(Icons.calendar_month_outlined, color: Colors.grey, size: 20),
+          ],
         ),
       ),
     );
@@ -388,22 +471,31 @@ class _AddBookingOneWayScreenViewState
           final now = DateTime.now();
           final dt = DateTime(
               now.year, now.month, now.day, picked.hour, picked.minute);
-          controller.text = DateFormat('HH:mm').format(dt);
+          controller.text = DateFormat('hh:mm a').format(dt);
+          if (mounted) setState(() {});
         }
       },
-      child: AbsorbPointer(
-        child: TextField(
-          controller: controller,
-          readOnly: true,
-          decoration: InputDecoration(
-            labelText: label,
-            hintStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            suffixIcon: const Icon(Icons.access_time),
-            border: InputBorder.none,
-          ),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xffDBDBDB)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? label : controller.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
+                ),
+              ),
+            ),
+            const Icon(Icons.access_time, color: Colors.grey, size: 20),
+          ],
         ),
       ),
     );
@@ -432,21 +524,21 @@ class _AddBookingOneWayScreenViewState
     );
   }
 
-  Widget _buildRequirementChip(String label) {
+  Widget _buildRequirementChip(String label, StateSetter setChipState) {
     bool isSelected = _selectedRequirements.contains(label);
+
     return GestureDetector(
       onTap: () {
-        setState(() {
+        setChipState(() {
           if (isSelected) {
             _selectedRequirements.remove(label);
-            _updateTextField(label, false);
           } else {
             _selectedRequirements.add(label);
-            _updateTextField(label, true);
           }
         });
       },
       child: Container(
+        alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFB300) : Colors.white,
@@ -475,14 +567,18 @@ class _AddBookingOneWayScreenViewState
     );
   }
 
-  void _updateTextField(String label, bool isAdding) {
-    // Chips are managed separately, no need to update text field
-    setState(() {});
+  void _toggleRequirement(String label) {
+    setState(() {
+      if (_selectedRequirements.contains(label)) {
+        _selectedRequirements.remove(label);
+      } else {
+        _selectedRequirements.add(label);
+      }
+    });
   }
 
   @override
   void dispose() {
-
     _startDateCtrl.dispose();
     _startTimeCtrl.dispose();
     _pickupCtrl.dispose();
@@ -521,13 +617,14 @@ class _AddBookingOneWayScreenViewState
                   _totalFareCtrl.clear();
                   _driverCommCtrl.clear();
                   _remarksCtrl.clear();
-                  _selectedRequirements.clear();
                   _showPhoneNumber = false;
                   // Reset bloc state
                   context.read<AddBookingBloc>().add(ResetBooking());
                   Navigator.pop(modalContext); // Close bottom sheet
-                  // Navigate to home page
-                  if (widget.onBack != null) {
+                  // Navigate to Posted Booking page
+                  if (widget.onSuccess != null) {
+                    widget.onSuccess!();
+                  } else if (widget.onBack != null) {
                     widget.onBack!();
                   }
                 }

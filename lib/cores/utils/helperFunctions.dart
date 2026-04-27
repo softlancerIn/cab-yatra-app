@@ -128,12 +128,19 @@ class HelperFunctions {
     Share.share(message);
   }
 
-  static Future<void> navigateToMap(String pickup, String drop) async {
+  static Future<void> navigateToMap(String pickup, [String? drop]) async {
     try {
       final String origin = Uri.encodeComponent(pickup);
-      final String destination = Uri.encodeComponent(drop);
-      final String googleMapsUrl =
-          "https://www.google.com/maps/dir/?api=1&origin=$origin&destination=$destination&travelmode=driving";
+      String googleMapsUrl;
+
+      if (drop != null && drop.isNotEmpty) {
+        final String destination = Uri.encodeComponent(drop);
+        googleMapsUrl =
+            "https://www.google.com/maps/dir/?api=1&origin=$origin&destination=$destination&travelmode=driving";
+      } else {
+        googleMapsUrl =
+            "https://www.google.com/maps/search/?api=1&query=$origin";
+      }
 
       final Uri uri = Uri.parse(googleMapsUrl);
 
@@ -170,10 +177,47 @@ class HelperFunctions {
     }
   }
 
+  static String formatBookingDate(String dateString, String timeString) {
+    if (dateString.isEmpty) return "";
+    try {
+      DateTime bookingDate;
+      if (dateString.contains("-")) {
+        bookingDate = DateFormat('yyyy-MM-dd').parse(dateString);
+      } else if (dateString.contains("/")) {
+        bookingDate = DateFormat('dd/MM/yyyy').parse(dateString);
+      } else if (dateString.contains(",")) {
+        bookingDate = DateFormat('MMM dd, yyyy').parse(dateString);
+      } else {
+        bookingDate = DateTime.parse(dateString);
+      }
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = today.add(const Duration(days: 1));
+      final target =
+          DateTime(bookingDate.year, bookingDate.month, bookingDate.day);
+
+      String formattedTime = formatTo12Hour(timeString);
+
+      if (target == today) {
+        return "Today@$formattedTime";
+      } else if (target == tomorrow) {
+        return "Tomorrow@$formattedTime";
+      } else {
+        String formattedDate =
+            DateFormat('MMM dd, yyyy').format(bookingDate).toUpperCase();
+        return "$formattedDate@$formattedTime";
+      }
+    } catch (e) {
+      return "$dateString @ $timeString";
+    }
+  }
+
   static String formatTo12Hour(String? timeString) {
     if (timeString == null || timeString.isEmpty) return "";
     try {
-      if (timeString.contains("AM") || timeString.contains("PM")) return timeString;
+      if (timeString.contains("AM") || timeString.contains("PM"))
+        return timeString;
 
       List<String> parts = timeString.split(':');
       if (parts.length < 2) return timeString;
@@ -186,5 +230,49 @@ class HelperFunctions {
     } catch (e) {
       return timeString;
     }
+  }
+
+  static String formatTimeAgo(dynamic timestamp) {
+    if (timestamp == null) return "Just now";
+    DateTime dateTime;
+    try {
+      if (timestamp is DateTime) {
+        dateTime = timestamp;
+      } else if (timestamp is String) {
+        dateTime = DateTime.parse(timestamp);
+      } else {
+        return "Just now";
+      }
+
+      final Duration diff = DateTime.now().difference(dateTime);
+
+      if (diff.inSeconds < 60) {
+        return "Just now";
+      } else if (diff.inMinutes < 60) {
+        return "${diff.inMinutes} min ago";
+      } else if (diff.inHours < 24) {
+        return "${diff.inHours} hr ago";
+      } else if (diff.inDays < 7) {
+        return "${diff.inDays} days ago";
+      } else {
+        return DateFormat('MMM d, yyyy').format(dateTime);
+      }
+    } catch (e) {
+      return "Just now";
+    }
+  }
+
+  static String getValidImageUrl(String? url,
+      {String fallback = "https://cabyatra.com/assets/images/user.png"}) {
+    if (url == null ||
+        url.isEmpty ||
+        url.trim() == "null" ||
+        url.startsWith("file:///")) {
+      return fallback;
+    }
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return fallback;
   }
 }

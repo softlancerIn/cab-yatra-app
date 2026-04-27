@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../app/router/navigation/nav.dart';
 import '../../app/router/navigation/routes.dart';
+import '../../cores/utils/helperFunctions.dart';
 import '../Custom_Widgets/custom_app_bar.dart';
 import 'bloc/chat_bloc.dart';
 import 'bloc/chat_event.dart';
@@ -38,7 +39,7 @@ class ChatListingScreen extends StatefulWidget {
 }
 
 class _ChatListingScreenState extends State<ChatListingScreen> {
-  bool isPostedSelected = false;
+  bool isPostedSelected = true;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
               context: context, bookingId: widget.bookingId!));
     } else {
       context.read<ChatListBloc>().add(
-          GetAllChatDriversEvent(context: context, type: "1"));
+          GetAllChatDriversEvent(context: context, type: "0"));
     }
   }
 
@@ -115,7 +116,7 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                         child: Text(
-                          'posted',
+                          'Posted',
                           style: TextStyle(
                             color: isPostedSelected
                                 ? Colors.white
@@ -202,6 +203,17 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                         'bookingId': item.bookingId?.toString() ?? widget.bookingId ?? "N/A",
                         'creatorName': item.name ?? "Guddu",
                         'receiverId': item.id?.toString() ?? "0",
+                      }).then((_) {
+                        if (context.mounted) {
+                          if (widget.bookingId != null) {
+                            context.read<ChatListBloc>().add(
+                                GetChatHistoryForBookingEvent(
+                                    context: context, bookingId: widget.bookingId!));
+                          } else {
+                            context.read<ChatListBloc>().add(
+                                GetAllChatDriversEvent(context: context, type: isPostedSelected ? "0" : "1"));
+                          }
+                        }
                       });
                     },
                     child: Padding(
@@ -251,10 +263,22 @@ class _ChatListingScreenState extends State<ChatListingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                'Booking ID : ${item.bookingId ?? widget.bookingId ?? "N/A"}',
+                                'Booking ID : ${item.orderId ?? item.bookingId ?? widget.bookingId ?? "N/A"}',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                HelperFunctions.formatTimeAgo(item.lastMessageTime ??
+                                    item.updatedAt ??
+                                    item.createdAt),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey.shade500,
                                   fontWeight: FontWeight.w400,
                                   fontFamily: 'Poppins',
                                 ),

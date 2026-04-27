@@ -67,6 +67,7 @@ class PersonalInfoBloc
       final updatedData = updateResponse.data;
       emit(state.copyWith(
         isSubmitting: false,
+        isProfileUpdateSuccess: true, // Signal success
         name: updatedData?.name ?? event.name,
         company: updatedData?.cInfo ?? event.cInfo,
         type: updatedData?.type?.toLowerCase() ?? event.type,
@@ -74,9 +75,16 @@ class PersonalInfoBloc
         licenseNumber2: updatedData?.licenseNumber2 ?? event.licenseNumber2,
         networkImage: updatedData?.driverImageUrl ?? state.networkImage,
         rating: updatedData?.rating?.toString() ?? state.rating,
+        image: null, // Clear local image after upload
       ));
+      
+      // Reset isProfileUpdateSuccess for next time
+      emit(state.copyWith(isProfileUpdateSuccess: false));
+
+      // Optionally re-load profile to ensure everything is in sync
+      add(LoadProfile(event.context));
     } catch (e) {
-      emit(state.copyWith(isSubmitting: false));
+      emit(state.copyWith(isSubmitting: false, isProfileUpdateSuccess: false));
     }
   }
 }

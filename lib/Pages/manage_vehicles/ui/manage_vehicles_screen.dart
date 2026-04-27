@@ -39,8 +39,11 @@ class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.orange,
         shape: const CircleBorder(),
+        onPressed: () {
+          context.read<VehicleBloc>().add(ResetVehicleForm());
+          _openAddVehicleBottomSheet(context);
+        },
         child: const Icon(Icons.add, color: Colors.white, size: 35),
-        onPressed: () => _openAddVehicleBottomSheet(context),
       ),
 
       body: BlocBuilder<VehicleBloc, VehicleState>(
@@ -155,16 +158,54 @@ class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
 
                               /// YEAR
                               Text(
-                                vehicle.vehicleYear,
+                                "Year: ${vehicle.vehicleYear}",
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey.shade500,
                                   fontFamily: 'Poppins',
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
+                              if (vehicle.driverNumber != null && vehicle.driverNumber!.isNotEmpty)
+                                Text(
+                                  "Driver: ${vehicle.driverNumber}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade500,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                             ],
                           ),
                         ),
+
+
+
+                        /// EDIT BUTTON (Only if not approved)
+                        if ((vehicle.isApprove ?? 0) == 0) ...[
+                          GestureDetector(
+                            onTap: () {
+                              _openAddVehicleBottomSheet(
+                                context,
+                                vehicleId: vehicle.id,
+                              );
+                            },
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(5),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
 
                         /// DELETE BUTTON
                         GestureDetector(
@@ -258,9 +299,9 @@ class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
   }
 
   /// ADD VEHICLE BOTTOM SHEET
-  void _openAddVehicleBottomSheet(BuildContext context) {
+  Future<void> _openAddVehicleBottomSheet(BuildContext context, {int? vehicleId}) async {
 
-    showModalBottomSheet(
+    final result = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -273,10 +314,40 @@ class _ManageVehiclesScreenState extends State<ManageVehiclesScreen> {
           expand: false,
           builder: (_, controller) {
 
-            return const AddVehicleBottomSheet();
+            return AddVehicleBottomSheet(vehicleId: vehicleId);
           },
         );
       },
     );
+
+    if (result == true && vehicleId == null && mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: const Text("Car Added",
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, fontFamily: 'Poppins')),
+          content: const Text(
+              "Your car has been added successfully. Please wait for admin approval.",
+              style: TextStyle(fontFamily: 'Poppins')),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+              },
+              child: const Text("OK",
+                  style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins')),
+            ),
+          ],
+        ),
+      );
+    }
   }
 }

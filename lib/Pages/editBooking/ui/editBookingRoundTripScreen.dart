@@ -1,3 +1,4 @@
+import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +12,8 @@ import '../bloc/editBookingBloc.dart';
 import '../bloc/editBookingEvent.dart';
 import '../bloc/editBookingState.dart';
 import '../../HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
+import '../../Booking/bloc/booking_bloc.dart';
+import '../../Booking/bloc/booking_event.dart';
 
 class EditBookingRoundTripScreen extends StatefulWidget {
   final String sId;
@@ -22,8 +25,10 @@ class EditBookingRoundTripScreen extends StatefulWidget {
   final String totalFare;
   final String driverCommission;
   final String remark;
+  final String? extra;
   final String? noOfDays;
   final String? tripNotes;
+  final String? isShowPhoneNumber;
   final String subType;
 
   const EditBookingRoundTripScreen({
@@ -38,8 +43,10 @@ class EditBookingRoundTripScreen extends StatefulWidget {
     required this.pickUpLocation,
     required this.vehicalType,
     required this.subType,
+    this.extra,
     this.noOfDays,
     this.tripNotes,
+    this.isShowPhoneNumber,
   });
 
   @override
@@ -61,78 +68,55 @@ class _EditBookingRoundTripScreenState
   final tripNotesCtrl = TextEditingController();
 
   bool _showPhoneNumber = false;
-  final List<String> _selectedRequirements = [];
+  final Set<String> _selectedRequirements = {};
 
   @override
   void initState() {
     super.initState();
-    _remarksCtrl.addListener(_onRemarksChanged);
     _pickupCtrl.text = widget.pickUpLocation;
     _dropCtrl.text = widget.dropLocation;
     _startDateCtrl.text = widget.pickUpDate;
     _startTimeCtrl.text = widget.pickUpTime;
     _totalFareCtrl.text = widget.totalFare;
     _driverCommCtrl.text = widget.driverCommission;
-    _remarksCtrl.text = widget.remark;
+
+    // Initialize selected chips from extra string
+    if (widget.extra != null && widget.extra!.isNotEmpty) {
+      final parts = widget.extra!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty);
+      _selectedRequirements.addAll(parts);
+    }
+    
+    _remarksCtrl.text = widget.remark ?? ""; 
     noOfDaysCtrl.text = widget.noOfDays ?? "";
-    tripNotesCtrl.text = widget.tripNotes ?? "";
+    tripNotesCtrl.text = (widget.tripNotes != null && widget.tripNotes!.isNotEmpty)
+        ? widget.tripNotes!
+        : widget.dropLocation; // Destination serves as fallback for trip notes in round trips
+    _showPhoneNumber = widget.isShowPhoneNumber == "1";
   }
 
-  void _onRemarksChanged() {
-    final List<String> parts = _remarksCtrl.text
-        .split(',')
-        .map((e) => e.trim().toLowerCase())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    final List<String> availableChips = [
-      "Only Diesel",
-      "With Carrier",
-      "All Inclusive",
-      "All Exclusive"
-    ];
-
-    bool changed = false;
-    for (var chip in availableChips) {
-      bool isInText = parts.contains(chip.toLowerCase());
-      bool isInList = _selectedRequirements.contains(chip);
-
-      if (isInText && !isInList) {
-        _selectedRequirements.add(chip);
-        changed = true;
-      } else if (!isInText && isInList) {
-        _selectedRequirements.remove(chip);
-        changed = true;
-      }
-    }
-
-    if (changed) {
-      if (mounted) setState(() {});
-    }
-  }
-
-  void _updateTextField(String label, bool isAdding) {
-    String currentText = _remarksCtrl.text.trim();
-
-    List<String> parts = currentText
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-
-    if (isAdding) {
-      bool exists = parts.any((e) => e.toLowerCase() == label.toLowerCase());
-      if (!exists) {
-        parts.insert(0, label);
-      }
-    } else {
-      parts.removeWhere((e) => e.toLowerCase() == label.toLowerCase());
-    }
-
-    _remarksCtrl.text = parts.join(", ");
-    _remarksCtrl.selection = TextSelection.fromPosition(
-      TextPosition(offset: _remarksCtrl.text.length),
+  Widget _label(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4.0, top: 8.0),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF3E4959),
+          fontFamily: 'Poppins',
+        ),
+      ),
     );
+  }
+
+  void _toggleRequirement(String label) {
+    setState(() {
+      if (_selectedRequirements.contains(label)) {
+        _selectedRequirements.remove(label);
+      } else {
+        _selectedRequirements.add(label);
+      }
+    });
   }
 
   @override
@@ -145,10 +129,9 @@ class _EditBookingRoundTripScreenState
         listener: (context, state) {
           if (state.isSuccess) {
             Fluttertoast.showToast(
-              msg: "Booking updated successfully!",
+              msg: "Booking details updated!",
               backgroundColor: Colors.green,
             );
-            context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
             showAssignDriverBottomSheet(context);
           }
           if (state.hasError && state.errorMessage != null) {
@@ -172,95 +155,134 @@ class _EditBookingRoundTripScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Vehicle Category Dropdown ───────────────────────────────
-                    const Text("Select Vehicle Category",
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-
+                    _label("Select vehical"), // Figma spelling
                     state.isLoading
                         ? const Center(child: CircularProgressIndicator())
-                        : state.carCategories == null ||
-                                state.carCategories!.data!.isEmpty
+                        : (state.carCategories == null ||
+                                state.carCategories!.data == null ||
+                                state.carCategories!.data!.isEmpty)
                             ? const Text("No categories available",
                                 style: TextStyle(color: Colors.red))
-                            : containerShadow(
-                                child: DropdownButtonFormField<int>(
-                                  initialValue: state.selectedCarCategoryId,
-                                  isExpanded: true,
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 14),
+                            : Container(
+                                height: 50,
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xffDBDBDB)),
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<int>(
+                                    dropdownColor: Colors.white,
+                                    borderRadius: BorderRadius.circular(12),
+                                    value: state.selectedCarCategoryId,
+                                    hint: const Text("Select vehicle...",
+                                        style: TextStyle(
+                                            fontSize: 13, color: Colors.grey)),
+                                    items: state.carCategories!.data!.map((car) {
+                                      return DropdownMenuItem<int>(
+                                        value: car.id,
+                                        child: Text(car.name ?? "",
+                                            style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black87)),
+                                      );
+                                    }).toList(),
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        context
+                                            .read<EditBookingBloc>()
+                                            .add(EditSelectCarCategory(val));
+                                      }
+                                    },
+                                    icon: const Icon(Icons.keyboard_arrow_down,
+                                        color: Colors.orange),
                                   ),
-                                  hint: const Text(
-                                    "Choose vehicle",
-                                    style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                  items: state.carCategories!.data!.map((car) {
-                                    return DropdownMenuItem<int>(
-                                      value: car.id,
-                                      child: Text(
-                                        car.name ?? "Unknown",
-                                        style: const TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w400),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      context
-                                          .read<EditBookingBloc>()
-                                          .add(EditSelectCarCategory(value));
-                                    }
-                                  },
                                 ),
                               ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
-                    CommonTextFormField(
+                    _label("Date / Time"),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildDateField(
+                            label: "Nov 01, 2025",
+                            controller: _startDateCtrl,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildTimeField(
+                            label: "10:51 PM",
+                            controller: _startTimeCtrl,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    _label("Pickup Location"),
+                    LocationAutocompleteField(
                       controller: _pickupCtrl,
-                      hintText: "Pickup Location",
+                      hint: "Enter Pickup location",
                     ),
-                    const SizedBox(height: 16),
-                    CommonTextFormField(
-                      controller: _dropCtrl,
-                      hintText: "Drop Location",
-                    ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 8),
+
+                    // Removed Drop Location field for Round Trip as requested
+
+                    const SizedBox(height: 8),
+
+                    _label("Number of days"),
                     CommonTextFormField(
                       controller: noOfDaysCtrl,
-                      hintText: "No Of Days",
+                      hintText: "0",
+                      keyboardType: TextInputType.number,
                     ),
-                    const SizedBox(height: 16),
+
+                    const SizedBox(height: 8),
+
+                    _label("Enter Trip Note"),
                     CommonTextFormField(
                       controller: tripNotesCtrl,
-                      hintText: "Trip Notes",
+                      hintText: "Fill details of your tour...",
+                      maxLines: 5,
+                      height: 120, // Increased for multiline as per Figma
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
 
-                    // ── Date & Time ─────────────────────────────────────────────
                     Row(
                       children: [
                         Expanded(
-                          child: containerShadow(
-                            child: _buildDateField(
-                              label: "Pickup Date",
-                              controller: _startDateCtrl,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label("Total amount"),
+                              CommonTextFormField(
+                                hintText: "0",
+                                controller: _totalFareCtrl,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: containerShadow(
-                            child: _buildTimeField(
-                              label: "Pickup Time",
-                              controller: _startTimeCtrl,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _label("commision amount"),
+                              CommonTextFormField(
+                                hintText: "0",
+                                controller: _driverCommCtrl,
+                                keyboardType: TextInputType.number,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -268,61 +290,60 @@ class _EditBookingRoundTripScreenState
 
                     const SizedBox(height: 24),
 
-                    // ── Total Fare & Driver Commission ──────────────────────────
-                    Row(
-                      children: [
-                        Expanded(
-                            child: CommonTextFormField(
-                          controller: _totalFareCtrl,
-                          hintText: "Total Fare",
-                        )),
-                        const SizedBox(width: 12),
-                        Expanded(
-                            child: CommonTextFormField(
-                          controller: _driverCommCtrl,
-                          hintText: "Driver Commission",
-                        )),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // ── Show Phone Number Switch ────────────────────────────────
                     Container(
-                      height: 60,
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
                         color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        shadows: const [
-                          BoxShadow(
-                            color: Color(0x3F000000),
-                            blurRadius: 4,
-                            offset: Offset(0, 0),
-                            spreadRadius: 0,
-                          )
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xffDBDBDB)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Show your contact to drivers",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF3E4959),
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  "this will help you to make direct deal.",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Transform.scale(
+                            scale: 0.8,
+                            child: Switch(
+                              value: _showPhoneNumber,
+                              activeColor: Colors.white,
+                              activeTrackColor: const Color(0xFFFFB300),
+                              onChanged: (val) =>
+                                  setState(() => _showPhoneNumber = val),
+                            ),
+                          ),
                         ],
                       ),
-                      child: SwitchListTile(
-                        title: const Text(
-                          "Show my phone number to driver",
-                          style: TextStyle(fontSize: 13),
-                        ),
-                        value: _showPhoneNumber,
-                        onChanged: (val) =>
-                            setState(() => _showPhoneNumber = val),
-                      ),
                     ),
 
                     const SizedBox(height: 24),
 
-                    // ── Extra Requirements Chips ───────────────────────────────────────
-                    const Text("Extra Requirements",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 14)),
-                    const SizedBox(height: 12),
+                    _label("Extra Requirements"),
                     Wrap(
                       spacing: 12,
                       runSpacing: 12,
@@ -333,17 +354,22 @@ class _EditBookingRoundTripScreenState
                         _buildRequirementChip("All Exclusive"),
                       ],
                     ),
-                    const SizedBox(height: 24),
-
-                    // ── Remarks / Extra Requirements TextField ──────────────────
-                    containerShadow(
-                      height: 100,
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 50,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xffDBDBDB)),
+                      ),
                       child: TextField(
                         controller: _remarksCtrl,
-                        maxLines: 3,
+                        onChanged: (val) => setState(() {}),
+                        maxLines: 1,
                         style: const TextStyle(fontSize: 13),
                         decoration: const InputDecoration(
-                          hintText: "Extra Requirements...",
+                          hintText: "Enter extra requirements...",
                           hintStyle: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w400,
@@ -371,9 +397,14 @@ class _EditBookingRoundTripScreenState
                                     msg: "Pickup location is required");
                                 return;
                               }
-                              if (_dropCtrl.text.trim().isEmpty) {
+                              if (noOfDaysCtrl.text.trim().isEmpty) {
                                 Fluttertoast.showToast(
-                                    msg: "Drop location is required");
+                                    msg: "No of days is required");
+                                return;
+                              }
+                              if (tripNotesCtrl.text.trim().isEmpty) {
+                                Fluttertoast.showToast(
+                                    msg: "Trip notes is required");
                                 return;
                               }
                               if (_startDateCtrl.text.isEmpty) {
@@ -387,14 +418,23 @@ class _EditBookingRoundTripScreenState
                                 return;
                               }
 
-                                final booking = EditSubmitBooking(
-                                  id: widget.sId,
-                                  subType: widget.subType,
+                               double totalAmountValue = double.tryParse(_totalFareCtrl.text) ?? 0.0;
+                               double commissionValue = double.tryParse(_driverCommCtrl.text) ?? 0.0;
+                               if (commissionValue >= totalAmountValue && totalAmountValue > 0) {
+                                 Fluttertoast.showToast(
+                                     msg: "Commission must be less than Total amount");
+                                 return;
+                               }
+
+
+                              final booking = EditSubmitBooking(
+                                id: widget.sId,
+                                subType: widget.subType,
                                 carCategoryId: state.selectedCarCategoryId!,
                                 pickUpDate: _startDateCtrl.text,
                                 pickUpTime: _startTimeCtrl.text,
                                 pickUpLocations: [_pickupCtrl.text.trim()],
-                                destinationLocations: [_dropCtrl.text.trim()],
+                                destinationLocations: [tripNotesCtrl.text.trim()], // Sending trip notes as the destination for Round Trips
                                 totalFare:
                                     double.tryParse(_totalFareCtrl.text) ?? 0.0,
                                 driverCommission:
@@ -402,6 +442,7 @@ class _EditBookingRoundTripScreenState
                                         0.0,
                                 showPhoneNumber: _showPhoneNumber,
                                 remarks: _remarksCtrl.text.trim(),
+                                extra: _selectedRequirements.toList(),
                                 noOfDays: noOfDaysCtrl.text.trim(),
                                 tripNotes: tripNotesCtrl.text.trim(),
                                 context: context,
@@ -437,22 +478,31 @@ class _EditBookingRoundTripScreenState
           lastDate: DateTime(2100),
         );
         if (picked != null) {
-          controller.text = DateFormat('yyyy-MM-dd').format(picked);
+          controller.text = DateFormat('MMM dd, yyyy').format(picked);
+          if (mounted) setState(() {});
         }
       },
-      child: AbsorbPointer(
-        child: TextField(
-          controller: controller,
-          readOnly: true,
-          decoration: InputDecoration(
-            labelText: label,
-            hintStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            suffixIcon: const Icon(Icons.calendar_month),
-            border: InputBorder.none,
-          ),
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xffDBDBDB)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? label : controller.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
+                ),
+              ),
+            ),
+            const Icon(Icons.calendar_month_outlined, color: Colors.grey, size: 20),
+          ],
         ),
       ),
     );
@@ -472,63 +522,42 @@ class _EditBookingRoundTripScreenState
           final now = DateTime.now();
           final dt = DateTime(
               now.year, now.month, now.day, picked.hour, picked.minute);
-          controller.text = DateFormat('HH:mm').format(dt);
+          controller.text = DateFormat('hh:mm a').format(dt);
+          if (mounted) setState(() {});
         }
       },
-      child: AbsorbPointer(
-        child: TextField(
-          controller: controller,
-          readOnly: true,
-          decoration: InputDecoration(
-            labelText: label,
-            hintStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            labelStyle:
-                const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-            suffixIcon: const Icon(Icons.access_time),
-            border: InputBorder.none,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget containerShadow({required Widget child, double height = 50}) {
-    return Container(
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      clipBehavior: Clip.antiAlias,
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xffDBDBDB)),
         ),
-        shadows: const [
-          BoxShadow(
-            color: Color(0x3F000000),
-            blurRadius: 4,
-            offset: Offset(0, 0),
-            spreadRadius: 0,
-          )
-        ],
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.text.isEmpty ? label : controller.text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: controller.text.isEmpty ? Colors.grey : Colors.black87,
+                ),
+              ),
+            ),
+            const Icon(Icons.access_time, color: Colors.grey, size: 20),
+          ],
+        ),
       ),
-      child: child,
     );
   }
 
   Widget _buildRequirementChip(String label) {
     bool isSelected = _selectedRequirements.contains(label);
+
     return GestureDetector(
       onTap: () {
-        setState(() {
-          if (isSelected) {
-            _selectedRequirements.remove(label);
-            _updateTextField(label, false);
-          } else {
-            _selectedRequirements.add(label);
-            _updateTextField(label, true);
-          }
-        });
+        _toggleRequirement(label);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -561,7 +590,6 @@ class _EditBookingRoundTripScreenState
 
   @override
   void dispose() {
-    _remarksCtrl.removeListener(_onRemarksChanged);
     _startDateCtrl.dispose();
     _startTimeCtrl.dispose();
     _pickupCtrl.dispose();
@@ -574,98 +602,134 @@ class _EditBookingRoundTripScreenState
     super.dispose();
   }
 
-  void showAssignDriverBottomSheet(BuildContext context) {
-    String? selectedValue = "1";
+  void showAssignDriverBottomSheet(BuildContext parentContext) {
+    String? selectedValue = "0";
 
     showModalBottomSheet(
-      context: context,
+      context: parentContext,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
+      builder: (modalContext) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                    child: DiskIndicatorReplacement(),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Booking updated Successfully",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Choose how you want to assign this booking",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildOption(
-                    title: "Assign to All Drivers",
-                    subtitle: "Broadcasting to all nearby available drivers",
-                    value: "1",
-                    selectedValue: selectedValue,
-                    onChanged: (val) => setModalState(() => selectedValue = val),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOption(
-                    title: "Personal Booking",
-                    subtitle: "Keep this booking for yourself",
-                    value: "2",
-                    selectedValue: selectedValue,
-                    onChanged: (val) => setModalState(() => selectedValue = val),
-                  ),
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFCB117),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: () {
-                        context.read<EditBookingBloc>().add(
-                              EditUpdateAssignMethodEvent(
-                                context: context,
-                                assignType: selectedValue.toString(),
-                              ),
-                            );
+          builder: (modalContext, setModalState) {
+            return BlocConsumer<EditBookingBloc, EditBookingState>(
+              listener: (context, state) {
+                if (state.updateAssignMethodModel != null) {
+                  Fluttertoast.showToast(
+                    msg: "Booking assigned successfully!",
+                    backgroundColor: Colors.green,
+                  );
+                  // Refresh the list
+                  context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
+                  
+                  // Refresh Posted Booking List if available
+                  try {
+                    context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+                  } catch (e) {
+                    debugPrint("BookingBloc not found in context, skipping refresh");
+                  }
 
-                        Navigator.pop(context); // Close bottom sheet
-                        Get.back(); // Return to home
-                      },
-                      child: const Text(
-                        "Done",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                  // Navigate back
+                  Navigator.pop(modalContext); // Close BottomSheet
+                  Navigator.pop(context); // Close Edit Screen
+                }
+              },
+              builder: (context, state) {
+                return Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      const Icon(Icons.check_circle_rounded,
+                          size: 80, color: Color(0xFFFFB300)),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Booking updated Successfully!",
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1E293B)),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Choose how you want to assign this booking",
+                        style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildOption(
+                        title: "Direct Assign",
+                        subtitle: "Auto assign to the first available driver",
+                        value: "0",
+                        selectedValue: selectedValue,
+                        onChanged: (val) =>
+                            setModalState(() => selectedValue = val),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildOption(
+                        title: "Manual Selection",
+                        subtitle: "Choose your favorite driver personally",
+                        value: "1",
+                        selectedValue: selectedValue,
+                        onChanged: (val) =>
+                            setModalState(() => selectedValue = val),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFFB300),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: state.isLoading
+                              ? null
+                              : () {
+                                  context.read<EditBookingBloc>().add(
+                                        EditUpdateAssignMethodEvent(
+                                          context: context,
+                                          assignType: selectedValue.toString(),
+                                          bookingId: widget.sId,
+                                        ),
+                                      );
+                                },
+                           child: state.isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2))
+                              : const Text(
+                                  "Confirm Selection",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                );
+              },
             );
           },
         );

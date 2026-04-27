@@ -17,6 +17,7 @@ import '../../Pages/chat/chat_screen.dart';
 import '../../Pages/Review/write_review.dart';
 import '../../Pages/chat/bloc/chat_bloc.dart';
 import '../../Pages/bookingDetails/ui/bookingDetailScreen.dart';
+import '../../Pages/bookingDetails/model/bookingDetailModel.dart';
 import '../../Pages/bookingDetails/bloc/bookingDetailsBloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Pages/Payment Method/ui/payment_method.dart';
@@ -214,15 +215,20 @@ class AppRouter {
             totalFare: bookingData.totalFaire ?? "",
             driverCommission: bookingData.driverCommission ?? "",
             remark: bookingData.remark ?? "",
+            extra: bookingData.extra,
             noOfDays: bookingData.noOfDays,
             tripNotes: bookingData.tripNotes,
+            isShowPhoneNumber: bookingData.isShowPhoneNumber,
           );
         },
       ),
 
       GoRoute(
         path: Routes.reviewScreen,
-        builder: (_, __) => const AgentReviewScreen(),
+        builder: (context, state) {
+          final driverId = state.extra is String ? state.extra as String : null;
+          return AgentReviewScreen(driverId: driverId);
+        },
       ),
       GoRoute(
         path: Routes.profile,
@@ -246,7 +252,8 @@ class AppRouter {
             userName: data?['userName'] ?? "User",
             bookingId: data?['bookingId'] ?? "N/A",
             creatorName: data?['creatorName'] ?? "Guddu",
-            receiverId: data?['receiverId'] ?? "0",
+            receiverId: (data?['driver_id'] ?? data?['receiverId'] ?? "0").toString(),
+            isFromDetails: data?['isFromDetails'] as bool? ?? false,
           );
         },
       ),
@@ -269,10 +276,29 @@ class AppRouter {
       GoRoute(
         path: Routes.bookingDetails,
         builder: (context, state) {
-          final bookingID = state.extra as String? ?? "0";
+          final extra = state.extra;
+          String bookingID = "0";
+          bool isFromHome = false;
+          bool showShareIcon = false;
+          bool hideChat = false;
+
+          if (extra is Map<String, dynamic>) {
+            bookingID = extra['bookingId']?.toString() ?? "0";
+            isFromHome = extra['isFromHome'] as bool? ?? false;
+            showShareIcon = extra['showShareIcon'] as bool? ?? false;
+            hideChat = extra['hideChat'] as bool? ?? false;
+          } else if (extra is String) {
+            bookingID = extra;
+          }
+
           return BlocProvider(
             create: (context) => BookingDetailBloc(),
-            child: BookingDetailScreen(bookingID: bookingID),
+            child: BookingDetailScreen(
+              bookingID: bookingID,
+              isFromHome: isFromHome,
+              showShareIcon: showShareIcon,
+              hideChat: hideChat,
+            ),
           );
         },
       ),

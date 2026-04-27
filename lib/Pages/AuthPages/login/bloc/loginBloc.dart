@@ -1,4 +1,5 @@
 import 'package:cab_taxi_app/app/router/navigation/nav.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/router/navigation/routes.dart';
@@ -48,19 +49,26 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
             errorMessage: "Send OTP Successfully",
             isLoading: false,
             isSuccess: true,
+            isRegistered: response.isRegistered,
           ),
         );
       } else {
         emit(
           state.copyWith(
             isLoading: false,
-            errorMessage: "Invalid credentials",
+            errorMessage: response.message ?? "Invalid credentials",
             hasError: true,
           ),
         );
       }
     } catch (e) {
-      emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
+      String msg = e.toString();
+      if (e is DioException) {
+        if (e.response?.data != null && e.response?.data is Map) {
+          msg = e.response?.data['message']?.toString() ?? msg;
+        }
+      }
+      emit(state.copyWith(isLoading: false, errorMessage: msg, hasError: true));
     }
   }
 }

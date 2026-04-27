@@ -9,6 +9,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'bloc/personal_info_bloc.dart';
 import 'bloc/personal_info_event.dart';
 import 'bloc/personal_info_state.dart';
+import 'package:cab_taxi_app/Pages/Review/bloc/review_bloc.dart';
+import 'package:cab_taxi_app/Pages/Review/bloc/review_event.dart';
+import 'package:cab_taxi_app/Pages/Review/bloc/review_state.dart';
 import '../../cores/services/secure_storage_service.dart';
 import '../Custom_Widgets/service_call_dialog.dart';
 
@@ -26,6 +29,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     context.read<PersonalInfoBloc>().add(LoadProfile(context));
+    context.read<ReviewBloc>().add(LoadReviews(context));
   }
 
   Future<void> launchURL(String url) async {
@@ -157,8 +161,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            context.read<PersonalInfoBloc>().add(LoadProfile(context));
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,40 +268,47 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   fontFamily: 'Poppins'),
                             ),
                             const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {
-                                Nav.push(context, Routes.reviewScreen);
-                              },
-                              behavior: HitTestBehavior.opaque,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    state.rating,
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            BlocBuilder<ReviewBloc, ReviewState>(
+                              builder: (context, reviewState) {
+                                final averageRating = reviewState.reviewModel?.averageRating?.toString() ?? state.rating;
+                                final totalReviews = reviewState.reviewModel?.totalReviews?.toString() ?? state.ratingCount;
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Nav.push(context, Routes.reviewScreen);
+                                  },
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        averageRating,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 12,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Icon(
+                                        Icons.star,
+                                        color: Color(0xFFFCB117),
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        '($totalReviews review)',
+                                        style: const TextStyle(
+                                          color: Color(0xFF787878),
+                                          fontSize: 11,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      )
+                                    ],
                                   ),
-                                  const SizedBox(width: 4),
-                                  const Icon(
-                                    Icons.star,
-                                    color: Color(0xFFFCB117),
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '(${state.ratingCount} review)',
-                                    style: const TextStyle(
-                                      color: Color(0xFF787878),
-                                      fontSize: 11,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  )
-                                ],
-                              ),
+                                );
+                              }
                             )
                           ],
                         ),
@@ -307,8 +323,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 height: 10,
               ),
               titleCardData(
-                  onTap: () {
-                    Nav.push(context, Routes.profile);
+                  onTap: () async {
+                    await Nav.push(context, Routes.profile);
+                    if (mounted) {
+                      context.read<PersonalInfoBloc>().add(LoadProfile(context));
+                    }
                   },
                   image: 'assets/images/personalIcon.png',
                   title: 'Personal Information'),
@@ -420,8 +439,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
+          ),
           ),
         ),
       ),

@@ -81,12 +81,12 @@ class AlertData {
     return [];
   }
 
-  /// Decode "[12,13,14]" → [12, 13, 14]
-  List<int> get parsedLocations {
+  /// Decode "['Delhi','Noida']" → ['Delhi', 'Noida']
+  List<String> get parsedLocations {
     if (locations == null || locations!.isEmpty || locations == 'null') return [];
     try {
       final decoded = jsonDecode(locations!);
-      if (decoded is List) return decoded.map((e) => int.tryParse(e.toString()) ?? 0).toList();
+      if (decoded is List) return decoded.map((e) => e.toString()).toList();
     } catch (_) {}
     return [];
   }

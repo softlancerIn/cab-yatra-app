@@ -58,7 +58,7 @@ class UpdateAlertsEvent extends DashboardEvent {
   final BuildContext context;
   final String alertType;    // "location_based"
   final List<int> carIds;
-  final List<int> locations; // int IDs as per API spec
+  final List<String> locations; // Location names as per API spec
   final String manualPickup; // "yes" or "no"
   final String status;       // "1" = active, "0" = inactive
   const UpdateAlertsEvent({

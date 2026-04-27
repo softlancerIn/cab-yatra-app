@@ -6,6 +6,7 @@ class DriverInfoCard extends StatelessWidget {
   final String subtitle;
   final double rating;
   final int reviewCount;
+  final bool showImage;
 
   const DriverInfoCard({
     super.key,
@@ -14,6 +15,7 @@ class DriverInfoCard extends StatelessWidget {
     required this.subtitle,
     required this.rating,
     required this.reviewCount,
+    this.showImage = true,
   });
 
   @override
@@ -30,17 +32,24 @@ class DriverInfoCard extends StatelessWidget {
       child: Row(
         children: [
           /// Profile Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: Image.network(
-              imagePath,
-              height: 64,
-              width: 64,
-              fit: BoxFit.cover,
+          if (showImage && imagePath.isNotEmpty && imagePath.startsWith('http')) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.network(
+                imagePath,
+                height: 64,
+                width: 64,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  height: 64,
+                  width: 64,
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.person, color: Colors.grey),
+                ),
+              ),
             ),
-          ),
-
-          const SizedBox(width: 14),
+            const SizedBox(width: 14),
+          ],
 
           /// Text Content
           Expanded(

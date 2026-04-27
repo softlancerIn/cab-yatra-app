@@ -4,10 +4,11 @@ import '../../Pages/Profile/model/review_model.dart';
 import '../../Pages/Review/bloc/review_bloc.dart';
 import '../../Pages/Review/bloc/review_event.dart';
 import '../../Pages/Review/bloc/review_state.dart';
-import '../Custom_Widgets/custom_app_bar.dart';
+ import '../Custom_Widgets/custom_app_bar.dart';
 
 class AgentReviewScreen extends StatefulWidget {
-  const AgentReviewScreen({super.key});
+  final String? driverId;
+  const AgentReviewScreen({super.key, this.driverId});
 
   @override
   State<AgentReviewScreen> createState() => _AgentReviewScreenState();
@@ -17,7 +18,7 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<ReviewBloc>().add(LoadReviews(context));
+    context.read<ReviewBloc>().add(LoadReviews(context, driverId: widget.driverId));
   }
 
   @override
@@ -41,6 +42,13 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
 
           final profile = state.profileModel?.data;
           final reviews = state.reviewModel?.data ?? [];
+          final reviewDriver = state.reviewModel?.driver;
+
+          // All data from API only
+          final String driverName = reviewDriver?.name ?? profile?.name ?? 'Unknown';
+          final String? driverImageUrl = reviewDriver?.driverImageUrl ?? profile?.driverImageUrl;
+          final String ratingText = state.reviewModel?.averageRating?.toString() ?? profile?.rating ?? '0.0';
+          final int totalReviewCount = state.reviewModel?.totalReviews ?? reviews.length;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -51,9 +59,8 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                 /// Profile Image
                 CircleAvatar(
                   radius: 45,
-                  backgroundImage: (profile?.driverImageUrl != null &&
-                          profile!.driverImageUrl!.isNotEmpty)
-                      ? NetworkImage(profile.driverImageUrl!)
+                  backgroundImage: (driverImageUrl != null && driverImageUrl.isNotEmpty)
+                      ? NetworkImage(driverImageUrl)
                       : const AssetImage('assets/images/profile_image.png')
                           as ImageProvider,
                 ),
@@ -67,7 +74,7 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                     const Icon(Icons.star, color: Colors.amber, size: 22),
                     const SizedBox(width: 6),
                     Text(
-                      profile?.rating ?? '0.0',
+                      ratingText,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -75,7 +82,7 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Based on ${reviews.length} rating\n& Reviews',
+                      'Based on $totalReviewCount rating\n& Reviews',
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -103,7 +110,7 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                       Row(
                         children: [
                           Text(
-                            profile?.name ?? 'Unknown',
+                            driverName,
                             style: const TextStyle(
                               color: Colors.black,
                               fontSize: 14,
@@ -112,9 +119,9 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                             ),
                           ),
                           const SizedBox(width: 5),
-                          const Text(
-                            '(Driver)',
-                            style: TextStyle(
+                          Text(
+                            '(${profile?.type ?? 'Driver'})',
+                            style: const TextStyle(
                               color: Color(0xFF787878),
                               fontSize: 12,
                               fontFamily: 'Poppins',
@@ -293,6 +300,31 @@ class _AgentReviewScreenState extends State<AgentReviewScreen> {
                 ),
 
                 const SizedBox(height: 6),
+
+                if (review.checkBoxReview != null && review.checkBoxReview!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: review.checkBoxReview!.map((tag) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0F0F0),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF3E4959),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      )).toList(),
+                    ),
+                  ),
 
                 Text(
                   review.textReview ?? '',

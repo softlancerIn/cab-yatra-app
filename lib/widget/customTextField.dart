@@ -71,7 +71,10 @@ class CommonTextFormField extends StatelessWidget {
     this.backgroundColor = Colors.white,
     this.borderColor,
     this.borderRadius = 10.0,
+    this.contentPadding,
   });
+
+  final EdgeInsetsGeometry? contentPadding;
 
   // Regex validator same as before
   String? _regexValidator(String? value) {
@@ -134,7 +137,7 @@ class CommonTextFormField extends StatelessWidget {
               : null,
           suffixIcon: customSuffix ?? suffixIcon,
           border: InputBorder.none, // No border, just container handles it
-          contentPadding:
+          contentPadding: contentPadding ??
               const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           hintStyle: const TextStyle(
             color: Colors.black54,

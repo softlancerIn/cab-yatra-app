@@ -51,8 +51,43 @@ class DriverBloc extends Bloc<DriverEvent, DriverState> {
     });
 
     on<DeleteDriver>(_deleteDriver);
+    on<UpdateDriver>(_updateDriver);
+    on<FetchDriverById>(_onFetchDriverById);
+    on<ResetDriverForm>((event, emit) {
+      emit(state.copyWith(clearFiles: true));
+    });
+  }
 
+  Future<void> _onFetchDriverById(FetchDriverById event, Emitter<DriverState> emit) async {
+    emit(state.copyWith(isFetching: true));
+    try {
+      final result = await repo.getDriverById(event.id);
+      emit(state.copyWith(isFetching: false, selectedDriver: result["data"]));
+    } catch (e) {
+      emit(state.copyWith(isFetching: false, error: e.toString()));
+    }
+  }
 
+  Future<void> _updateDriver(
+      UpdateDriver event,
+      Emitter<DriverState> emit,
+      ) async {
+    emit(state.copyWith(loading: true, success: false));
+
+    try {
+      await repo.updateDriver(
+        id: event.id,
+        fields: event.fields,
+        files: event.files,
+      );
+
+      emit(state.copyWith(loading: false, success: true));
+      add(LoadDrivers());
+      await Future.delayed(const Duration(milliseconds: 300));
+      emit(state.copyWith(success: false));
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+    }
   }
 
   Future<void> _deleteDriver(

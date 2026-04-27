@@ -41,7 +41,7 @@ class CustomSearchBar extends StatelessWidget {
               onSubmitted: (_) => onSearch(),
               onChanged: onChanged,
               decoration: const InputDecoration(
-                hintText: 'Search your post booking ...',
+                hintText: 'Search by Booking ID ...',
                 hintStyle: TextStyle(
                   color: Colors.grey,
                   fontSize: 12,

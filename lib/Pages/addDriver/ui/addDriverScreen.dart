@@ -94,7 +94,8 @@ import '../bloc/submitDriver.dart';
 //   }
 // }
 class AddDriverBottomSheet extends StatefulWidget {
-  const AddDriverBottomSheet({super.key});
+  final int? driverId;
+  const AddDriverBottomSheet({super.key, this.driverId});
 
   @override
   State<AddDriverBottomSheet> createState() => _AddDriverBottomSheetState();
@@ -106,6 +107,14 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
   final licenseCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
   final addressCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.driverId != null) {
+      context.read<DriverBloc>().add(FetchDriverById(widget.driverId!));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,12 +129,14 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
         listener: (context, state) {
           if (state.success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Driver Added Successfully"),
+              SnackBar(
+                content: Text(widget.driverId == null
+                    ? "Driver Added Successfully"
+                    : "Driver Updated Successfully"),
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           } else if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -133,6 +144,20 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                 backgroundColor: Colors.red,
               ),
             );
+          }
+
+          if (state.selectedDriver != null && widget.driverId != null) {
+            final driver = state.selectedDriver;
+            if (nameCtrl.text.isEmpty)
+              nameCtrl.text = (driver['name'] ?? '').toString();
+            if (phoneCtrl.text.isEmpty)
+              phoneCtrl.text = (driver['phone_number'] ?? '').toString();
+            if (licenseCtrl.text.isEmpty)
+              licenseCtrl.text = (driver['license_number'] ?? '').toString();
+            if (cityCtrl.text.isEmpty)
+              cityCtrl.text = (driver['city_name'] ?? '').toString();
+            if (addressCtrl.text.isEmpty)
+              addressCtrl.text = (driver['address'] ?? '').toString();
           }
         },
         child: SingleChildScrollView(
@@ -144,9 +169,9 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Add Driver",
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  Text(widget.driverId == null ? "Add Driver" : "Update Driver",
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                   InkWell(
                     onTap: () => Navigator.pop(context),
                     child: const CircleAvatar(
@@ -174,16 +199,30 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                         decoration: BoxDecoration(
                           color: Colors.grey.shade300,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade400, width: 1.5),
+                          border: Border.all(
+                              color: Colors.grey.shade400, width: 1.5),
                           image: state.profileImage != null
                               ? DecorationImage(
                                   image: FileImage(state.profileImage!),
                                   fit: BoxFit.cover,
                                 )
-                              : null,
+                              : (state.selectedDriver != null &&
+                                      state.selectedDriver[
+                                              'profile_image_url'] !=
+                                          null)
+                                  ? DecorationImage(
+                                      image: NetworkImage(state
+                                          .selectedDriver['profile_image_url']),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                         ),
-                        child: state.profileImage == null
-                            ? const Icon(Icons.person_add, size: 40, color: Colors.black)
+                        child: (state.profileImage == null &&
+                                (state.selectedDriver == null ||
+                                    state.selectedDriver['profile_image_url'] ==
+                                        null))
+                            ? const Icon(Icons.person_add,
+                                size: 40, color: Colors.black)
                             : null,
                       ),
                     );
@@ -199,7 +238,11 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
               const SizedBox(height: 15),
 
               CommonTextFormField(
-                  controller: phoneCtrl, hintText: "Contact Number",maxLength: 10,),
+                controller: phoneCtrl,
+                hintText: "Contact Number",
+                maxLength: 10,
+                keyboardType: TextInputType.number,
+              ),
               const SizedBox(height: 15),
 
               CommonTextFormField(
@@ -227,6 +270,7 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                         child: _uploadBox(
                           text: "+ Front",
                           file: state.dlFront,
+                          imageUrl: state.selectedDriver?['dl_frontImage_url'],
                           onTap: () {
                             context.read<DriverBloc>().add(PickDLFront());
                           },
@@ -237,6 +281,7 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                         child: _uploadBox(
                           text: "+ Back",
                           file: state.dlBack,
+                          imageUrl: state.selectedDriver?['dl_backImage_url'],
                           onTap: () {
                             context.read<DriverBloc>().add(PickDLBack());
                           },
@@ -262,6 +307,8 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                         child: _uploadBox(
                           text: "+ Front",
                           file: state.aadharFront,
+                          imageUrl:
+                              state.selectedDriver?['aadhar_frontImage_url'],
                           onTap: () {
                             context.read<DriverBloc>().add(PickAadharFront());
                           },
@@ -272,6 +319,8 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                         child: _uploadBox(
                           text: "+ Back",
                           file: state.aadharBack,
+                          imageUrl:
+                              state.selectedDriver?['aadhar_backImage_url'],
                           onTap: () {
                             context.read<DriverBloc>().add(PickAadharBack());
                           },
@@ -296,16 +345,29 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
                       };
 
                       final files = <String, File>{};
-                      if (state.profileImage != null) files["profile_image"] = state.profileImage!;
-                      if (state.dlFront != null) files["dl_frontImage"] = state.dlFront!;
-                      if (state.dlBack != null) files["dl_backImage"] = state.dlBack!;
-                      if (state.aadharFront != null) files["aadhar_frontImage"] = state.aadharFront!;
-                      if (state.aadharBack != null) files["aadhar_backImage"] = state.aadharBack!;
+                      if (state.profileImage != null)
+                        files["driver_image"] = state.profileImage!;
+                      if (state.dlFront != null)
+                        files["dl_frontImage"] = state.dlFront!;
+                      if (state.dlBack != null)
+                        files["dl_backImage"] = state.dlBack!;
+                      if (state.aadharFront != null)
+                        files["aadhar_frontImage"] = state.aadharFront!;
+                      if (state.aadharBack != null)
+                        files["aadhar_backImage"] = state.aadharBack!;
 
-                      context.read<DriverBloc>().add(SubmitDriver(fields, files));
+                      if (widget.driverId != null) {
+                        context
+                            .read<DriverBloc>()
+                            .add(UpdateDriver(widget.driverId!, fields, files));
+                      } else {
+                        context
+                            .read<DriverBloc>()
+                            .add(SubmitDriver(fields, files));
+                      }
                     },
                     isLoading: state.loading,
-                    text: "Add +",
+                    text: widget.driverId == null ? "Add +" : "Update",
                   );
                 },
               ),
@@ -324,6 +386,7 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
     required String text,
     required VoidCallback onTap,
     required File? file,
+    String? imageUrl,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -333,24 +396,40 @@ class _AddDriverBottomSheetState extends State<AddDriverBottomSheet> {
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: file == null
-            ? Center(
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                  ),
-                ),
-              )
-            : ClipRRect(
+        child: file != null
+            ? ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.file(
                   file,
                   fit: BoxFit.cover,
                   width: double.infinity,
                 ),
-              ),
+              )
+            : (imageUrl != null && imageUrl.isNotEmpty)
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Text(
+                          text,
+                          style:
+                              const TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      text,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import '../../../cores/constants/api_constants.dart';
 import '../../../cores/network/api_service.dart';
@@ -13,7 +15,7 @@ class ChatRepo {
   }) async {
     try {
       final response = await _apiService.get(
-        "${ApiConstants.allChatDrivers}?type=$type",
+        "${ApiConstants.allChatDrivers}?type=$type&is_approve=1",
       );
       return ChatDriversResponseModel.fromJson(response);
     } catch (e) {
@@ -37,44 +39,50 @@ class ChatRepo {
     }
   }
 
-  Future<List<MessageListModel>> getChatMessages({
+  Future<Map<String, dynamic>> getChatMessages({
     required BuildContext context,
     required String bookingId,
+    required String driverId,
   }) async {
     try {
       final response = await _apiService.get(
-        "${ApiConstants.chatMessages}/$bookingId",
+        "${ApiConstants.chatMessages}/$bookingId?driver_id=$driverId",
       );
       
-      if (response is List) {
-        return response.map((e) => MessageListModel.fromJson(e)).toList();
-      } else if (response is Map && response['status'] == true && response['data'] != null) {
-        return (response['data'] as List)
-            .map((e) => MessageListModel.fromJson(e))
-            .toList();
+      if (response is Map) {
+        return Map<String, dynamic>.from(response);
       }
-      return [];
+      return {};
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> sendMessage({
+  Future<Map<String, dynamic>?> sendNewMessage({
     required BuildContext context,
     required String bookingId,
     required String receiverId,
     required String message,
+    String? socketId,
+    required int type,
+    Map<String, dynamic>? metaData,
   }) async {
     try {
+      final formData = FormData.fromMap({
+        'booking_id': bookingId,
+        'receiver_id': receiverId,
+        'message': message,
+        'type': type.toString(),
+        // API expects meta_data as a JSON string, or empty string if none
+        'meta_data': metaData != null ? jsonEncode(metaData) : '',
+      });
+
       final response = await _apiService.post(
         ApiConstants.sendMessage,
-        data: {
-          'booking_id': bookingId,
-          'receiver_id': receiverId,
-          'message': message,
-        },
+        data: formData,
+        options: socketId != null ? Options(headers: {'X-Socket-Id': socketId}) : null,
       );
-      return response['status'] == true;
+      return response as Map<String, dynamic>?;
     } catch (e) {
       rethrow;
     }
@@ -94,6 +102,92 @@ class ChatRepo {
         },
       );
       // Pusher expect a JSON response with 'auth' and optionally 'channel_data'
+      return response as Map<String, dynamic>?;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> updateBookingStatus({
+    required BuildContext context,
+    required String bookingId,
+    required String status,
+  }) async {
+    try {
+      final response = await _apiService.put(
+        "${ApiConstants.booking}/$bookingId",
+        data: {"status": status},
+      );
+      return (response['status'] == true || response['status'] == 1);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Creates a Razorpay order and returns the full response map.
+  /// The [amount] should be in rupees (e.g. 500 for ₹500).
+  /// The API accepts rupees and returns `amount` in paise in the response.
+  Future<Map<String, dynamic>?> createRazorpayOrder({
+    required num amount,
+  }) async {
+    try {
+      final response = await _apiService.post(
+        ApiConstants.razorpayCreateOrder,
+        data: {'amount': amount.toInt()}, // send rupees directly
+      );
+      return response as Map<String, dynamic>?;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Verifies a Razorpay payment using multipart form-data.
+  /// [amount] should be in rupees (e.g. 500 for ₹500).
+  Future<Map<String, dynamic>?> verifyPayment({
+    required String orderId,
+    required String paymentId,
+    required String signature,
+    required num amount,
+    required String bookingId, // ✅ newly required
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        "razorpay_order_id": orderId,
+        "razorpay_payment_id": paymentId,
+        "razorpay_signature": signature,
+        "amount": amount.toInt().toString(),
+        "booking_id": bookingId,
+      });
+
+      final response = await _apiService.post(
+        ApiConstants.razorpayVerifyPayment,
+        data: formData,
+      );
+      return response as Map<String, dynamic>?;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Submits a star rating and optional review comment for a completed booking.
+  /// [bookingId] – the booking being rated
+  /// [rating]    – 1 to 5 stars
+  /// [review]    – optional text comment
+  Future<Map<String, dynamic>?> submitRating({
+    required String bookingId,
+    required int rating,
+    String review = '',
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'booking_id': bookingId,
+        'rating': rating.toString(),
+        'review': review,
+      });
+      final response = await _apiService.post(
+        ApiConstants.submitRating,
+        data: formData,
+      );
       return response as Map<String, dynamic>?;
     } catch (e) {
       rethrow;

@@ -22,43 +22,37 @@ class VehicleRepo {
   /// GET VEHICLE LIST
   Future<VehicleListModel> getVehicles() async {
     final response = await _api.get(
-      "api/driver/V2/profile/vehicles", // Assuming this is the endpoint
+      ApiConstants.vehicles,
       requiresAuth: true,
     );
     return VehicleListModel.fromJson(response);
   }
 
+  /// GET VEHICLE BY ID
+  Future<Map<String, dynamic>> getVehicleById(int id) async {
+    final response = await _api.get(
+      "${ApiConstants.vehicles}/$id",
+      requiresAuth: true,
+    );
+    return response;
+  }
+
   /// DELETE VEHICLE
   Future<bool> deleteVehicle(int id) async {
     final response = await _api.delete(
-      "api/driver/V2/profile/vehicles/$id",
+      "${ApiConstants.vehicles}/$id",
       requiresAuth: true,
     );
     return response['status'] == true;
   }
-
-  /// ADD VEHICLE
- /* Future<bool> addVehicle({
-    required Map<String, dynamic> fields,
-    required Map<String, File> files,
-  }) async {
-    final response = await _api.uploadFiles(
-      "api/driver/V2/profile/vehicles",
-      fields: fields,
-      files: files,
-      requiresAuth: true,
-    );
-    return response['status'] == true;
-  }*/
 
   /// ADD VEHICLE
   Future<bool> addVehicle({
     required Map<String, dynamic> fields,
     required Map<String, File> files,
   }) async {
-
     final response = await _api.uploadFiles(
-      "api/driver/V2/profile/vehicles",
+      ApiConstants.vehicles,
       fields: fields,
       files: files,
       requiresAuth: true,
@@ -71,7 +65,24 @@ class VehicleRepo {
     return false;
   }
 
+  /// UPDATE VEHICLE (PUT)
+  Future<bool> updateVehicle({
+    required int id,
+    required Map<String, dynamic> fields,
+    required Map<String, File> files,
+  }) async {
+    final response = await _api.uploadFiles(
+      "${ApiConstants.vehicles}/$id",
+      fields: fields,
+      files: files,
+      requiresAuth: true,
+      method: "POST",
+    );
 
+    if (response != null && response['status'] == true) {
+      return true;
+    }
 
-
+    return false;
+  }
 }

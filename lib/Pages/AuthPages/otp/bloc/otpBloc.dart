@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../app/router/navigation/nav.dart';
@@ -20,28 +21,48 @@ class OTPBloc extends Bloc<OTPEvent, OTPState> {
     VerifyOtpEvent event,
     Emitter<OTPState> emit,
   ) async {
-    emit(state.copyWith(isLoading: true, hasError: false));
-
-    final response = await authRepo.verifyOtp(
-      phone: event.mobileNumber,
-      otp: event.otp,
-      context: event.context,
-    );
-
-    if (response.status == true) {
-      Nav.go(event.context, Routes.home);
-      emit(
-        state.copyWith(
-          isLoading: false,
-          isSuccess: true,
-        ),
+    try {
+      final response = await authRepo.verifyOtp(
+        phone: event.mobileNumber,
+        otp: event.otp,
+        context: event.context,
       );
-    } else {
+
+      if (response.status == true) {
+        // Navigation is handled inside authRepo.verifyOtp for "Old" users
+        // but we still emit success here.
+        emit(
+          state.copyWith(
+            isLoading: false,
+            isSuccess: true,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            hasError: true,
+            errorMessage: response.message?.toString() ?? "Verification failed",
+          ),
+        );
+      }
+    } catch (e) {
+      String message = "Something went wrong";
+      if (e is DioException) {
+        if (e.response?.data != null && e.response?.data is Map) {
+          message = e.response?.data['message']?.toString() ?? message;
+        } else {
+          message = e.message ?? message;
+        }
+      } else {
+        message = e.toString();
+      }
+      
       emit(
         state.copyWith(
           isLoading: false,
           hasError: true,
-          errorMessage: response.message, // 👈 API message
+          errorMessage: message,
         ),
       );
     }

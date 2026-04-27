@@ -8,11 +8,11 @@ import '../bookingDetails/ui/bookingDetailScreen.dart';
 import 'bloc/booking_bloc.dart';
 import 'bloc/booking_event.dart';
 import 'bloc/booking_state.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_bloc.dart';
-import 'package:cab_taxi_app/Pages/HomePageFlow/dashboard/bloc/dashboard_state.dart';
 import '../HomePageFlow/custom/apply_filter_dialog.dart';
 import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
+import '../../cores/services/secure_storage_service.dart';
 import '../chat/chat_listing.dart';
+import '../chat/repo/chat_repo.dart';
 
 class BookingPage extends StatefulWidget {
   final VoidCallback? onBack;
@@ -28,7 +28,46 @@ class _BookingPageState extends State<BookingPage> {
   @override
   void initState() {
     super.initState();
+    context.read<BookingBloc>().add(const RESETBookingEvent());
     context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+  }
+
+  String _getStatusText(String? status) {
+    switch (status) {
+      case '0':
+        return 'Open';
+      case '1':
+        return 'Assigned';
+      case '2':
+        return 'Completed';
+      case '3':
+        return 'Cancelled';
+      case '4':
+        return 'Picked Up';
+      case '5':
+        return 'Expired';
+      default:
+        return status ?? '';
+    }
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status) {
+      case '0':
+        return const Color(0xff45B129); // Green for Open
+      case '1':
+        return const Color(0xffFCB117); // Orange for Assigned
+      case '2':
+        return const Color(0xff45B129); // Green for Completed
+      case '3':
+        return const Color(0xffF45858); // Red for Cancelled
+      case '4':
+        return Colors.blue; // Blue for Picked Up
+      case '5':
+        return Colors.grey; // Grey for Expired
+      default:
+        return const Color(0xff45B129);
+    }
   }
 
   @override
@@ -41,9 +80,14 @@ class _BookingPageState extends State<BookingPage> {
         showLeading: true,
         onLeadingPressed: widget.onBack ?? () => Navigator.pop(context),
       ),
-      body: BlocBuilder<BookingBloc, BookingState>(
+      body: BlocConsumer<BookingBloc, BookingState>(
+        listener: (context, state) {
+          if (state.searchQuery.isEmpty && searchController.text.isNotEmpty) {
+            searchController.clear();
+          }
+        },
         builder: (context, state) {
-          if (state.isLoading) {
+          if (state.isLoading && state.postedBookingModel == null) {
             return SizedBox(
               height: size.height,
               width: size.width,
@@ -52,57 +96,74 @@ class _BookingPageState extends State<BookingPage> {
           }
           if (state.postedBookingModel == null) {
             return SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              }
+              height: size.height,
+              width: size.width,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          }
 
-              final allBookings = state.postedBookingModel!.data ?? [];
-              final newBooking = allBookings.where((booking) {
-                // Search Query Filter
-                final query = state.searchQuery.toLowerCase().trim();
-                bool matchesSearch = query.isEmpty ||
-                    (booking.orderId?.toLowerCase().contains(query) ?? false) ||
-                    (booking.id?.toString().toLowerCase().contains(query) ?? false);
+          final allBookings = state.postedBookingModel!.data ?? [];
+          final newBooking = allBookings.where((booking) {
+            // Search Query Filter
+            final query = state.searchQuery.toLowerCase().trim();
+            bool matchesSearch = query.isEmpty ||
+                (booking.orderId?.toLowerCase().contains(query) ?? false) ||
+                (booking.id?.toString().toLowerCase().contains(query) ?? false);
 
-                // Drop Location Filter
-                bool matchesDrop = state.dropLocationFilter == null ||
-                    (booking.destinationLoc ?? "")
+            // Drop Location Filter
+            bool matchesDrop = state.dropLocationFilter == null ||
+                (booking.destinationLoc ?? "")
+                    .toLowerCase()
+                    .contains(state.dropLocationFilter!.toLowerCase());
+
+            // Pickup Location Filter
+            bool matchesPickup = state.pickupLocationFilters == null ||
+                state.pickupLocationFilters!.isEmpty ||
+                state.pickupLocationFilters!.any((loc) =>
+                    (booking.pickUpLoc ?? "")
                         .toLowerCase()
-                        .contains(state.dropLocationFilter!.toLowerCase());
+                        .contains(loc.toLowerCase()));
 
-                // Pickup Location Filter
-                bool matchesPickup = state.pickupLocationFilters == null ||
-                    state.pickupLocationFilters!.any((loc) =>
-                        (booking.pickUpLoc ?? "")
-                            .toLowerCase()
-                            .contains(loc.toLowerCase()));
+            // Vehicle Type Filter
+            bool matchesVehicle = state.selectedVehicleTypes == null ||
+                state.selectedVehicleTypes!.isEmpty ||
+                state.selectedVehicleTypes!.any((v) =>
+                    (booking.carCategory?.name ?? "")
+                        .toLowerCase()
+                        .contains(v.toLowerCase()));
 
-                // Vehicle Type Filter
-                bool matchesVehicle = state.selectedVehicleTypes == null ||
-                    state.selectedVehicleTypes!.any((v) =>
-                        (booking.carCategory?.name ?? "")
-                            .toLowerCase()
-                            .contains(v.toLowerCase()));
+            // Booking Status Filter
+            bool matchesStatus = true;
+            if (state.bookingStatusFilter != null) {
+              final bookingStatus = booking.status ?? booking.isAssigned;
+              switch (state.bookingStatusFilter) {
+                case 'Open':
+                  matchesStatus = bookingStatus == '0';
+                  break;
+                case 'Assigned':
+                  matchesStatus = bookingStatus == '1';
+                  break;
+                case 'Completed':
+                  matchesStatus = bookingStatus == '2';
+                  break;
+                case 'Cancelled':
+                  matchesStatus = bookingStatus == '3';
+                  break;
+                case 'Picked Up':
+                  matchesStatus = bookingStatus == '4';
+                  break;
+                case 'Expired':
+                  matchesStatus = bookingStatus == '5';
+                  break;
+              }
+            }
 
-                // Booking Status Filter
-                bool matchesStatus = true;
-                if (state.bookingStatusFilter != null) {
-                  if (state.bookingStatusFilter == 'Open') {
-                    matchesStatus = booking.isAssigned == '0';
-                  } else if (state.bookingStatusFilter == 'Assigned') {
-                    matchesStatus = booking.isAssigned == '1';
-                  }
-                  // Note: Add logic here for Completed/Cancelled if API supports it
-                }
-
-                return matchesSearch &&
-                    matchesDrop &&
-                    matchesPickup &&
-                    matchesVehicle &&
-                    matchesStatus;
-              }).toList();
+            return matchesSearch &&
+                matchesDrop &&
+                matchesPickup &&
+                matchesVehicle &&
+                matchesStatus;
+          }).toList();
 
           return Column(
             children: [
@@ -159,7 +220,9 @@ class _BookingPageState extends State<BookingPage> {
                         ),
                         child: Icon(
                           Icons.tune,
-                          color: state.isFilterActive ? const Color(0xffF45858) : Colors.black,
+                          color: state.isFilterActive
+                              ? const Color(0xffF45858)
+                              : Colors.black,
                           size: 28,
                         ),
                       ),
@@ -171,6 +234,9 @@ class _BookingPageState extends State<BookingPage> {
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {
+                    context
+                        .read<BookingBloc>()
+                        .add(const ClearPostedBookingFilterEvent());
                     context
                         .read<BookingBloc>()
                         .add(GetPostedBooingEvent(context: context));
@@ -187,6 +253,7 @@ class _BookingPageState extends State<BookingPage> {
                             MaterialPageRoute(
                               builder: (context) => BookingDetailScreen(
                                 bookingID: newBookingData.id.toString(),
+                                showShareIcon: true,
                               ),
                             ),
                           );
@@ -228,12 +295,16 @@ class _BookingPageState extends State<BookingPage> {
                                           ),
                                         ),
                                         TextSpan(
-                                          text: newBookingData.isAssigned == '1' ? '(Assigned)' : '(Open)',
+                                          text: _getStatusText(
+                                              newBookingData.status ??
+                                                  newBookingData.isAssigned),
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                             fontFamily: 'Poppins',
-                                            color: newBookingData.isAssigned == '1' ? Colors.blue : const Color(0xff45B129),
+                                            color: _getStatusColor(
+                                                newBookingData.status ??
+                                                    newBookingData.isAssigned),
                                           ),
                                         ),
                                       ],
@@ -273,6 +344,18 @@ class _BookingPageState extends State<BookingPage> {
                                                 color: Color(0xffF45858),
                                                 fontFamily: 'Poppins'),
                                           ),
+                                          if (newBookingData.noOfDays != null &&
+                                              newBookingData
+                                                  .noOfDays!.isNotEmpty &&
+                                              newBookingData.noOfDays != "0")
+                                            Text(
+                                              ' (${newBookingData.noOfDays!.padLeft(2, '0')} days)',
+                                              style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                  fontFamily: 'Poppins'),
+                                            ),
                                         ],
                                       ),
                                       Text(
@@ -329,7 +412,11 @@ class _BookingPageState extends State<BookingPage> {
                                           children: [
                                             const SizedBox(height: 2),
                                             Text(
-                                              newBookingData.pickUpLoc ?? "",
+                                              (newBookingData.pickUpCity ?? "")
+                                                      .isNotEmpty
+                                                  ? newBookingData.pickUpCity!
+                                                  : (newBookingData.pickUpLoc ??
+                                                      ""),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
@@ -338,7 +425,10 @@ class _BookingPageState extends State<BookingPage> {
                                                   fontFamily: 'Poppins'),
                                             ),
                                             const SizedBox(height: 18),
-                                            if ((newBookingData.subTypeLabel ?? "").toLowerCase().contains('round'))
+                                            if ((newBookingData.subTypeLabel ??
+                                                    "")
+                                                .toLowerCase()
+                                                .contains('round'))
                                               const Text(
                                                 'Round Trip',
                                                 style: TextStyle(
@@ -349,7 +439,14 @@ class _BookingPageState extends State<BookingPage> {
                                               )
                                             else
                                               Text(
-                                                newBookingData.destinationLoc ?? "",
+                                                (newBookingData.destinationCity ??
+                                                            "")
+                                                        .isNotEmpty
+                                                    ? newBookingData
+                                                        .destinationCity!
+                                                    : (newBookingData
+                                                            .destinationLoc ??
+                                                        ""),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
@@ -365,7 +462,8 @@ class _BookingPageState extends State<BookingPage> {
 
                                       /// Commission Box
                                       Container(
-                                        height: 38,
+                                        height:
+                                            30, // Decreased height as per Figma
                                         decoration: BoxDecoration(
                                           color: const Color(0xffEFEFEF),
                                           borderRadius:
@@ -384,12 +482,12 @@ class _BookingPageState extends State<BookingPage> {
                                                   Text(
                                                       '₹ ${newBookingData.totalFaire}',
                                                       style: const TextStyle(
-                                                          fontSize: 11,
+                                                          fontSize: 10,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           fontFamily:
                                                               'Poppins')),
-                                                  const Text('Total Faire',
+                                                  const Text('Total Amount',
                                                       style: TextStyle(
                                                           fontSize: 7,
                                                           fontFamily:
@@ -414,7 +512,7 @@ class _BookingPageState extends State<BookingPage> {
                                                   Text(
                                                       '₹ ${newBookingData.driverCommission}',
                                                       style: const TextStyle(
-                                                          fontSize: 11,
+                                                          fontSize: 10,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                           color: Colors.white,
@@ -488,11 +586,20 @@ class _BookingPageState extends State<BookingPage> {
                                               fontFamily: 'Poppins'),
                                         ),
                                         TextSpan(
-                                          text: newBookingData.remark ?? "N/A",
+                                          text: (newBookingData.extra != null &&
+                                                  newBookingData
+                                                      .extra!.isNotEmpty)
+                                              ? (newBookingData.remark !=
+                                                          null &&
+                                                      newBookingData
+                                                          .remark!.isNotEmpty)
+                                                  ? "${newBookingData.extra!}, ${newBookingData.remark!}"
+                                                  : newBookingData.extra!
+                                              : newBookingData.remark ?? "N/A",
                                           style: const TextStyle(
                                               fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xffF45858),
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.black,
                                               fontFamily: 'Poppins'),
                                         ),
                                       ],
@@ -500,105 +607,383 @@ class _BookingPageState extends State<BookingPage> {
                                   ),
                                 ),
 
-                                /// Footer Buttons (Chat, Edit, Delete)
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                  child: Row(
+                                  padding: const EdgeInsets.only(
+                                      left: 12, right: 12, bottom: 15),
+                                  child: Column(
                                     children: [
-                                      Expanded(
-                                        child: _actionButton(
+                                      // Case 1: Assigned Booking (Stacked Buttons)
+                                      if (newBookingData.status == '1') ...[
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _actionButton(
+                                                icon: "assets/images/chatNew.png",
+                                                label: "Chat",
+                                                color: const Color(0xffFCB117),
+                                                onTap: () async {
+                                                  if (newBookingData.assignDriverId != null && newBookingData.assignDriverId != 0) {
+                                                    final myId = await SecureStorageService.getUserId();
+                                                    final isMeCreator = myId == newBookingData.driverId?.toString() || myId == newBookingData.userId?.toString();
+                                                    final String finalReceiverId = isMeCreator 
+                                                        ? newBookingData.assignDriverId.toString() 
+                                                        : (newBookingData.driverId?.toString() ?? "0");
+                                                    final String finalUserName = isMeCreator ? (newBookingData.assignDriver?.name ?? newBookingData.carCategory?.name ?? "Driver") : "Agent";
+
+                                                    Nav.push(context, Routes.chatScreen, extra: {
+                                                      'userName': finalUserName,
+                                                      'bookingId': newBookingData.id.toString(),
+                                                      'creatorName': "Guddu",
+                                                      'driver_id': finalReceiverId,
+                                                      'receiverId': finalReceiverId,
+                                                    });
+                                                  } else {
+                                                    ChatListingScreen.show(context,
+                                                        bookingId: newBookingData.id.toString());
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _actionButton(
+                                                label: "Pickup Booking",
+                                                color: const Color(0xffFCB117),
+                                                onTap: () async {
+                                                  final chatRepo = ChatRepo();
+                                                  final success = await chatRepo.updateBookingStatus(
+                                                    context: context,
+                                                    bookingId: newBookingData.id.toString(),
+                                                    status: "4",
+                                                  );
+                                                  if (success) {
+                                                    await chatRepo.sendNewMessage(
+                                                      context: context,
+                                                      bookingId: newBookingData.id.toString(),
+                                                      receiverId: newBookingData.assignDriverId?.toString() ?? '0',
+                                                      message: "This booking is picked by agent",
+                                                      type: 3,
+                                                    );
+                                                    if (context.mounted) {
+                                                      context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+                                                    }
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 10),
+                                        _actionButton(
+                                          label: "Cancel Booking",
+                                          color: const Color(0xffF45858),
+                                          onTap: () async {
+                                            bool? confirm = await showDialog<bool>(
+                                              context: context,
+                                              builder: (ctx) => AlertDialog(
+                                                title: const Text("Cancel Booking", style: TextStyle(fontFamily: 'Poppins')),
+                                                content: const Text("Are you sure you want to cancel this booking?", style: TextStyle(fontFamily: 'Poppins')),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(ctx, false),
+                                                    child: const Text("No", style: TextStyle(color: Colors.grey, fontFamily: 'Poppins')),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () => Navigator.pop(ctx, true),
+                                                    child: const Text("Yes", style: TextStyle(color: Color(0xffF45858), fontFamily: 'Poppins')),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            
+                                            if (confirm == true) {
+                                              final chatRepo = ChatRepo();
+                                              final success = await chatRepo.updateBookingStatus(
+                                                context: context,
+                                                bookingId: newBookingData.id.toString(),
+                                                status: "3",
+                                              );
+                                              if (success && context.mounted) {
+                                                context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ]
+                                      else if (newBookingData.status == '4')
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _actionButton(
+                                                icon: "assets/images/chatNew.png",
+                                                label: "Chat",
+                                                color: const Color(0xffFCB117),
+                                                onTap: () async {
+                                                  final myId = await SecureStorageService.getUserId();
+                                                  final isMeCreator = myId == newBookingData.driverId?.toString() || myId == newBookingData.userId?.toString();
+                                                  final String finalReceiverId = isMeCreator 
+                                                      ? (newBookingData.assignDriverId?.toString() ?? newBookingData.driverId?.toString() ?? "0")
+                                                      : (newBookingData.driverId?.toString() ?? "0");
+                                                  final String finalUserName = isMeCreator ? (newBookingData.assignDriver?.name ?? newBookingData.carCategory?.name ?? "Driver") : "Agent";
+
+                                                  Nav.push(context, Routes.chatScreen, extra: {
+                                                    'userName': finalUserName,
+                                                    'bookingId': newBookingData.id.toString(),
+                                                    'creatorName': "Guddu",
+                                                    'driver_id': finalReceiverId,
+                                                    'receiverId': finalReceiverId,
+                                                  });
+                                                },
+                                              ),
+                                            ),
+                                            
+                                            // 2-hour delay check for End Booking
+                                            if (() {
+                                              final pdt = newBookingData.pickupDateTime;
+                                              if (pdt == null) return true;
+                                              return DateTime.now().isAfter(pdt.add(const Duration(hours: 2)));
+                                            }()) ...[
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: _actionButton(
+                                                  label: "End Booking",
+                                                  color: const Color(0xFF2C3E50),
+                                                  onTap: () async {
+                                                    final chatRepo = ChatRepo();
+                                                    final success = await chatRepo.updateBookingStatus(
+                                                      context: context,
+                                                      bookingId: newBookingData.id.toString(),
+                                                      status: "2",
+                                                    );
+                                                    if (success) {
+                                                      await chatRepo.sendNewMessage(
+                                                        context: context,
+                                                        bookingId: newBookingData.id.toString(),
+                                                        receiverId: newBookingData.assignDriverId?.toString() ?? '0',
+                                                        message: "This booking is completed",
+                                                        type: 3,
+                                                      );
+                                                      if (context.mounted) {
+                                                        context.read<BookingBloc>().add(GetPostedBooingEvent(context: context));
+                                                      }
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        )
+                                      // Case 2: Open Booking (Side-by-side Chat/Edit/Delete)
+                                      else if (newBookingData.status == '0')
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: _actionButton(
+                                                icon:
+                                                    "assets/images/chatNew.png",
+                                                label: "Chat",
+                                                color: const Color(0xffFCB117),
+                                                onTap: () async {
+                                                  if (newBookingData.assignDriverId != null && newBookingData.assignDriverId != 0) {
+                                                    final myId = await SecureStorageService.getUserId();
+                                                    // For posted bookings, driver_id IS the creator (poster)
+                                                    final isMeCreator = myId == newBookingData.driverId?.toString() || myId == newBookingData.userId?.toString();
+                                                    final String finalReceiverId = isMeCreator 
+                                                        ? newBookingData.assignDriverId.toString() 
+                                                        : (newBookingData.driverId?.toString() ?? "0");
+                                                    final String finalUserName = isMeCreator ? (newBookingData.assignDriver?.name ?? newBookingData.carCategory?.name ?? "Driver") : "Agent";
+
+                                                    Nav.push(context, Routes.chatScreen, extra: {
+                                                      'userName': finalUserName,
+                                                      'bookingId': newBookingData.id.toString(),
+                                                      'creatorName': "Guddu",
+                                                      'driver_id': finalReceiverId,
+                                                      'receiverId': finalReceiverId,
+                                                    });
+                                                  } else {
+                                                    ChatListingScreen.show(context,
+                                                        bookingId: newBookingData.id.toString());
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _actionButton(
+                                                icon:
+                                                    "assets/images/pencil 1.png",
+                                                label: "Edit",
+                                                color: Colors.black,
+                                                onTap: () {
+                                                  Nav.push(context,
+                                                      Routes.editBooking,
+                                                      extra: newBookingData);
+                                                },
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: _actionButton(
+                                                label: "Delete",
+                                                color: const Color(0xffF45858),
+                                                onTap: () {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (context) =>
+                                                        DeleteBookingDialog(
+                                                            bookingId:
+                                                                newBookingData
+                                                                    .id
+                                                                    .toString()),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      // Case 3: Expired Booking (Show User List)
+                                      else if (newBookingData.status == '5')
+                                        _actionButton(
                                           icon: "assets/images/chatNew.png",
                                           label: "Chat",
                                           color: const Color(0xffFCB117),
                                           onTap: () {
-                                            ChatListingScreen.show(context, bookingId: newBookingData.id.toString());
+                                            ChatListingScreen.show(context,
+                                                bookingId: newBookingData.id
+                                                    .toString());
+                                          },
+                                        )
+                                      // Case 4: Other statuses (Single Chat button)
+                                      else if (newBookingData.status != '0')
+                                        _actionButton(
+                                          icon: "assets/images/chatNew.png",
+                                          label: "Chat",
+                                          color: const Color(0xffFCB117),
+                                          onTap: () async {
+                                            final bool isAssigned =
+                                                (newBookingData.driverId != null &&
+                                                    newBookingData.driverId != 0 &&
+                                                    newBookingData.driverId != -1) ||
+                                                (newBookingData.assignDriverId != null &&
+                                                    newBookingData.assignDriverId != 0);
+
+                                            if (isAssigned ||
+                                                newBookingData.status == '4') {
+                                              final myId =
+                                                  await SecureStorageService
+                                                      .getUserId();
+                                              // For posted bookings, driver_id IS the creator (poster)
+                                              final isMeCreator = myId ==
+                                                  newBookingData.driverId?.toString() ||
+                                                  myId == newBookingData.userId?.toString();
+
+                                              final String finalReceiverId =
+                                                  isMeCreator
+                                                      ? (newBookingData.assignDriverId?.toString() ??
+                                                          newBookingData.driverId?.toString() ?? 
+                                                          "0")
+                                                      : (newBookingData.driverId
+                                                              ?.toString() ??
+                                                          "0");
+
+                                              final String finalUserName =
+                                                  isMeCreator
+                                                      ? (newBookingData.assignDriver?.name ??
+                                                          newBookingData.carCategory?.name ??
+                                                          "User")
+                                                      : "Agent";
+
+                                              Nav.push(
+                                                  context, Routes.chatScreen,
+                                                  extra: {
+                                                    'userName': finalUserName,
+                                                    'bookingId': newBookingData
+                                                        .id
+                                                        .toString(),
+                                                    'creatorName': "Guddu",
+                                                    'driver_id': finalReceiverId,
+                                                    'receiverId':
+                                                        finalReceiverId,
+                                                  });
+                                            } else {
+                                              ChatListingScreen.show(context,
+                                                  bookingId: newBookingData.id
+                                                      .toString());
+                                            }
                                           },
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _actionButton(
-                                          icon: "assets/images/pencil 1.png",
-                                          label: "Edit",
-                                          color: Colors.black,
-                                          onTap: () {
-                                            Nav.push(
-                                                context, Routes.editBooking,
-                                                extra: newBookingData);
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _actionButton(
-                                          label: "Delete",
-                                          color: const Color(0xffF45858),
-                                          onTap: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) =>
-                                                  DeleteBookingDialog(
-                                                      bookingId: newBookingData
-                                                          .id
-                                                          .toString()),
-                                            );
-                                          },
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
 
                                 /// Share Button
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(12, 10, 12, 15),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      double total = double.tryParse(newBookingData.totalFaire ?? '0') ?? 0.0;
-                                      double comm = double.tryParse(newBookingData.driverCommission ?? '0') ?? 0.0;
-                                      HelperFunctions.shareBookingDetail(
-                                        orderId: newBookingData.orderId ?? "",
-                                        subTypeLabel: newBookingData.subTypeLabel ?? "",
-                                        pickupLocation: newBookingData.pickUpLoc ?? "",
-                                        dropLocation: newBookingData.destinationLoc ?? "",
-                                        vehicleType: newBookingData.carCategory?.name ?? "",
-                                        driverEarning: total - comm,
-                                        pickupDate: newBookingData.pickUpDate ?? "",
-                                        pickupTime: newBookingData.pickUpTime ?? "",
-                                        remark: newBookingData.remark ?? "",
-                                        tripNotes: newBookingData.tripNotes ?? "",
-                                        noOfDays: newBookingData.noOfDays ?? "",
-                                      );
-                                    },
-                                    child: Container(
-                                      height: 44,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xffFCB117),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Text("Share",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                  fontFamily: 'Poppins')),
-                                          const SizedBox(width: 10),
-                                          Image.asset(
-                                              "assets/images/paper-plane 1.png",
-                                              height: 18,
-                                              color: Colors.white),
-                                        ],
+                                if (newBookingData.status == '0')
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        12, 10, 12, 15),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        double total = double.tryParse(
+                                                newBookingData.totalFaire ??
+                                                    '0') ??
+                                            0.0;
+                                        double comm = double.tryParse(
+                                                newBookingData
+                                                        .driverCommission ??
+                                                    '0') ??
+                                            0.0;
+                                        HelperFunctions.shareBookingDetail(
+                                          orderId: newBookingData.orderId ?? "",
+                                          subTypeLabel:
+                                              newBookingData.subTypeLabel ?? "",
+                                          pickupLocation:
+                                              newBookingData.pickUpLoc ?? "",
+                                          dropLocation:
+                                              newBookingData.destinationLoc ??
+                                                  "",
+                                          vehicleType: newBookingData
+                                                  .carCategory?.name ??
+                                              "",
+                                          driverEarning: total - comm,
+                                          pickupDate:
+                                              newBookingData.pickUpDate ?? "",
+                                          pickupTime:
+                                              newBookingData.pickUpTime ?? "",
+                                          remark: newBookingData.remark ?? "",
+                                          tripNotes:
+                                              newBookingData.tripNotes ?? "",
+                                          noOfDays:
+                                              newBookingData.noOfDays ?? "",
+                                        );
+                                      },
+                                      child: Container(
+                                        height: 44,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xffFCB117),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Text("Share",
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.white,
+                                                    fontFamily: 'Poppins')),
+                                            const SizedBox(width: 10),
+                                            Image.asset(
+                                                "assets/images/paper-plane 1.png",
+                                                height: 18,
+                                                color: Colors.white),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           ),

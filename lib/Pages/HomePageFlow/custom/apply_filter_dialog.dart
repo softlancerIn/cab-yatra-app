@@ -431,7 +431,7 @@ class _ApplyFilterDialogState extends State<ApplyFilterDialog> {
   }
 
   void _showStatusPicker() {
-    final List<String> statuses = ['Open', 'Assigned', 'Completed', 'Cancelled'];
+    final List<String> statuses = ['Open', 'Assigned', 'Completed', 'Cancelled', 'Expired'];
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,

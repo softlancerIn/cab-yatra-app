@@ -10,8 +10,9 @@ abstract class ReviewEvent extends Equatable {
 
 class LoadReviews extends ReviewEvent {
   final dynamic context;
-  const LoadReviews(this.context);
+  final String? driverId;
+  const LoadReviews(this.context, {this.driverId});
 
   @override
-  List<Object?> get props => [context];
+  List<Object?> get props => [context, driverId];
 }

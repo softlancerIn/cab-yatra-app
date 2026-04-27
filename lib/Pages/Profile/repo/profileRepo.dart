@@ -88,19 +88,20 @@ class ProfileRepo {
   }
   Future<GetProfileModel> getProfile({
     required BuildContext context,
-
+    String? driverId,
   }) async {
     try {
       final response = await _api.get(
         ApiConstants.profile,
         requiresAuth: true,
-
+        queryParameters: driverId != null ? {"id": driverId} : null,
       );
       print("?????????????????????");
-print("👌👌👌👌Profile Get success 👌👌👌👌👌 ${response["data"]["id"]}");
-
-      await SecureStorageService.saveUserID("${response['data']["id"]}");
-      print("👌👌👌👌Profile Get success22 👌👌👌👌👌 ${response["data"]["id"]}");
+      if (driverId == null) {
+        print("👌👌👌👌Profile Get success 👌👌👌👌👌 ${response["data"]["id"]}");
+        await SecureStorageService.saveUserID("${response['data']["id"]}");
+        print("👌👌👌👌Profile Get success22 👌👌👌👌👌 ${response["data"]["id"]}");
+      }
       return GetProfileModel.fromJson(response);
 
 
@@ -137,11 +138,16 @@ print("👌👌👌👌Profile Get success 👌👌👌👌👌 ${response["data
 
   Future<ReviewModel> getReviews({
     required BuildContext context,
+    String? driverId,
   }) async {
+      if (driverId == null || driverId == "0" || driverId.isEmpty) {
+        return ReviewModel(status: true, message: "No driver selected", data: []);
+      }
     try {
       final response = await _api.get(
         ApiConstants.reviews,
         requiresAuth: true,
+        queryParameters: {"driver_id": driverId},
       );
       return ReviewModel.fromJson(response);
     } on DioException catch (e) {

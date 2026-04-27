@@ -38,14 +38,19 @@ class ApiService {
         dynamic data,
         Map<String, dynamic>? queryParameters,
         bool requiresAuth = true,
+        Options? options,
       }) async {
     await _checkInternet();
     try {
+      final finalOptions = options ?? Options();
+      finalOptions.extra ??= {};
+      finalOptions.extra!['requiresAuth'] = requiresAuth;
+
       final response = await _dio.post(
         endpoint,
         data: data,
         queryParameters: queryParameters,
-        options: Options(extra: {'requiresAuth': requiresAuth}),
+        options: finalOptions,
       );
       return response.data;
     } catch (e) {
@@ -113,23 +118,27 @@ class ApiService {
     }
   }
   Future<dynamic> uploadFiles(
-      String endpoint, {
-        required Map<String, File> files,
-        Map<String, dynamic>? fields,
-        bool requiresAuth = true,
-      }) async {
+    String endpoint, {
+    required Map<String, File> files,
+    Map<String, dynamic>? fields,
+    bool requiresAuth = true,
+    String method = "POST",
+  }) async {
     await _checkInternet();
 
     try {
       if (files.isEmpty) {
+        if (method == "PUT") {
+          return await put(endpoint, data: fields, requiresAuth: requiresAuth);
+        }
         return await post(endpoint, data: fields, requiresAuth: requiresAuth);
       }
       final formData = FormData();
-
+      // ... (no changes to formData building)
       if (fields != null) {
         formData.fields.addAll(
           fields.entries.map(
-                (e) => MapEntry(e.key, e.value.toString()),
+            (e) => MapEntry(e.key, e.value.toString()),
           ),
         );
       }
@@ -137,7 +146,7 @@ class ApiService {
       for (var entry in files.entries) {
         formData.files.add(
           MapEntry(
-            entry.key, // 👈 key same as API
+            entry.key,
             await MultipartFile.fromFile(
               entry.value.path,
               filename: entry.value.path.split('/').last,
@@ -146,19 +155,11 @@ class ApiService {
         );
       }
 
-      // Print FormData for debugging
-      print("---- FORMDATA DEBUG ----");
-      print("Fields: ${formData.fields}");
-      print("Files:");
-      for (var file in formData.files) {
-        print("${file.key}: ${file.value.filename}");
-      }
-      print("------------------------");
-
-      final response = await _dio.post(
+      final response = await _dio.request(
         endpoint,
         data: formData,
         options: Options(
+          method: method,
           extra: {'requiresAuth': requiresAuth},
           contentType: 'multipart/form-data',
         ),

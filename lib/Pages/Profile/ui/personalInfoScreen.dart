@@ -5,9 +5,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../widget/customTextField.dart';
 import '../../Custom_Widgets/custom_app_bar.dart';
-import '../bloc/personal_info_bloc.dart';
-import '../bloc/personal_info_event.dart';
-import '../bloc/personal_info_state.dart';
+import 'package:cab_taxi_app/Pages/Profile/bloc/personal_info_bloc.dart';
+import 'package:cab_taxi_app/Pages/Profile/bloc/personal_info_event.dart';
+import 'package:cab_taxi_app/Pages/Profile/bloc/personal_info_state.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
   const PersonalInfoScreen({super.key});
@@ -20,6 +20,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   final nameController = TextEditingController();
   final companyController = TextEditingController();
   final license1Controller = TextEditingController();
+  final license2Controller = TextEditingController();
 
   final ImagePicker picker = ImagePicker();
 
@@ -34,6 +35,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     nameController.dispose();
     companyController.dispose();
     license1Controller.dispose();
+    license2Controller.dispose();
     super.dispose();
   }
 
@@ -55,16 +57,25 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: BlocConsumer<PersonalInfoBloc, PersonalInfoState>(
             listener: (context, state) {
-              // ── This runs EVERY time state changes ──
-              // Perfect place for side-effects like updating controllers
-              nameController.text = state.name;
-              companyController.text = state.company;
-              license1Controller.text = state.licenseNumber;
+              // ── Update Controllers from state ──
+              if (!state.isSubmitting) {
+                nameController.text = state.name;
+                companyController.text = state.company;
+                license1Controller.text = state.licenseNumber;
+                license2Controller.text = state.licenseNumber2;
+              }
 
-              // Optional: only update if user hasn't typed anything yet
-              // if (nameController.text.isEmpty || nameController.text == "Name") {
-              //   nameController.text = state.name;
-              // }
+              // Close screen after success
+              if (state.isProfileUpdateSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Profile updated successfully"),
+                    backgroundColor: Colors.green,
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+                Navigator.pop(context);
+              }
             },
             builder: (context, state) {
               if (state.isLoading) {
@@ -77,35 +88,32 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 60),
 
                   // Profile Image
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => pickImage(context),
-                        child: CircleAvatar(
-                          radius: 45,
-                          backgroundColor: Colors.grey[200],
-                          backgroundImage: state.image != null
-                              ? FileImage(state.image!)
-                              : (state.networkImage != null &&
-                                      state.networkImage!.isNotEmpty)
-                                  ? NetworkImage(state.networkImage!)
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => pickImage(context),
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(16),
+                          image: (state.image != null)
+                              ? DecorationImage(image: FileImage(state.image!), fit: BoxFit.cover)
+                              : (state.networkImage != null && state.networkImage!.isNotEmpty)
+                                  ? DecorationImage(image: NetworkImage(state.networkImage!), fit: BoxFit.cover)
                                   : null,
-                          child: (state.image == null &&
-                                  (state.networkImage == null ||
-                                      state.networkImage!.isEmpty))
-                              ? const Icon(Icons.camera_alt,
-                                  size: 40, color: Colors.grey)
-                              : null,
                         ),
+                        child: (state.image == null && (state.networkImage == null || state.networkImage!.isEmpty))
+                            ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                            : null,
                       ),
-                    ],
+                    ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 50),
 
                   CommonTextFormField(
                     controller: nameController,
@@ -114,60 +122,51 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         context.read<PersonalInfoBloc>().add(NameChanged(val)),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 25),
 
                   CommonTextFormField(
                     controller: companyController,
-                    hintText: "Remark",
+                    hintText: "Campany",
                     onChanged: (val) => context
                         .read<PersonalInfoBloc>()
                         .add(CompanyChanged(val)),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 25),
 
-                  // Role buttons (unchanged)
-
+                  // Role buttons
                   Row(
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context
-                              .read<PersonalInfoBloc>()
-                              .add(TypeChanged("agent")),
-                          child: roleButton("agent", state.type),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("agent")),
+                          child: roleButton("Agent", state.type),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context
-                              .read<PersonalInfoBloc>()
-                              .add(TypeChanged("owner")),
-                          child: roleButton("owner", state.type),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("owner")),
+                          child: roleButton("Owner", state.type),
                         ),
                       ),
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => context
-                              .read<PersonalInfoBloc>()
-                              .add(TypeChanged("driver")),
-                          child: roleButton("driver", state.type),
+                          onTap: () => context.read<PersonalInfoBloc>().add(TypeChanged("driver")),
+                          child: roleButton("Driver", state.type),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
 
                   CommonTextFormField(
                     controller: license1Controller,
-                    hintText: "Licence Number (optional)",
-                    onChanged: (val) {
-                      // Optional: you can add event if you want live update in state
-                    },
+                    hintText: "City name",
+                    onChanged: (val) {},
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 80), // Large gap before the update button as per design
 
                   SizedBox(
                     width: double.infinity,
@@ -181,13 +180,6 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       onPressed: state.isSubmitting
                           ? null
                           : () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Profile updated successfully"),
-                                  backgroundColor: Colors.green,
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
                               // Only send image if picked, otherwise null
                               final imageToSend = state.image != null &&
                                       (state.image?.path.isNotEmpty ?? false)
@@ -198,9 +190,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                                       context: context,
                                       type: state.type,
                                       name: nameController.text.trim(),
-                                      licenseNumber:
-                                          license1Controller.text.trim(),
-                                      licenseNumber2: "",
+                                      licenseNumber: license1Controller.text.trim(),
+                                      licenseNumber2: license2Controller.text.trim(),
                                       cInfo: companyController.text.trim(),
                                       driverImage: imageToSend,
                                     ),
@@ -225,21 +216,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
   }
 
   Widget roleButton(String role, String selectedRole) {
-    final bool isSelected = role == selectedRole;
+    // Standardize comparison to avoid case-sensitivity issues while keeping UI labels capitalized
+    final bool isSelected = role.toLowerCase() == selectedRole.toLowerCase();
 
     return Container(
       height: 45,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xffF4A100) : Colors.grey[300],
-        borderRadius: BorderRadius.circular(12),
+        color: isSelected ? const Color(0xffF4A100) : const Color(0xFFE9E9E9),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
-        role, // small letter show karega
+        role,
         style: TextStyle(
           color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.w500,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+          fontFamily: 'Poppins',
         ),
       ),
     );

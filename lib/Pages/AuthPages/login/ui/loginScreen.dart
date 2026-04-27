@@ -1,5 +1,8 @@
+import 'package:country_picker/country_picker.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../../../app/router/navigation/nav.dart';
 import '../../../../app/router/navigation/routes.dart';
@@ -20,13 +23,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String selectedCountryCode = '+91'; // Default country code
-  final List<String> countryCodes = [
-    '+91',
-    '+1',
-    '+44',
-    '+61'
-  ]; // Add more as needed
+  @override
+  void initState() {
+    super.initState();
+    context.read<SignInBloc>().add(const ResetSendOtpEvent());
+  }
+
+  String selectedCountryCode = '+91';
+  String selectedCountryFlag = '🇮🇳';
 
   // final authController = Get.put(AuthController());
 
@@ -48,26 +52,56 @@ class _LoginScreenState extends State<LoginScreen> {
         body: BlocListener<SignInBloc, SignInState>(
           listener: (context, state) async {
             if (state.isSuccess) {
-              if (widget.isRegister == true) {
+              if (state.isRegistered == true) {
+                Nav.push(context, Routes.otp, extra: numberController.text);
+              } else {
                 Nav.push(context, Routes.newRegister,
                     extra: numberController.text);
-              } else {
-                Nav.push(context, Routes.otp, extra: numberController.text);
               }
             }
-            if (state.hasError && state.errorMessage != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
-              context.read<SignInBloc>().add(const ResetSendOtpEvent());
-            }
-
             if (state.errorMessage != null) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+              if (state.errorMessage!.toLowerCase().contains("blocked")) {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    title: const Text(
+                      "Account Blocked",
+                      style: TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    content: Text(
+                      state.errorMessage!,
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          context
+                              .read<SignInBloc>()
+                              .add(const ResetSendOtpEvent());
+                        },
+                        child: const Text("OK"),
+                      ),
+                    ],
+                  ),
+                );
+              } else {
+                Fluttertoast.showToast(
+                  msg: state.errorMessage!,
+                  backgroundColor: state.hasError ? Colors.red : Colors.green,
+                  textColor: Colors.white,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                );
+
+                if (state.hasError) {
+                  context.read<SignInBloc>().add(const ResetSendOtpEvent());
+                }
+              }
             }
-            context.read<SignInBloc>().emit(state.copyWith(errorMessage: null));
           },
           child:
               BlocBuilder<SignInBloc, SignInState>(builder: (context, state) {
@@ -106,43 +140,58 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Container(
                           width: double.infinity,
-                          height: 48,
+                          height: 56,
                           decoration: ShapeDecoration(
                             shape: RoundedRectangleBorder(
-                              side: BorderSide(width: 1.0, color: Colors.grey.shade400),
+                              side: BorderSide(
+                                  width: 1.0, color: Colors.grey.shade400),
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: Row(
                             children: [
-                              // Country Code Dropdown
-                              DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: selectedCountryCode,
-                                  items: countryCodes.map((String code) {
-                                    return DropdownMenuItem<String>(
-                                      value: code,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 12.0),
-                                        child: Text(
-                                          code,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.black87,
-                                          ),
+                              // Country Code Picker
+                              GestureDetector(
+                                onTap: () {
+                                  showCountryPicker(
+                                    context: context,
+                                    showPhoneCode: true,
+                                    onSelect: (Country country) {
+                                      setState(() {
+                                        selectedCountryCode =
+                                            '+${country.phoneCode}';
+                                        selectedCountryFlag = country.flagEmoji;
+                                      });
+                                    },
+                                    countryListTheme: CountryListThemeData(
+                                      borderRadius: BorderRadius.circular(15),
+                                      inputDecoration: InputDecoration(
+                                        hintText: 'Search country',
+                                        prefixIcon: const Icon(Icons.search),
+                                        border: OutlineInputBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                         ),
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedCountryCode = newValue!;
-                                    });
-                                  },
-                                  icon: const Padding(
-                                    padding: EdgeInsets.only(right: 8.0),
-                                    child: Icon(Icons.arrow_drop_down, color: Colors.black87),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12.0),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "$selectedCountryFlag $selectedCountryCode",
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      const Icon(Icons.arrow_drop_down,
+                                          color: Colors.black87),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -156,12 +205,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                     keyboardType: TextInputType.phone,
                                     controller: numberController,
                                     maxLength: 10,
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
                                       counterText: '',
-                                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 15),
                                       hintText: 'Enter your Mobile number',
-                                      hintStyle: TextStyle(fontSize: 16, color: Colors.grey.shade500),
+                                      hintStyle: TextStyle(
+                                          fontSize: 18,
+                                          color: Colors.grey.shade400),
                                     ),
                                   ),
                                 ),
@@ -254,9 +310,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              const TextSpan(
+                              TextSpan(
                                 text: 'Terms of Use',
-                                style: TextStyle(
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () =>
+                                      Nav.push(context, Routes.termsCondition),
+                                style: const TextStyle(
                                   color: Color(0xFF3E4959),
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
@@ -269,9 +328,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontWeight: FontWeight.w400,
                                 ),
                               ),
-                              const TextSpan(
+                              TextSpan(
                                 text: 'Privacy Policy',
-                                style: TextStyle(
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () =>
+                                      Nav.push(context, Routes.privacyPolicy),
+                                style: const TextStyle(
                                   color: Color(0xFF3E4959),
                                   fontWeight: FontWeight.bold,
                                   decoration: TextDecoration.underline,
