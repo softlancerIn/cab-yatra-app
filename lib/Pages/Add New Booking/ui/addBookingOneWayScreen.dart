@@ -1,5 +1,6 @@
 import 'package:cab_taxi_app/widget/customTextField.dart';
 import 'package:cab_taxi_app/widget/primary_button.dart';
+import 'package:cab_taxi_app/cores/utils/helperFunctions.dart';
 import 'package:flutter/material.dart';
 import 'package:cab_taxi_app/Pages/HomePageFlow/custom/location_autocomplete_field.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -335,7 +336,13 @@ class _AddBookingOneWayScreenViewState
                     text: "Post Booking",
                     onPressed: state.isSubmitting
                         ? null
-                        : () {
+                        : () async {
+                            // Check payment details first
+                            final bool hasPaymentDetails =
+                                await HelperFunctions.validatePaymentDetails(
+                                    context);
+                            if (!hasPaymentDetails) return;
+
                             if (state.selectedCarCategoryId == null) {
                               Fluttertoast.showToast(
                                   msg: "Please select vehicle category");

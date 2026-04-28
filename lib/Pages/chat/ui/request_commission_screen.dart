@@ -5,7 +5,7 @@ import '../../../cores/utils/helperFunctions.dart';
 class RequestCommissionScreen extends StatefulWidget {
   final BookingData bookingData;
   final String agencyName;
-  final Function(num editedCommission) onSubmit;
+  final Function(num editedAmount, num editedCommission) onSubmit;
 
   const RequestCommissionScreen({
     super.key,
@@ -313,9 +313,11 @@ class _RequestCommissionScreenState extends State<RequestCommissionScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
+                  final strAmount = _amountController.text.replaceAll(',', '').trim();
                   final strCommission = _commissionController.text.replaceAll(',', '').trim();
+                  num parsedAmount = num.tryParse(strAmount) ?? widget.bookingData.totalAmount;
                   num parsedCommission = num.tryParse(strCommission) ?? 0;
-                  widget.onSubmit(parsedCommission);
+                  widget.onSubmit(parsedAmount, parsedCommission);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFFB300),

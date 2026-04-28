@@ -50,10 +50,6 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-                  child: SliderWidget(banners: state.homeDataResponseModel!.banners),
-                ),
                 const Center(
                     child: Padding(
                   padding: EdgeInsets.only(top: 50.0),
@@ -66,15 +62,9 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
 
         return SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-                  child: SliderWidget(banners: state.homeDataResponseModel!.banners),
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                 ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -516,7 +506,6 @@ class _ActiveBookingSectionState extends State<ActiveBookingSection> {
                     }),
               ],
             ),
-          ),
         );
       }),
     );

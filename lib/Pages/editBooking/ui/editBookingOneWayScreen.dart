@@ -18,6 +18,7 @@ import '../../Booking/bloc/booking_event.dart';
 class EditBookingOneWayScreen extends StatefulWidget {
   final String sId;
   final String vehicalType;
+  final String? vehicleCategoryName;
   final String pickUpLocation;
   final String dropLocation;
   final String pickUpDate;
@@ -37,6 +38,7 @@ class EditBookingOneWayScreen extends StatefulWidget {
       required this.dropLocation,
       required this.pickUpLocation,
       required this.vehicalType,
+      this.vehicleCategoryName,
       this.extra,
       this.isShowPhoneNumber});
 
@@ -112,7 +114,8 @@ class EditBookingOneWayScreenState extends State<EditBookingOneWayScreen> {
     return BlocProvider(
       create: (context) => EditBookingBloc()
         ..add(EditLoadCarCategories(context,
-            initialCarCategoryId: int.tryParse(widget.vehicalType))),
+            initialCarCategoryId: int.tryParse(widget.vehicalType),
+            initialCarCategoryName: widget.vehicleCategoryName)),
       child: BlocConsumer<EditBookingBloc, EditBookingState>(
         listener: (context, state) {
           if (state.isSuccess) {

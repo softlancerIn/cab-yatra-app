@@ -20,6 +20,7 @@ class EditBookingScreen extends StatefulWidget {
   final String? noOfDays;
   final String? tripNotes;
   final String? isShowPhoneNumber;
+  final String? vehicleCategoryName;
   const EditBookingScreen({
     super.key,
     required this.bookingType,
@@ -36,6 +37,7 @@ class EditBookingScreen extends StatefulWidget {
     this.noOfDays,
     this.tripNotes,
     this.isShowPhoneNumber,
+    this.vehicleCategoryName,
   });
 
   @override
@@ -78,6 +80,7 @@ class _EditBookingScreenState extends State<EditBookingScreen>
               remark: widget.remark,
               totalFare: widget.totalFare,
               vehicalType: widget.vehicalType,
+              vehicleCategoryName: widget.vehicleCategoryName,
               extra: widget.extra,
               isShowPhoneNumber: widget.isShowPhoneNumber,
             )
@@ -95,6 +98,7 @@ class _EditBookingScreenState extends State<EditBookingScreen>
                 tripNotes: widget.tripNotes,
                 totalFare: widget.totalFare,
                 vehicalType: widget.vehicalType,
+                vehicleCategoryName: widget.vehicleCategoryName,
                 isShowPhoneNumber: widget.isShowPhoneNumber,
               ),
       drawerEnableOpenDragGesture: true,

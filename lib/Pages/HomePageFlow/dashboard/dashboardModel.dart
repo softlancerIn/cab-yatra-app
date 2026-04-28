@@ -138,6 +138,7 @@ class BookingItem {
   final String? pickUpCity;
   final String? destinationCity;
   final String? assignType;
+  final String? carCategoryId;
   final AssignDriver? assignDriver;
 
   BookingItem({
@@ -164,6 +165,7 @@ class BookingItem {
     this.pickUpCity,
     this.destinationCity,
     this.assignType,
+    this.carCategoryId,
     this.assignDriver,
   });
 
@@ -192,6 +194,7 @@ class BookingItem {
       pickUpCity: json['pickUpCity']?.toString(),
       destinationCity: json['destinationCity']?.toString(),
       assignType: json['assignType']?.toString(),
+      carCategoryId: (json['car_category_id'] ?? json['carCategory_id'])?.toString(),
       assignDriver: json['assignDriver'] != null
           ? AssignDriver.fromJson(json['assignDriver'])
           : null,

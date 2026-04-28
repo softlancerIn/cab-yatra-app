@@ -55,6 +55,7 @@ class SeeBookingData {
   String? subTypeLabel;
   String? isAirportLabel;
   String? carImage;
+  String? carCategoryName;
   String? pickUpCity;
   String? destinationCity;
   CarCategory? carCategory;
@@ -89,6 +90,7 @@ class SeeBookingData {
       this.subTypeLabel,
       this.isAirportLabel,
       this.carImage,
+      this.carCategoryName,
       this.pickUpCity,
       this.destinationCity,
       this.carCategory,
@@ -103,7 +105,7 @@ class SeeBookingData {
     driverId = json['driver_id'];
     userId = json['user_id']?.toString() ?? json['creator_id']?.toString();
     subType = json['subType'];
-    carCategoryId = json['carCategory_id'];
+    carCategoryId = json['carCategory_id']?.toString();
     pickUpDate = json['pickUp_date'];
     pickUpTime = json['pickUp_time'];
     // booking_type = json['booking_type'];
@@ -148,8 +150,13 @@ class SeeBookingData {
     if (json.containsKey('booking_type')) subTypeLabel = json['booking_type'];
     if (json.containsKey('assignType')) assignType = json['assignType']; // We might need to add this field or map to isAssigned
     if (json.containsKey('driver_number')) driverNumber = json['driver_number'];
+    if (json.containsKey('car_category_id')) carCategoryId = json['car_category_id']?.toString();
     if (json.containsKey('car_category_name')) {
-       carCategory ??= CarCategory(name: json['car_category_name']);
+       carCategoryName = json['car_category_name']?.toString();
+       carCategory ??= CarCategory(name: carCategoryName);
+    }
+    if (carCategoryId == null || carCategoryId!.isEmpty) {
+      carCategoryId = carCategory?.id?.toString();
     }
   }
 

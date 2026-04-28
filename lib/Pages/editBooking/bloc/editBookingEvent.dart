@@ -10,9 +10,10 @@ abstract class EditBookingEvent extends Equatable {
 class EditLoadCarCategories extends EditBookingEvent {
   final BuildContext context;
   final int? initialCarCategoryId;
-  const EditLoadCarCategories(this.context, {this.initialCarCategoryId});
+  final String? initialCarCategoryName;
+  const EditLoadCarCategories(this.context, {this.initialCarCategoryId, this.initialCarCategoryName});
   @override
-  List<Object?> get props => [context, initialCarCategoryId];
+  List<Object?> get props => [context, initialCarCategoryId, initialCarCategoryName];
 }
 
 class EditSelectCarCategory extends EditBookingEvent {

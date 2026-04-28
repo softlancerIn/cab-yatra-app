@@ -26,7 +26,7 @@ class AddBookingRepo {
     required List destinationLoc,
     required List pickupCity,
     required List destinationCity,
-    required double total_faire,
+    required double total_fare,
     required double driverCommission,
     required bool is_show_phoneNumber,
     required List extra,
@@ -49,7 +49,7 @@ class AddBookingRepo {
           "destinationLoc": destinationLoc,
           "pickUpCity": pickupCity,
           "destinationCity": destinationCity,
-          "total_faire": total_faire,
+          "total_faire": total_fare,
           "driverCommission": driverCommission,
           "is_show_phoneNumber": is_show_phoneNumber,
           "extra": extra,
@@ -81,7 +81,7 @@ class AddBookingRepo {
                 extra: extra,
                 remarks: remarks,
                 subType: subType,
-                total_faire: total_faire
+                total_fare: total_fare
               ),
         );
         throw NoInternetException();
@@ -105,7 +105,7 @@ class AddBookingRepo {
                   tripNotes: tripNotes,
                   noOfDay: noOfDay,
                   subType: subType,
-                  total_faire: total_faire
+                  total_fare: total_fare
               ),
         );
         throw ServerException();

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../Pages/Payment Method/repo/paymentRepo.dart';
+import '../../app/router/navigation/nav.dart';
+import '../../app/router/navigation/routes.dart';
 
 class HelperFunctions {
   static bool isPickupTime(String? pickupDate, String? pickUpTime) {
@@ -274,5 +277,54 @@ class HelperFunctions {
       return url;
     }
     return fallback;
+  }
+
+  static Future<bool> validatePaymentDetails(BuildContext context) async {
+    try {
+      final paymentRepo = PaymentRepo();
+      final res = await paymentRepo.getPaymentApi();
+
+      final bool hasDetails = res.data?.any((p) {
+            final bName = p.bankName?.trim() ?? "";
+            final uId = p.upiId?.trim() ?? "";
+            return bName.isNotEmpty || uId.isNotEmpty;
+          }) ??
+          false;
+
+      if (!hasDetails) {
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text("Payment Details Required",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              content: const Text(
+                  "Please add your Bank Details or UPI ID in Profile > Payment Method before proceeding with this booking."),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Nav.push(context, Routes.paymentMethod);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffFCB117)),
+                  child: const Text("Add Now",
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          );
+        }
+        return false;
+      }
+      return true;
+    } catch (e) {
+      debugPrint("Error validating payment details: $e");
+      return true; // Allow proceeding if API check fails to avoid blocking users
+    }
   }
 }

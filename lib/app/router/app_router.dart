@@ -208,6 +208,7 @@ class AppRouter {
             sId: bookingData.id ?? 0,
             bookingType: bookingData.subTypeLabel ?? "",
             vehicalType: bookingData.carCategoryId ?? "",
+            vehicleCategoryName: bookingData.carCategoryName,
             pickUpLocation: bookingData.pickUpLoc ?? "",
             dropLocation: bookingData.destinationLoc ?? "",
             pickUpDate: bookingData.pickUpDate ?? "",

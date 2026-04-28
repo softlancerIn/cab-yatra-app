@@ -635,12 +635,20 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
 
         // --- NEW: AD-HOC AVAILABILITY CHECK FOR AGENTS ---
         if (!isMeCreator) {
+          // Check payment details first
+          final bool hasPaymentDetails =
+              await HelperFunctions.validatePaymentDetails(context);
+          if (!hasPaymentDetails) return;
+
           // Show a quick loader while checking
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator(color: Color(0xffFCB117))),
-          );
+          if (context.mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => const Center(
+                  child: CircularProgressIndicator(color: Color(0xffFCB117))),
+            );
+          }
 
           try {
             final driverRepo = DriverRepo();

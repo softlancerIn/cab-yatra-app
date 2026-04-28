@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as p;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
@@ -554,9 +558,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             type: MessageType.info,
                             isMe: true,
                             apiType: 1,
+                            images: images, // Attach images to the details message too
                             metaData: {
                               "driver_id": selectedDriver!.id,
                               "vehicle_id": selectedVehicle!.id,
+                              "images": images, // Also in metaData for sharing
                             },
                           );
                           // Second Message: Clickable photo link (photos in metaData)
@@ -1177,114 +1183,88 @@ class _ChatScreenState extends State<ChatScreen> {
         (_myId != null && _myId == creatorIdStr);
 
     if (isCreator) {
-      // 🟢 CREATOR SIDE LOGIC (Based on driver_id)
+      // 🟢 CREATOR SIDE LOGIC
       if (status == '0') {
-        if (_bookingData?.assignType == '1') {
-          return SizedBox(
-            width: double.infinity,
-            child:
-                _cardButton("Request Commission", const Color(0xFFFFB300), () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => RequestCommissionScreen(
-                    bookingData: _bookingData!,
-                    agencyName: widget.userName,
-                    onSubmit: (editedCommission) async {
-                      Navigator.pop(context); // close form
-                      if (editedCommission > 0) {
-                        // Update the commission in the database via Edit API
-                        try {
-                          final editRepo = EditBookingRepo();
-
-                          // Map subType from label if not directly available
-                          final String effectiveSubType = _bookingData!
-                                  .subTypeLabel
-                                  .toLowerCase()
-                                  .contains("one way")
-                              ? "1"
-                              : "2";
-
-                          await editRepo.editBookingApi(
-                            id: _bookingData!.id.toString(),
-                            subType: effectiveSubType,
-                            carCategoryId: int.tryParse(
-                                    _bookingData!.carCategoryId?.toString() ??
-                                        "0") ??
-                                0,
-                            pickUp_date: _bookingData!.pickupDate,
-                            pickUp_time: _bookingData!.pickupTime,
-                            pickUpLoc: [_bookingData!.pickupLocation],
-                            destinationLoc: [_bookingData!.dropLocation],
-                            total_faire: _bookingData!.totalAmount,
-                            driverCommission: editedCommission.toDouble(),
-                            is_show_phoneNumber: int.tryParse(_bookingData!
-                                        .isShowPhoneNumber
-                                        ?.toString() ??
-                                    "0") ??
-                                0,
-                            remarks: _bookingData!.remark,
-                            extra: (_bookingData!.extra != null &&
-                                    _bookingData!.extra!.isNotEmpty)
-                                ? _bookingData!.extra!
-                                    .split(',')
-                                    .map((e) => e.trim())
-                                    .toList()
-                                : [],
-                            noOfDays: _bookingData!.noOfDays,
-                            tripNotes: _bookingData!.tripNotes,
-                            context: context,
-                          );
-                          _fetchBookingDetails(); // Refresh chat summary
-                        } catch (e) {
-                          debugPrint("❌ Error updating commission API: $e");
-                        }
-
-                        _sendMessage(
-                          text:
-                              "__pay_request:${editedCommission.toInt()}:Please pay the commission of ₹${editedCommission.toInt()} to assign this booking",
-                          type: MessageType.info,
-                          isMe: true,
-                          apiType: 0,
-                          isPaymentRequest: true,
-                        );
-                      } else {
-                        Fluttertoast.showToast(
-                            msg: "Commission must be greater than 0.");
-                      }
-                    },
-                  ),
-                ),
-              );
-            }),
-          );
-        }
-
-        // Before assign: show Edit
         return SizedBox(
           width: double.infinity,
-          child: _cardButton("Edit Booking", const Color(0xFFFFB300), () {
-            final seeData = SeeBookingData(
-              id: _bookingData!.id,
-              orderId: _bookingData!.orderId,
-              driverId: _bookingData!.driverId,
-              pickUpDate: _bookingData!.pickupDate,
-              pickUpTime: _bookingData!.pickupTime,
-              pickUpLoc: _bookingData!.pickupLocation,
-              destinationLoc: _bookingData!.dropLocation,
-              totalFaire: _bookingData!.totalAmount.toStringAsFixed(0),
-              driverCommission:
-                  _bookingData!.driverCommission.toStringAsFixed(0),
-              remark: _bookingData!.remark,
-              subTypeLabel: _bookingData!.subTypeLabel,
-              noOfDays: _bookingData!.noOfDays,
-              tripNotes: _bookingData!.tripNotes,
-              status: _bookingData!.status,
-              carCategoryId: _bookingData!.carCategoryId,
-              extra: _bookingData!.extra,
-              isShowPhoneNumber: _bookingData!.isShowPhoneNumber,
+          child:
+              _cardButton("Request Commission", const Color(0xffFCB117), () async {
+              // Check payment details first
+              final bool hasPaymentDetails =
+                  await HelperFunctions.validatePaymentDetails(context);
+              if (!hasPaymentDetails) return;
+
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => RequestCommissionScreen(
+                  bookingData: _bookingData!,
+                  agencyName: widget.userName,
+                  onSubmit: (editedAmount, editedCommission) async {
+                    Navigator.pop(context); // close form
+                    if (editedCommission > 0) {
+                      // Update the commission and total fare in the database via Edit API
+                      try {
+                        final editRepo = EditBookingRepo();
+
+                        // Map subType from label if not directly available
+                        final String effectiveSubType = _bookingData!
+                                .subTypeLabel
+                                .toLowerCase()
+                                .contains("one way")
+                            ? "1"
+                            : "2";
+
+                        await editRepo.editBookingApi(
+                          id: _bookingData!.id.toString(),
+                          subType: effectiveSubType,
+                          carCategoryId: int.tryParse(
+                                  _bookingData!.carCategoryId?.toString() ??
+                                      "0") ??
+                               0,
+                          pickUp_date: _bookingData!.pickupDate,
+                          pickUp_time: _bookingData!.pickupTime,
+                          pickUpLoc: [_bookingData!.pickupLocation],
+                          destinationLoc: [_bookingData!.dropLocation],
+                          total_fare: editedAmount.toDouble(),
+                          driverCommission: editedCommission.toDouble(),
+                          is_show_phoneNumber: int.tryParse(_bookingData!
+                                      .isShowPhoneNumber
+                                      ?.toString() ??
+                                  "0") ??
+                              0,
+                          remarks: _bookingData!.remark,
+                          extra: (_bookingData!.extra != null &&
+                                  _bookingData!.extra!.isNotEmpty)
+                              ? _bookingData!.extra!
+                                  .split(',')
+                                  .map((e) => e.trim())
+                                  .toList()
+                              : [],
+                          noOfDays: _bookingData!.noOfDays,
+                          tripNotes: _bookingData!.tripNotes,
+                          context: context,
+                        );
+                        _fetchBookingDetails(); // Refresh chat summary
+                      } catch (e) {
+                        debugPrint("❌ Error updating commission API: $e");
+                      }
+
+                      _sendMessage(
+                        text:
+                            "__pay_request:${editedCommission.toInt()}:Please pay the commission of ₹${editedCommission.toInt()} to assign this booking",
+                        type: MessageType.info,
+                        isMe: true,
+                        apiType: 0,
+                        isPaymentRequest: true,
+                      );
+                    } else {
+                      Fluttertoast.showToast(
+                          msg: "Commission must be greater than 0.");
+                    }
+                  },
+                ),
+              ),
             );
-            Nav.push(context, Routes.editBooking, extra: seeData);
           }),
         );
       } else if (status == '1') {
@@ -1297,10 +1277,22 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: _cardButton("Cancel Booking", const Color(0xFFF45858),
                   () async {
+                final bool? confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text("Cancel Booking"),
+                    content: const Text("Are you sure you want to cancel this booking?"),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("No")),
+                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Yes, Cancel", style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+                if (confirm != true) return;
                 final success = await _chatRepo.updateBookingStatus(
                   context: context,
                   bookingId: widget.bookingId,
-                  status: "3", // Cancel
+                  status: "3",
                 );
                 if (success) _fetchBookingDetails();
               }),
@@ -1369,10 +1361,22 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: _cardButton("Cancel Booking", const Color(0xFFF45858),
                   () async {
+                final bool? confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text("Cancel Booking"),
+                    content: const Text("Are you sure you want to cancel this booking?"),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("No")),
+                      TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Yes, Cancel", style: TextStyle(color: Colors.red))),
+                    ],
+                  ),
+                );
+                if (confirm != true) return;
                 final success = await _chatRepo.updateBookingStatus(
                   context: context,
                   bookingId: widget.bookingId,
-                  status: "3", // Cancel
+                  status: "3",
                 );
                 if (success) _fetchBookingDetails();
               }),
@@ -1510,6 +1514,13 @@ class _ChatScreenState extends State<ChatScreen> {
           parts.length >= 3 ? parts.sublist(2).join(':') : message.text;
       final String amountStr = parts.length >= 2 ? parts[1] : '';
       final bool isMe = message.isMe;
+      final bool isExpiredPayment = _messages.isNotEmpty &&
+          _messages.firstWhere((m) => m.isPaymentRequest, orElse: () => message) != message;
+      
+      final bool isAlreadyPaid = _isCommissionPaid ||
+          (_bookingData != null &&
+              ['1', '4', '2'].contains(_bookingData!.status));
+
 
       return Column(
         crossAxisAlignment:
@@ -1523,18 +1534,38 @@ class _ChatScreenState extends State<ChatScreen> {
                   left: isMe ? 60 : 0, right: isMe ? 0 : 60, top: 4, bottom: 4),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isMe ? const Color(0xFFE8E8E8) : const Color(0xFFFFB300),
+                color: isExpiredPayment 
+                    ? Colors.grey.shade300 
+                    : (isMe ? const Color(0xFFE8E8E8) : const Color(0xFFFFB300)),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                displayText,
-                style: TextStyle(
-                  color: isMe ? Colors.black87 : Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayText,
+                      style: TextStyle(
+                        color: isExpiredPayment ? Colors.grey : (isMe ? Colors.black87 : Colors.white),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    if (isExpiredPayment && !isAlreadyPaid) 
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text(
+                          "Link Expired",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
             ),
           ),
           // 2️⃣ Interative chat bubble action button
@@ -1544,15 +1575,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
             final bool isDriverSide =
                 _myId != _bookingData!.driverId.toString();
-            final bool isAlreadyPaid = _isCommissionPaid ||
-                (_bookingData != null &&
-                    ['1', '4', '2'].contains(_bookingData!.status));
 
             if (isDriverSide) {
               return Align(
                 alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                 child: GestureDetector(
-                  onTap: isAlreadyPaid
+                  onTap: (isAlreadyPaid || isExpiredPayment)
                       ? null
                       : () {
                           final num parsedAmount =
@@ -1566,8 +1594,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 11),
                     decoration: BoxDecoration(
-                      color:
-                          isAlreadyPaid ? Colors.grey : const Color(0xFF4CAF50),
+                      color: isAlreadyPaid 
+                          ? const Color(0xFF4CAF50) 
+                          : (isExpiredPayment ? Colors.grey.shade400 : const Color(0xFF4CAF50)),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -1576,7 +1605,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         Text(
                             isAlreadyPaid
                                 ? "Commission Paid"
-                                : "Pay Commission ₹$amountStr",
+                                : (isExpiredPayment ? "Link Expired" : "Pay Commission ₹$amountStr"),
                             style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -1638,6 +1667,8 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final bool isMe = message.isMe;
+    final bool isVehicleDetail = message.apiType == 1 || message.apiType == 3;
+
     return Column(
       crossAxisAlignment:
           isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -1656,11 +1687,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
             // Added share icon for sent messages (shows on left of bubble)
-            if (isMe && message.apiType == 1)
+            if (isMe && isVehicleDetail)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: IconButton(
-                  onPressed: () => Share.share(message.text),
+                  onPressed: () => _shareMessageWithImages(message),
                   icon: const Icon(Icons.share, 
                     size: 20, 
                     color: Color(0xFFFFB300)
@@ -1716,33 +1747,70 @@ class _ChatScreenState extends State<ChatScreen> {
                       GestureDetector(
                         onTap: hasImages ? () => _showImagesDialog(images) : null,
                         behavior: HitTestBehavior.opaque,
-                        child: Text(
-                          displayText,
-                          style: TextStyle(
-                            color: (message.type == MessageType.received ||
-                                    message.type == MessageType.system ||
-                                    (message.type == MessageType.info && !isMe))
-                                ? Colors.white
-                                : Colors.black,
-                            fontSize: 14,
-                            fontWeight: isMe ? FontWeight.w500 : FontWeight.w400,
-                            decoration: hasImages ? TextDecoration.underline : null,
-                            height: 1.4,
-                            fontFamily: 'Poppins',
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayText,
+                              style: TextStyle(
+                                color: (message.type == MessageType.received ||
+                                        message.type == MessageType.system ||
+                                        (message.type == MessageType.info && !isMe))
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 14,
+                                fontWeight: isMe ? FontWeight.w500 : FontWeight.w400,
+                                decoration: hasImages ? TextDecoration.underline : null,
+                                height: 1.4,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      if (hasImages) ...[
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 100,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            shrinkWrap: true,
+                            itemCount: images.length,
+                            separatorBuilder: (context, index) => const SizedBox(width: 8),
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () => _showImagesDialog(images),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    images[index],
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.broken_image),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ],
                   );
                 }),
               ),
             ),
             // Added share icon for received messages (shows on right of bubble)
-            if (!isMe && message.apiType == 1)
+            if (!isMe && isVehicleDetail)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: IconButton(
-                  onPressed: () => Share.share(message.text),
+                  onPressed: () => _shareMessageWithImages(message),
                   icon: const Icon(Icons.share, 
                     size: 20, 
                     color: Color(0xFFFFB300)
@@ -1816,6 +1884,47 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _shareMessageWithImages(ChatMessage message) async {
+    try {
+      final List<String> images = message.images ?? [];
+      final String text = message.text;
+
+      if (images.isEmpty) {
+        await Share.share(text);
+        return;
+      }
+
+      Fluttertoast.showToast(msg: "Preparing images for sharing...");
+
+      final directory = await getTemporaryDirectory();
+      final List<XFile> xFiles = [];
+
+      for (int i = 0; i < images.length; i++) {
+        try {
+          final response = await http.get(Uri.parse(images[i]));
+          if (response.statusCode == 200) {
+            final String fileName = "vehicle_image_${i}_${p.basename(images[i])}";
+            final File file = File(p.join(directory.path, fileName));
+            await file.writeAsBytes(response.bodyBytes);
+            xFiles.add(XFile(file.path));
+          }
+        } catch (e) {
+          debugPrint("Error downloading image $i: $e");
+        }
+      }
+
+      if (xFiles.isNotEmpty) {
+        await Share.shareXFiles(xFiles, text: text);
+      } else {
+        await Share.share(text);
+      }
+    } catch (e) {
+      debugPrint("Error sharing message: $e");
+      Fluttertoast.showToast(msg: "Error sharing images, sharing text only.");
+      await Share.share(message.text);
+    }
   }
 
   void _fetchDriversAndVehicles() async {

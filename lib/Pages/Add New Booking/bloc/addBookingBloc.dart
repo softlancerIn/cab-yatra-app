@@ -82,7 +82,7 @@ class AddBookingBloc extends Bloc<AddBookingEvent, AddBookingState> {
         destinationLoc: event.destinationLocations,
         pickupCity: event.pickupCity,
         destinationCity: event.destinationCity,
-        total_faire: event.totalFare,
+        total_fare: event.totalFare,
         driverCommission: event.driverCommission,
         noOfDay: event.noOfDay,
         tripNotes: event.tripNotes,

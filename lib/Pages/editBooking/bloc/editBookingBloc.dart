@@ -23,10 +23,21 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
 
     try {
       final model = await repo.getCarCategory(context: event.context);
+      
+      int? resolvedId = event.initialCarCategoryId;
+      if (resolvedId == null && event.initialCarCategoryName != null && model != null && model.data != null) {
+        try {
+          final matched = model.data!.firstWhere(
+            (c) => c.name?.toLowerCase().trim() == event.initialCarCategoryName?.toLowerCase().trim(),
+          );
+          resolvedId = matched.id;
+        } catch (_) {}
+      }
+
       emit(state.copyWith(
         isLoading: false,
         carCategories: model,
-        selectedCarCategoryId: event.initialCarCategoryId,
+        selectedCarCategoryId: resolvedId,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -59,7 +70,7 @@ class EditBookingBloc extends Bloc<EditBookingEvent, EditBookingState> {
         pickUp_time: event.pickUpTime,
         pickUpLoc: event.pickUpLocations,
         destinationLoc: event.destinationLocations,
-        total_faire: event.totalFare,
+        total_fare: event.totalFare,
         driverCommission: event.driverCommission,
         is_show_phoneNumber: event.showPhoneNumber ? 1 : 0,
         remarks: event.remarks,

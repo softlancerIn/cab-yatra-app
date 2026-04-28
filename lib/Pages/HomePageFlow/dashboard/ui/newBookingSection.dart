@@ -75,10 +75,14 @@ class _NewBookingSectionState extends State<NewBookingSection> {
           //     : Column(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
-                child: SliderWidget(banners: state.homeDataResponseModel!.banners),
-              ),
+              if (state.homeDataResponseModel?.banners != null && state.homeDataResponseModel!.banners.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                  child: SliderWidget(
+                    key: const ValueKey('new_booking_banner'),
+                    banners: state.homeDataResponseModel!.banners,
+                  ),
+                ),
               if (newBooking.isEmpty)
                 const Padding(
                   padding: EdgeInsets.only(top: 40.0),

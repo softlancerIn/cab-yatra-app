@@ -205,111 +205,112 @@ class _HomepageState extends State<Homepage>
           ),
         ),
       ),
-      body:
-          BlocConsumer<DashboardBloc, DashboardState>(
-        listener: (context, state) {
-          // Sync search controller when state is cleared (on pull-to-refresh or filter clear)
-          if (state.searchQuery.isEmpty && searchController.text.isNotEmpty) {
-            searchController.clear();
-          }
-        },
-        builder: (context, state) {
-        if (state.isLoading && state.homeDataResponseModel == null) {
-          return SizedBox(
-              height: size.height,
-              width: size.width,
-              child: const Center(child: CircularProgressIndicator()));
-        }
-        
-        if (state.errorMessage != null && state.homeDataResponseModel == null) {
-          return SizedBox(
-              height: size.height,
-              width: size.width,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Error: ${state.errorMessage}"),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<DashboardBloc>().add(GetHomeDataEvent(context: context));
-                      },
-                      child: const Text("Retry"),
-                    )
-                  ],
-                ),
-              ));
-        }
+      body: Column(
+        children: [
+          // ── Search + Tabs ────────────────────────────────────────────────
+          Expanded(
+            child: BlocConsumer<DashboardBloc, DashboardState>(
+              listener: (context, state) {
+                if (state.searchQuery.isEmpty &&
+                    searchController.text.isNotEmpty) {
+                  searchController.clear();
+                }
+              },
+              builder: (context, state) {
+                if (state.isLoading &&
+                    state.homeDataResponseModel == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-        if (state.homeDataResponseModel == null) {
-          return SizedBox(
-              height: size.height,
-              width: size.width,
-              child: const Center(child: Text("No data available")));
-        }
-
-        final activeBookings = state.homeDataResponseModel!.activeBooking.data;
-        final newBooking = state.homeDataResponseModel!.newBooking.data;
-
-        return Column(
-          children: [
-            /// Search and Filter Section
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 16, 14, 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: CustomSearchBar(
-                      controller: searchController,
-                      onSearch: () {
-                        context.read<DashboardBloc>().add(
-                            UpdateSearchQueryEvent(
-                                searchQuery: searchController.text.trim()));
-                      },
-                      onChanged: (value) {
-                        context.read<DashboardBloc>().add(UpdateSearchQueryEvent(searchQuery: value.trim()));
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  GestureDetector(
-                    onTap: () {
-                      Nav.push(context, Routes.applyFilter);
-                    },
-                    child: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Colors.grey.shade300, width: 1),
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                      ),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/images/seetingFilter.png",
-                          height: 24,
-                          color: state.isFilterActive ? const Color(0xFFF45858) : Colors.black87,
+                if (state.errorMessage != null &&
+                    state.homeDataResponseModel == null) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Error: ${state.errorMessage}'),
+                        ElevatedButton(
+                          onPressed: () => context
+                              .read<DashboardBloc>()
+                              .add(GetHomeDataEvent(context: context)),
+                          child: const Text('Retry'),
                         ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (state.homeDataResponseModel == null) {
+                  return const Center(child: Text('No data available'));
+                }
+
+                return Column(
+                  children: [
+                    // Search & Filter
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomSearchBar(
+                              controller: searchController,
+                              onSearch: () {
+                                context.read<DashboardBloc>().add(
+                                    UpdateSearchQueryEvent(
+                                        searchQuery:
+                                            searchController.text.trim()));
+                              },
+                              onChanged: (value) {
+                                context.read<DashboardBloc>().add(
+                                    UpdateSearchQueryEvent(
+                                        searchQuery: value.trim()));
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () =>
+                                Nav.push(context, Routes.applyFilter),
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.grey.shade300, width: 1),
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.white,
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/seetingFilter.png',
+                                  height: 24,
+                                  color: state.isFilterActive
+                                      ? const Color(0xFFF45858)
+                                      : Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-                ],
-              ),
+                    // Tab views
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: const [
+                          NewBookingSection(),
+                          ActiveBookingSection(),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-            // Content Section
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  NewBookingSection(),
-                  ActiveBookingSection(),
-                ],
-              ),
-            ),
-          ],
-        );
-      }),
+          ),
+        ],
+      ),
       drawerEnableOpenDragGesture: true,
     );
   }
